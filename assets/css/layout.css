@@ -1,0 +1,27 @@
+@CHARSET "UTF-8";
+
+
+.mainloader {
+	float:right; z-index:100000;
+	margin:0px 0px 0px 0px;
+}
+
+.boxloader {
+	text-align:center;
+	margin-top:100px;
+}
+
+.home-chart-row1-height {
+	height:210px;
+}
+
+.home-chart-row2-height {
+	height:210px;
+}
+
+.control-label-inline {
+	float:none; 
+	display:inline-block; 
+	width:100px; margin-right:10px;
+	text-align:right;
+}

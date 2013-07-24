@@ -1,0 +1,29 @@
+@CHARSET "UTF-8";
+
+.reports-tbl TH {
+	text-align:center;
+}
+
+.reports-tbl .date {
+	text-align:center;
+}
+
+.reports-tbl .package-name {
+	
+}
+
+.reports-tbl .version-name {
+	text-align:center;
+}
+
+.reports-tbl .version-code {
+	text-align:center;
+}
+
+.reports-tbl .android-version {
+	text-align:center;
+}
+
+.reports-tbl .phone-model {
+	
+}
