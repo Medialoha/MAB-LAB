@@ -1,4 +1,4 @@
-<?php
+<?php define('DIRECT_ACCESS_CHECK', true);
 /**
  * Copyright (c) 2013 EIRL DEVAUX J. - Medialoha.
  * All rights reserved. This program and the accompanying materials
@@ -8,9 +8,7 @@
  *
  * Contributors:
  *     EIRL DEVAUX J. - Medialoha - initial API and implementation
- */
-
-define('DIRECT_ACCESS_CHECK', true); 
+ */ 
 
 require_once('includes/define.php');
 require_once('includes/config.php');

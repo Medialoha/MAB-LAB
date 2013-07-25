@@ -2,8 +2,8 @@
 $mGlobalCfg = array(
 	'db.host'=>'localhost',
 	'db.name'=>'mablab',
-	'db.user'=>'mablabuser',
-	'db.pwd'=>'password',
+	'db.user'=>'mablab',
+	'db.pwd'=>'booboop',
 		
 	'tbl.prefix'=>'mabl_',
 		

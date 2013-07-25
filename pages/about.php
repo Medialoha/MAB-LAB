@@ -14,7 +14,7 @@
 <div class="row" >
 	<div class="span6 offset3" >
 		<h3><?php echo APP_NAME; ?>&nbsp;&nbsp;<small class="muted" ><?php  echo VERSION_NAME.' #'.VERSION_CODE; ?></small></h3>
-		<small>License&nbsp;<a href="libs/bootstrap/LICENSE" target="_blank" >Apache License</a></small>
+		<small>License&nbsp;<a href="LICENSE.md" target="_blank" >GNU GPL v3 License</a></small>
 		
 		<hr/>
 	</div>
@@ -34,7 +34,7 @@
 			<dt><a href="http://jquery.com/" target="_blank" >jQuery</a></dt>
 			<dd>
 				<blockquote>jQuery is a fast, small, and feature-rich JavaScript library. It makes things like HTML document traversal and manipulation, event handling, animation, and Ajax much simpler with an easy-to-use API that works across a multitude of browsers. With a combination of versatility and extensibility, jQuery has changed the way that millions of people write JavaScript.</blockquote>
-				<small>License&nbsp;<a href="libs/jquery/LICENSE" target="_blank" >MIT License</a></small>
+				<small>License&nbsp;<a href="libs/jquery/LICENSE" target="_blank" >MIT</a></small>
 			</dd>
 			
 			<dt></dt><dd><br/></dd>
@@ -42,7 +42,7 @@
 			<dt><a href="http://www.flotcharts.org/" target="_blank" >Flot</a> - Attractive JavaScript plotting for jQuery</dt>
 			<dd>
 				<blockquote>Flot is a pure JavaScript plotting library for jQuery, with a focus on simple usage, attractive looks and interactive features.</blockquote>
-				<small>License&nbsp;<a href="libs/flot/LICENSE.txt" target="_blank" >MIT License</a></small>
+				<small>License&nbsp;<a href="libs/flot/LICENSE.txt" target="_blank" >MIT</a></small>
 			</dd>
 			
 			<dt></dt><dd><br/></dd>

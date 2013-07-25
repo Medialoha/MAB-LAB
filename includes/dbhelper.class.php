@@ -1,14 +1,5 @@
-<?php defined('DIRECT_ACCESS_CHECK') or die('DIRECT ACCESS NOT ALLOWED');
-/**
- * Copyright (c) 2013 EIRL DEVAUX J. - Medialoha.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the GNU Public License v3.0
- * which accompanies this distribution, and is available at
- * http://www.gnu.org/licenses/gpl.html
- *
- * Contributors:
- *     EIRL DEVAUX J. - Medialoha - initial API and implementation
- */
+<?php
+defined('DIRECT_ACCESS_CHECK') or die('DIRECT ACCESS NOT ALLOWED');
 
 define('TBL_USERS', 'users');
 define('USER_ID', 'user_id');
@@ -23,6 +14,9 @@ define('REPORT_PACKAGE_NAME', 'package_name');
 define('REPORT_VERSION_NAME', 'app_version_name');
 define('REPORT_VERSION_CODE', 'app_version_code');
 define('REPORT_ANDROID_VERSION', 'android_version');
+define('REPORT_PHONE_MODEL', 'phone_model');
+define('REPORT_BRAND', 'brand');
+define('REPORT_PRODUCT', 'product');
 
 define('REPORT_STATE', 'report_state');
 define('REPORT_TAG', 'report_tag');

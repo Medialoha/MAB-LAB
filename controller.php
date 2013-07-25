@@ -1,4 +1,4 @@
-<?php
+<?php defined('DIRECT_ACCESS_CHECK') or die('DIRECT ACCESS NOT ALLOWED');
 /**
  * Copyright (c) 2013 EIRL DEVAUX J. - Medialoha.
  * All rights reserved. This program and the accompanying materials
@@ -9,8 +9,6 @@
  * Contributors:
  *     EIRL DEVAUX J. - Medialoha - initial API and implementation
  */
-
-defined('DIRECT_ACCESS_CHECK') or die('DIRECT ACCESS NOT ALLOWED');
 
 $action = $_REQUEST['a'];
 
@@ -142,6 +140,11 @@ switch ($action) {
 	case 'getlastreports' :
 			require_once('pages/last_reports_box.php');
 		break;
+		
+//////// GET CHART DATA
+	case 'getmostaffecteddev' :
+			require_once('pages/most_affected_devices_box.php');
+		break;		
 		
 //////// GET CHART DATA
 	case 'getchartdata' :

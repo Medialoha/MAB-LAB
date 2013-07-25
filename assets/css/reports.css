@@ -27,3 +27,40 @@
 .reports-tbl .phone-model {
 	
 }
+
+TABLE.most-affected TD {
+}
+
+TABLE.most-affected .device {
+	display:inline-block;
+}
+
+TABLE.most-affected .brand {
+	display:inline-block;	
+}
+
+TABLE.most-affected TD.count { 
+	font-size:22px;
+	text-align:center; 
+}
+
+.most-affected-1 {
+	color:#F15151;	
+}
+
+.most-affected-2 {
+	color:#F3755C;	
+}
+
+.most-affected-3 {
+	color:#F18B5E;	
+}
+
+.most-affected-4 {
+	color:#EFA564;	
+}
+
+.most-affected-5 {
+	color:#EFA564;	
+}
+

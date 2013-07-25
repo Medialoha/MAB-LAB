@@ -22,16 +22,18 @@ require_once('includes/charthelper.class.php');
 		<div id="chart1-1" class="home-chart-row1-height" ></div>
 	</div> 
 	<div class="span4" >
-		<h4></h4>
+		<h4>Most Affected Devices</h4>
 		<div id="chart1-3" class="home-chart-row1-height" ></div>
 	</div> 
 </div>
+
 <div class="row" style="margin-top:30px;" >
 	<div class="span8" >
 		<h4>Evolution</h4>
 		<div id="chart2-1" class="home-chart-row2-height" ></div>
 	</div> 
 </div>
+
 <div class="row" style="margin-top:30px;" >
 	<div class="span12" >
 		<h4>Last reports</h4>

@@ -25,7 +25,7 @@ function loadChart(containerId, chartId, type) {
 			}
 			
 			chartData = jQuery.parseJSON(result[1]);
-			console.log(chartData);
+			//console.log(chartData);
 			
 		} catch(err) { onError(err); return false; }
 		

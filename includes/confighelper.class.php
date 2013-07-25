@@ -96,20 +96,18 @@ class CfgHelper {
 		$configFile = $configDir.'/config.php';
 		$configTmplFile = $configFile.'.tmpl';
 		
-		// create empty config file if not exists
-		if (!file_exists($configFile)) {
+		// if config file does not exist then check if dir is writeable
+		if (!file_exists($configFile) && !is_writeable($configDir)) {
+			$error = 'Config directory '.$configDir.' is not writeable !';
 			
-			if (is_writeable($configDir)) {
-				
-				
-			} else { $error = 'Config directory '.$configDir.' is not writeable !'; }
-			
-		// check if existing config file is writeable
+		// else if config file exists then check if file is writeable
 		} else if (!is_writeable($configFile)) {
 			$error = 'File '.$configFile.' is not writeable !';
-			
-		// if config file checks passed then check if config template file is readable
-		} else if (!is_readable($configTmplFile)) {
+
+		} 
+		
+		// if no error found then check if config template file is readable
+		if ($error==null && !is_readable($configTmplFile)) {
 			$error = 'File '.$configTmplFile.' is not readable !';
 			
 		}
