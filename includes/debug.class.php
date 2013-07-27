@@ -15,6 +15,11 @@ $mMaxLogFileSize = 3145728;
 $mSupportMailAddr = '';
 $mMailSubject = 'Website log report: %s';
 
+define('DEBUG', 0);
+define('INFO', 1);
+define('WARNING', 2);
+define('ERROR', 3);
+
 
 class Debug {
 	
@@ -28,21 +33,36 @@ class Debug {
 		}
 		
 		if (!@mail($mSupportMailAddr, sprintf($mMailSubject, $_SERVER['SERVER_NAME']), $message, $header)) {
-			Debug::log("ERROR", "Sending mail failed !", "Debug.class", false);
+			Debug::log(ERROR, "Sending mail failed !", "Debug.class", false);
 		}
 	}
 	
-	public static function logd($message, $tag=null) { Debug::log("DEBUG", $message, $tag, false); }
+	public static function logd($message, $tag=null) { Debug::log(DEBUG, $message, $tag, false); }
 	
-	public static function logi($message, $tag=null) {Debug::log("INFO", $message, $tag, false); }
+	public static function logi($message, $tag=null) {Debug::log(INFO, $message, $tag, false); }
 	
-	public static function logw($message, $tag=null) { Debug::log("WARNING", $message, $tag, false); }
+	public static function logw($message, $tag=null) { Debug::log(WARNING, $message, $tag, false); }
 	
-	public static function loge($message, $tag=null) { Debug::log("ERROR", $message, $tag, true); }
+	public static function loge($message, $tag=null) { Debug::log(ERROR, $message, $tag, true); }
 	
 	public static function log($severity, $message, $tag=null, $sendmail=false) {
 		global $mLogFile, $mMaxLogFileSize;
+
+		if ($severity<LOG_SEVERITY) return;
+		
+		switch ($severity) {
+			case DEBUG : $severityStr = 'DEBUG';
+				break;
+			case INFO : $severityStr = 'INFO';
+				break;
+			case WARNING : $severityStr = 'WARNING';
+				break;
+			case ERROR : $severityStr = 'ERROR';
+				break;
 				
+			default : $severityStr = ' - ';
+		}
+		
 		if (!is_string($message))
 			$message = print_r($message, true);
 		
@@ -55,7 +75,7 @@ class Debug {
 		$inF = @fopen($mLogFile, "a");
 		@chmod($mLogFile, 0777);
 		
-		$message = "[".date("d-m-y H:i.s")."]\t".$severity."\t".($tag!=null?$tag."\t:\t":"").$message."\n";
+		$message = "[".date("d-m-y H:i.s")."]\t".$severityStr."\t".($tag!=null?$tag."\t:\t":"").$message."\n";
 		@fwrite($inF, $message);
 		@fclose($inF);
 		

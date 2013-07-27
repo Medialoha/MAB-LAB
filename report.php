@@ -24,17 +24,22 @@ Debug::logi('New report requested !', 'REPORT');
 $cfg = CfgHelper::getInstance();
 
 // check if HTTP basic auth is required
-if ($cfg->isReportBasicAuthEnabled() && !$cfg->isReportBasicAuthGranted($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW'])) {
-	Debug::loge('Somebody try to access report script without a correct login/password !!!', 'REPORT');
+if ($cfg->isReportBasicAuthEnabled()) {
+	Debug::logd('Authentication required ...', 'REPORT');
 	
-	if ($cfg->sendMailOnReportReceived()) {
-		MailHelper::sendMail($cfg->getReportMailRecipients(),
-													'On report received auth failure !',
-													'Somebody try to access report script without a correct login/password !!!');
-	}
-	
-	// exit if access not granted
-	exit;
+	if (!$cfg->isReportBasicAuthGranted($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW'])) {
+		Debug::loge('Somebody try to access report script without a correct login/password !!!', 'REPORT');
+		
+		if ($cfg->sendMailOnReportReceived()) {
+			MailHelper::sendMail($cfg->getReportMailRecipients(),
+														'On report received auth failure !',
+														'Somebody try to access report script without a correct login/password !!!');
+		}
+		
+		// exit if access not granted
+		exit;
+		
+	} else { Debug::logd('  |_ access granted !', 'REPORT'); }
 }
 
 // Get HTTP PUT data

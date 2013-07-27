@@ -157,11 +157,19 @@ class CfgHelper {
 	public function isReportBasicAuthEnabled() { return $this->mBasicAuth; }
 	
 	public function isReportBasicAuthGranted($login, $password) {
-		Debug::logd($login.' : '.$password, 'CONFIG');
+		Debug::logd('Check access for '.$login.' / '.$password, 'CONFIG');
 		
 		foreach ($this->mBasicAuthAccounts as $account) {
-			if (strcmp($login, $account['login'])==0) {				
-				if (strcmp($password, $account['clear']?$account['password']:md5($account['password']))==0)
+			if (strcmp($login, $account['login'])==0) {
+				Debug::logd('  |_ login found !', 'CONFIG');
+				
+				if (!$account['clear']) {
+					$requiredPassword = md5($account['password']);
+					Debug::logd('  |_ obfuscated password enabled', 'CONFIG');
+					
+				} else { $requiredPassword = $account['password']; }
+				
+				if (strcmp($password, $requiredPassword)==0)
 					return true;
 			} 
 		}
