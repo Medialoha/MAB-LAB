@@ -25,9 +25,13 @@ $cfg = CfgHelper::getInstance();
 
 // check if HTTP basic auth is required
 if ($cfg->isReportBasicAuthEnabled()) {
-	Debug::logd('Authentication required ...', 'REPORT');
+	Debug::logi('Authentication required ...', 'REPORT');
 	
 	if (!$cfg->isReportBasicAuthGranted($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW'])) {
+		if (!array_key_exists('PHP_AUTH_USER', $_SERVER) || !array_key_exists('PHP_AUTH_PW', $_SERVER)) {
+			Debug::loge('HTTP authentication USER/PW does not exist in $_SERVER !!!', 'REPORT');
+		}
+		
 		Debug::loge('Somebody try to access report script without a correct login/password !!!', 'REPORT');
 		
 		if ($cfg->sendMailOnReportReceived()) {
@@ -39,7 +43,7 @@ if ($cfg->isReportBasicAuthEnabled()) {
 		// exit if access not granted
 		exit;
 		
-	} else { Debug::logd('  |_ access granted !', 'REPORT'); }
+	} else { Debug::logi('  |_ access granted !', 'REPORT'); }
 }
 
 // Get HTTP PUT data
