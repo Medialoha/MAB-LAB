@@ -11,8 +11,8 @@
  */
 
 define('APP_NAME', 'MAB-LAB');
-define('VERSION_NAME', '1.0.0-Connor');
-define('VERSION_CODE', 1);
+define('VERSION_NAME', '1.1.0-Abby');
+define('VERSION_CODE', 2);
 
 define('PAGE_ID_HOME', 'h');
 define('PAGE_ID_CONTACT', 'c');

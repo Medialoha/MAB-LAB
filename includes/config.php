@@ -14,6 +14,9 @@ $mGlobalCfg = array(
 	'report.sendmail'=>false,
 	'report.sendmail.recipients'=>'',
 		
+	'report.basicauth'=>false,
+	'report.basicauth.accounts'=>array(),
+		
 	'mail.from.addr'=>'',
 	'mail.from.name'=>'MAB-LAB',
 		

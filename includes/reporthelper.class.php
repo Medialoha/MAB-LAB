@@ -111,7 +111,7 @@ class ReportHelper {
 		
 		foreach($dispArr as $obj) {
 			$values = get_object_vars($obj);
-			
+						
 			?><table class="table table-condensed table-hover" >
 				<tr>
 					<td>Orientation</td>
@@ -119,7 +119,11 @@ class ReportHelper {
 				</tr>
 				<tr>
 					<td>Current Size Range</td>
-					<td><span class="muted" >Largest</span>&nbsp;<?php echo $obj->currentSizeRange['largest']; ?>&nbsp;-&nbsp;<span class="muted" >Smallest</span>&nbsp;<?php echo $obj->currentSizeRange['smallest']; ?></td>
+					<td>
+						<?php if (isset($obj->currentSizeRange)) { ?>
+							<span class="muted" >Largest</span>&nbsp;<?php echo $obj->currentSizeRange['largest']; ?>&nbsp;-&nbsp;<span class="muted" >Smallest</span>&nbsp;<?php echo $obj->currentSizeRange['smallest']; ?>
+						<?php } else { ?><i class="muted" >Not set</i><?php } ?>
+					</td>
 				</tr>
 				<tr><td>Size&nbsp;/&nbsp;Real Size</td><td><?php echo $obj->getSize; ?>&nbsp;/&nbsp;<?php echo $obj->getRealSize; ?></td></tr>
 				<tr><td>Pixel Format</td><td><?php echo $obj->pixelFormat; ?></td></tr>

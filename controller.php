@@ -37,11 +37,25 @@ switch ($action) {
 						// check for boolean value
 						if (strcmp($key, 'report.packagename.shrink')==0 || strcmp($key, 'report.sendmail')==0) {
 							$tmpCfg[$key] = $v=='1'?true:false;
-
+						
 						} else { $tmpCfg[$key] = $v; }
 					}
 				}
 			}
+			Debug::logd($_POST);
+			if (array_key_exists('report-basicauth', $_POST)) {
+				$tmpCfg['report.basicauth'] = true;
+
+				// check report basic auth account
+				$account = array(	
+											'login'=>$_POST['report-basicauth-login'], 
+											'password'=>$_POST['report-basicauth-password'],
+											'clear'=>(!array_key_exists('report-basicauth-obfuscate', $_POST))
+										);
+
+				$tmpCfg['report.basicauth.accounts'] = array($account);
+				
+			} else { $tmpCfg['report.basicauth'] = false; }
 						
 			$error = CfgHelper::writeConfig($tmpCfg);
 			if ($error==null) {

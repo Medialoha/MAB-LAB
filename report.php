@@ -21,6 +21,22 @@ require_once('includes/mailhelper.class.php');
 
 Debug::logi('New report requested !', 'REPORT');
 
+$cfg = CfgHelper::getInstance();
+
+// check if HTTP basic auth is required
+if ($cfg->isReportBasicAuthEnabled() && !$cfg->isReportBasicAuthGranted($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW'])) {
+	Debug::loge('Somebody try to access report script without a correct login/password !!!', 'REPORT');
+	
+	if ($cfg->sendMailOnReportReceived()) {
+		MailHelper::sendMail($cfg->getReportMailRecipients(),
+													'On report received auth failure !',
+													'Somebody try to access report script without a correct login/password !!!');
+	}
+	
+	// exit if access not granted
+	exit;
+}
+
 // Get HTTP PUT data
 $data = file_get_contents("php://input");
 
@@ -50,10 +66,10 @@ if (!empty($data)) {
 	$result = DBHelper::insertReport($values);
 	if (!$result) {
 		Debug::loge('Inserting report data failed ! '.DBHelper::getLastError(), 'REPORT');
+		Debug::loge('Report content '.print_r($values, r), 'REPORT');
 		
-	} else { Debug::logi('Report inserted with success ! '.print_r($values, r), 'REPORT'); }
-	
-	$cfg = CfgHelper::getInstance();
+	} else { Debug::logi('Report inserted with success !', 'REPORT'); }
+
 	if ($cfg->sendMailOnReportReceived()) {
 		MailHelper::sendMail($cfg->getReportMailRecipients(),
 													'New report received !',

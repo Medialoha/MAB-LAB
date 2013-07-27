@@ -21,6 +21,9 @@ class CfgHelper {
 	private $mDateTimezone;
 	private $mShrinkPackageName;
 	
+	private $mBasicAuth;
+	private $mBasicAuthAccounts;
+	
 	private $mSendMailOnReportReceived;
 	private $mReportMailRecipients;
 	
@@ -54,6 +57,9 @@ class CfgHelper {
 		} else { date_default_timezone_set($obj->mDateTimezone); }
 		
 		$obj->mShrinkPackageName = $mGlobalCfg['report.packagename.shrink'];
+		
+		$obj->mBasicAuth = $mGlobalCfg['report.basicauth'];
+		$obj->mBasicAuthAccounts = $mGlobalCfg['report.basicauth.accounts'];
 		
 		$obj->mSendMailOnReportReceived = is_bool($mGlobalCfg['report.sendmail'])?$mGlobalCfg['report.sendmail']:true;
 		$obj->mReportMailRecipients = is_string($mGlobalCfg['report.sendmail.recipients'])?$mGlobalCfg['report.sendmail.recipients']:'';
@@ -114,29 +120,30 @@ class CfgHelper {
 		
 		// if all files checks passed
 		if ($error==null) {
+			$accounts = ''; $sep = ''; 
+			foreach ($arr['report.basicauth.accounts'] as $account) {
+				$accounts .= $sep.'array(\'login\'=>"'.$account['login'].'", \'password\'=>"'.$account['password'].'", \'clear\'=>'.($account['clear']?'true':'false').')';
+				$sep = ',';
+			}
+
 			$tmpl = file_get_contents($configTmplFile);
 
 			if (!file_put_contents($configFile,
-					sprintf($tmpl,
-										$arr['db.host'],
-										$arr['db.name'],
-										$arr['db.user'],
-										$arr['db.pwd'],
-							
-										$arr['tbl.prefix'],
-							
-										$arr['date.format'],
-										$arr['date.timezone'],
-							
-										$arr['report.packagename.shrink']?'true':'false',
-										$arr['report.sendmail']?'true':'false',
-										$arr['report.sendmail.recipients'],
-							
-										$arr['mail.from.addr'],
-										$arr['mail.from.name'],
-							
-										$arr['report.tags']
-									))) {
+															sprintf($tmpl,
+																				$arr['db.host'], $arr['db.name'], $arr['db.user'], $arr['db.pwd'],
+																				$arr['tbl.prefix'],
+																				$arr['date.format'], $arr['date.timezone'],
+																	
+																				$arr['report.packagename.shrink']?'true':'false',
+																				$arr['report.sendmail']?'true':'false',
+																				$arr['report.sendmail.recipients'],
+																	
+																				$arr['report.basicauth']?'true':'false',
+																				$accounts,
+																	
+																				$arr['mail.from.addr'], $arr['mail.from.name'],
+																				$arr['report.tags']
+																			))) {
 					
 				$error = 'An error occured while writing configuration file !';
 			}
@@ -147,20 +154,42 @@ class CfgHelper {
 	
 	
 	// GETTERS
-	public function getDateTimezone() { return $this->mDateTimezone; }
+	public function isReportBasicAuthEnabled() { return $this->mBasicAuth; }
+	
+	public function isReportBasicAuthGranted($login, $password) {
+		Debug::logd($login.' : '.$password, 'CONFIG');
+		
+		foreach ($this->mBasicAuthAccounts as $account) {
+			if (strcmp($login, $account['login'])==0) {				
+				if (strcmp($password, $account['clear']?$account['password']:md5($account['password']))==0)
+					return true;
+			} 
+		}
+		
+		return false;
+	}
+	
+	public function getBasicAuthAccount() {
+		if (sizeof($this->mBasicAuthAccounts)>0)
+			return (object)$this->mBasicAuthAccounts[0];
+		
+		return (object)array('login'=>null, 'password'=>null, 'clear'=>false);
+	}
 	
 	public function getDateFormat() { return $this->mDateFormat; }
 	
-	public function shrinkPackageName() { return $this->mShrinkPackageName; }
+	public function getDateTimezone() { return $this->mDateTimezone; }
 	
-	public function getTablePrefix() { return $this->mTablePrefix; }
-	
-	public function sendMailOnReportReceived() { return $this->mSendMailOnReportReceived; }
+	public function getMailFromAddr() { return $this->mMailSender[0]; }
+	public function getMailFromName() { return $this->mMailSender[1]; }
 	
 	public function getReportMailRecipients($asArray=true) { 
 		return $asArray?explode(',', $this->mReportMailRecipients):$this->mReportMailRecipients; 
 	}
 	
-	public function getMailFromAddr() { return $this->mMailSender[0]; }
-	public function getMailFromName() { return $this->mMailSender[1]; }
+	public function getTablePrefix() { return $this->mTablePrefix; }
+	
+	public function shrinkPackageName() { return $this->mShrinkPackageName; }
+	
+	public function sendMailOnReportReceived() { return $this->mSendMailOnReportReceived; }
 }

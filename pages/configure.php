@@ -43,6 +43,44 @@ $cfg = CfgHelper::getInstance();
 	  </div>
   </fieldset>
 
+  <?php 
+  	$account = $cfg->getBasicAuthAccount(); 
+  	$disabled = $cfg->isReportBasicAuthEnabled()?null:'disabled="disabled"'; 
+  ?>
+  <fieldset><legend>Report Authentication</legend>
+	  <div class="control-group">
+	    <label class="control-label" for="reportBasicAuthEnabled">Enable HTTP basic auth</label>
+	    <div class="controls">
+	      <input type="checkbox" id="reportBasicAuthEnabled" name="report-basicauth" <?php if ($cfg->isReportBasicAuthEnabled()) echo 'checked="checked"'; ?> onclick="toggleBasicAuthFields(this);" value="1" >
+	    </div>
+	  </div>
+	  <div class="control-group">
+	    <label class="control-label" for="reportBasicAuthLogin">Login</label>
+	    <div class="controls">
+	      <input type="text" id="reportBasicAuthLogin" name="report-basicauth-login" value="<?php echo $account->login; ?>" <?php echo $disabled; ?> />
+	    </div>
+	  </div>
+	  <div class="control-group">
+	    <label class="control-label" for="reportBasicAuthPassword">Password</label>
+	    <div class="controls">
+	      <input type="password" id="reportBasicAuthPassword" name="report-basicauth-password" value="<?php echo $account->password; ?>" <?php echo $disabled; ?> onkeyup="clearObfPwd()" />
+	      
+	      <label class="control-label-inline" style="width:200px;" for="" >Obfuscated with md5</label>
+	      <input type="checkbox" id="reportBasicAuthPasswordClear" name="report-basicauth-obfuscate" <?php if (!$account->clear) echo 'checked="checked"'; ?> <?php echo $disabled; ?> value="1" onchange="toggleObfPwd()" />
+	    </div>
+	  </div>
+	  <div class="control-group">
+	  	<label class="control-label" style="padding-top:0px;" >Help</label>
+	    <div class="controls">
+	 			<small class="muted" >
+	 				<i>If you use obfuscated password, type your clear password here. 
+	 				<br/>And, under your app, use the obfuscated password : </i>
+	 				<b id="obfpwd" ><?php if (!$account->clear) echo md5($account->password); else echo ' - '; ?></b>
+	 			</small>
+	 		</div>
+	  </div>
+  </fieldset>
+
   <fieldset><legend>Mail Options</legend>
 	  <div class="control-group">
 	    <label class="control-label" for="reportSendMail" >On report received</label>
@@ -114,9 +152,11 @@ $cfg = CfgHelper::getInstance();
 	<div class="row" style="margin-top:50px;" >
 		<div class="control-group span6 offset5" >
     	<div class="controls" >
-	      <button type="submit" class="btn">Save</button>
+	      <button type="submit" class="btn btn-primary" >Save</button>
 	      <button type="submit" class="btn">Cancel</button>
 	    </div>
 	  </div>
 	</div>
 </form>
+
+<script type="text/javascript" src="assets/functions-configure.js" ></script>
