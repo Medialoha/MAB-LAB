@@ -12,7 +12,7 @@
 
 define('APP_NAME', 'MAB-LAB');
 define('VERSION_NAME', '1.1.1-Abby');
-define('VERSION_CODE', 2);
+define('VERSION_CODE', 3);
 
 define('LOG_SEVERITY', 1); // could be 0=>DEBUG, 1=>INFO, 2=>WARNING, 3=>ERROR
 
