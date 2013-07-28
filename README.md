@@ -9,6 +9,11 @@ If you update, don't forget to remove the includes/config.php file from the new 
 
 ## Change Log ##
 
+**Version 1.1.2-Abby**
+
+- *Add two methods for HTTP basic auth : PHP or htaccess/htpasswd files*
+- *Report script moved to report/report.php*
+
 **Version 1.1.1-Abby**
 
 - *Correct authentication problem*

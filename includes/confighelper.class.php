@@ -10,6 +10,9 @@
  *     EIRL DEVAUX J. - Medialoha - initial API and implementation
  */
 
+define('AUTH_METHOD_PHP', 0);
+define('AUTH_METHOD_HTACCESS', 1);
+
 
 class CfgHelper {
 	
@@ -22,6 +25,7 @@ class CfgHelper {
 	private $mShrinkPackageName;
 	
 	private $mBasicAuth;
+	private $mBasicAuthMethod;
 	private $mBasicAuthAccounts;
 	
 	private $mSendMailOnReportReceived;
@@ -38,10 +42,11 @@ class CfgHelper {
 	}
 	
 	public static function init($recreate=false) {
-		if (!$_SESSION[CONFIG_OBJ_SESSION_NAME] instanceof CfgHelper || $recreate==true) {
+		if (!array_key_exists(CONFIG_OBJ_SESSION_NAME, $_SESSION) || !$_SESSION[CONFIG_OBJ_SESSION_NAME] instanceof CfgHelper || $recreate==true) {
 			$_SESSION[CONFIG_OBJ_SESSION_NAME] = CfgHelper::createHelperObject();
 		}
 	}
+	
 	private static function createHelperObject() {
 		global $mGlobalCfg;
 		
@@ -59,6 +64,7 @@ class CfgHelper {
 		$obj->mShrinkPackageName = $mGlobalCfg['report.packagename.shrink'];
 		
 		$obj->mBasicAuth = $mGlobalCfg['report.basicauth'];
+		$obj->mBasicAuthMethod = $mGlobalCfg['report.basicauth.method'];
 		$obj->mBasicAuthAccounts = $mGlobalCfg['report.basicauth.accounts'];
 		
 		$obj->mSendMailOnReportReceived = is_bool($mGlobalCfg['report.sendmail'])?$mGlobalCfg['report.sendmail']:true;
@@ -101,10 +107,11 @@ class CfgHelper {
 		$configDir = $path.'includes';
 		$configFile = $configDir.'/config.php';
 		$configTmplFile = $configFile.'.tmpl';
-		
+			
 		// if config file does not exist then check if dir is writeable
-		if (!file_exists($configFile) && !is_writeable($configDir)) {
-			$error = 'Config directory '.$configDir.' is not writeable !';
+		if (!file_exists($configFile)) {
+			if (!is_writeable($configDir))
+				$error = 'Config directory '.$configDir.' is not writeable !';
 			
 		// else if config file exists then check if file is writeable
 		} else if (!is_writeable($configFile)) {
@@ -139,6 +146,7 @@ class CfgHelper {
 																				$arr['report.sendmail.recipients'],
 																	
 																				$arr['report.basicauth']?'true':'false',
+																				$arr['report.basicauth.method'],
 																				$accounts,
 																	
 																				$arr['mail.from.addr'], $arr['mail.from.name'],
@@ -155,6 +163,8 @@ class CfgHelper {
 	
 	// GETTERS
 	public function isReportBasicAuthEnabled() { return $this->mBasicAuth; }
+	
+	public function isBasicAuthPHPMethodEnabled() { return $this->mBasicAuthMethod==AUTH_METHOD_PHP; }
 	
 	public function isReportBasicAuthGranted($login, $password) {
 		Debug::logd('Check access for '.$login.' / '.$password, 'CONFIG');
@@ -183,6 +193,8 @@ class CfgHelper {
 		
 		return (object)array('login'=>null, 'password'=>null, 'clear'=>false);
 	}
+	
+	public function getBasicAuthMethod() { return $this->mBasicAuthMethod; }
 	
 	public function getDateFormat() { return $this->mDateFormat; }
 	

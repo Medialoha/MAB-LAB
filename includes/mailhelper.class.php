@@ -10,7 +10,7 @@
  *     EIRL DEVAUX J. - Medialoha - initial API and implementation
  */
 
-require_once 'libs/PHPMailer/class.phpmailer.php';
+require_once(BASE_PATH.'libs/PHPMailer/class.phpmailer.php');
 
 
 class MailHelper {

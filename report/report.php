@@ -1,4 +1,4 @@
-<?php define('DIRECT_ACCESS_CHECK', true);
+<?php define('DIRECT_ACCESS_CHECK', true); 
 /**
  * Copyright (c) 2013 EIRL DEVAUX J. - Medialoha.
  * All rights reserved. This program and the accompanying materials
@@ -10,26 +10,30 @@
  *     EIRL DEVAUX J. - Medialoha - initial API and implementation
  */ 
 
-require_once('includes/define.php');
-require_once('includes/config.php');
-require_once('includes/confighelper.class.php');
-require_once('includes/helper.class.php');
-require_once('includes/debug.class.php');
-require_once('includes/dbhelper.class.php');
-require_once('includes/reporthelper.class.php');
-require_once('includes/mailhelper.class.php');
+session_start();
+
+define('BASE_PATH', '../');
+
+require_once(BASE_PATH.'/includes/define.php');
+require_once(BASE_PATH.'includes/config.php');
+require_once(BASE_PATH.'includes/confighelper.class.php');
+require_once(BASE_PATH.'includes/helper.class.php');
+require_once(BASE_PATH.'includes/debug.class.php');
+require_once(BASE_PATH.'includes/dbhelper.class.php');
+require_once(BASE_PATH.'includes/reporthelper.class.php');
+require_once(BASE_PATH.'includes/mailhelper.class.php');
 
 Debug::logi('New report requested !', 'REPORT');
 
 $cfg = CfgHelper::getInstance();
 
-// check if HTTP basic auth is required
-if ($cfg->isReportBasicAuthEnabled()) {
-	Debug::logi('Authentication required ...', 'REPORT');
+// check if HTTP basic auth is required and PHP method is used
+if ($cfg->isReportBasicAuthEnabled() && $cfg->isBasicAuthPHPMethodEnabled()) {
+	Debug::logi('Authentication required ...', 'REPORT');	
 	
 	if (!$cfg->isReportBasicAuthGranted($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW'])) {
 		if (!array_key_exists('PHP_AUTH_USER', $_SERVER) || !array_key_exists('PHP_AUTH_PW', $_SERVER)) {
-			Debug::loge('HTTP authentication USER/PW does not exist in $_SERVER !!!', 'REPORT');
+			Debug::loge('HTTP authentication USER/PW does not exist in $_SERVER !!! Check your application acra parameters. If the problem still remain you should try the htaccess/htpasswd method.', 'REPORT');
 		}
 		
 		Debug::loge('Somebody try to access report script without a correct login/password !!!', 'REPORT');
@@ -90,5 +94,4 @@ if (!empty($data)) {
 	DBHelper::close();
 
 } else { Debug::loge('Invalid report request data ! '.print_r($_REQUEST, true), 'REPORT'); }
-
 ?>

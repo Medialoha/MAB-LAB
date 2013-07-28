@@ -15,8 +15,8 @@ CfgHelper::init(true);
 
 $cfg = CfgHelper::getInstance(); 
 ?>
-<form class="form-horizontal" method="post" >
-	<input type="hidden" name="a" value="updateconfig" />
+<form name="configForm" class="form-horizontal" method="post" >
+	<input type="hidden" id="action" name="a" value="" />
 	<input type="hidden" name="in-report-tags" value="" />
 
   <fieldset><legend>Display Options</legend>
@@ -65,8 +65,8 @@ $cfg = CfgHelper::getInstance();
 	    <div class="controls">
 	      <input type="password" id="reportBasicAuthPassword" name="report-basicauth-password" value="<?php echo $account->password; ?>" <?php echo $disabled; ?> onkeyup="clearObfPwd()" />
 	      
-	      <label class="control-label-inline" style="width:200px;" for="" >Obfuscated with md5</label>
-	      <input type="checkbox" id="reportBasicAuthPasswordClear" name="report-basicauth-obfuscate" <?php if (!$account->clear) echo 'checked="checked"'; ?> <?php echo $disabled; ?> value="1" onchange="toggleObfPwd()" />
+	      <label class="control-label-inline" style="width:200px;" for="reportBasicAuthPasswordObfuscate" >Obfuscated with md5</label>
+	      <input type="checkbox" id="reportBasicAuthPasswordObfuscate" name="report-basicauth-obfuscate" <?php if (!$account->clear) echo 'checked="checked"'; ?> <?php echo $disabled; ?> value="1" onchange="toggleObfPwd()" />
 	    </div>
 	  </div>
 	  <div class="control-group">
@@ -78,6 +78,36 @@ $cfg = CfgHelper::getInstance();
 	 				<b id="obfpwd" ><?php if (!$account->clear) echo md5($account->password); else echo ' - '; ?></b>
 	 			</small>
 	 		</div>
+	  </div>
+	  
+	  <div class="control-group">
+	    <label class="control-label" for="reportBasicAuthMethod">Method</label>
+	    <div class="controls">
+	      <select id="reportBasicAuthMethod" name="report-basicauth-method" <?php echo $disabled; ?> >
+	      	<option value="0" <?php if($cfg->getBasicAuthMethod()==AUTH_METHOD_PHP) echo 'selected="selected"'; ?> >PHP</option>
+	      	<option value="1" <?php if($cfg->getBasicAuthMethod()==AUTH_METHOD_HTACCESS) echo 'selected="selected"'; ?> >htaccess/htpasswd</option>
+	      </select>
+	      <?php 
+	      	if($cfg->getBasicAuthMethod()==AUTH_METHOD_HTACCESS) {
+	      			if (file_exists('report/.htaccess') && file_exists('report/.htpasswd')) {
+								?>&nbsp;&nbsp;<span class="label label-success" ><i class="icon-info-sign icon-white" ></i>&nbsp;.htaccess/.htpasswd files exist.</span><?php
+								
+							} else { ?>&nbsp;&nbsp;<span class="label label-warning" ><i class="icon-warning-sign icon-white" ></i>&nbsp;.htaccess and/or .htpasswd not found !</span><?php }
+							
+							// display create files button only if all parameters set properly
+							if ($cfg->isReportBasicAuthEnabled() && !empty($account->login) && !empty($account->password)) {
+								?><br/><br/><button type="button" class="btn" onclick="createHtFiles()" >(Re)Create files</button><?php
+							}
+							
+					} else {
+						if (file_exists('report/.htaccess') || file_exists('report/.htpasswd')) {
+							?>&nbsp;&nbsp;<span class="label label-warning" ><i class="icon-warning-sign icon-white" ></i>&nbsp;.htaccess and .htpasswd files must be deleted to use PHP auth method !</span>
+							<br/><br/><button type="button" class="btn btn-danger" onclick="deleteHtFiles()" >Delete files</button>
+							<?php
+						}
+					}
+				?>
+	    </div>
 	  </div>
   </fieldset>
 
@@ -152,8 +182,8 @@ $cfg = CfgHelper::getInstance();
 	<div class="row" style="margin-top:50px;" >
 		<div class="control-group span6 offset5" >
     	<div class="controls" >
-	      <button type="submit" class="btn btn-primary" >Save</button>
-	      <button type="submit" class="btn">Cancel</button>
+	      <button type="button" class="btn btn-primary" onclick="submitForm()" >Save</button>
+	      <button type="button" class="btn" onclick="cancelForm()" >Cancel</button>
 	    </div>
 	  </div>
 	</div>

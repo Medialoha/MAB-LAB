@@ -25,6 +25,71 @@ switch ($action) {
 			header('Location:index.php');   
 		break;
 		
+//////// CREATE HTACCESS AND HTPASSWD FILES
+	case 'createHtFiles' : 
+			$cfg = CfgHelper::getInstance();
+			$error = null;
+			$reportDir = 'report/';
+			
+			if ($cfg->isReportBasicAuthEnabled() && $cfg->getBasicAuthMethod()==AUTH_METHOD_HTACCESS) {
+				require_once('libs/PHP-Htpasswd/Htpasswd.php');
+				
+				if (!is_writeable($reportDir)) {
+					$error = 'Report directory is not writeable !';
+					
+				} else {
+					$content = 'AuthUserFile "'.getcwd().'/report/.htpasswd"'."\n".
+											'AuthName "MAB-LAB Report Script"'."\n".
+											'AuthType Basic'."\n".
+											'<Files "report.php" >'."\n".
+											"\t".'require valid-user'."\n".
+											'</Files>';
+					
+					if (file_put_contents($reportDir.'.htaccess', $content)) {
+						$account = $cfg->getBasicAuthAccount();
+						
+						$password = Htpasswd::encryptPassword($account->password, Htpasswd::ENCTYPE_APR_MD5);
+						
+						$content = $account->login.':'.$password."\n";
+						
+						if (!file_put_contents($reportDir.'.htpasswd', $content)) {
+							$error = 'An error occured while trying to write .htpasswd file ! .htaccess file was removed.';
+							@unlink($reportDir.'.htaccess');
+						}
+						
+					} else { $error = 'An error occured while trying to write .htaccess file !'; }
+				}
+				
+			} else { $error = 'Your configuration is not properly set !'; }
+			
+			if ($error==null) {
+				Helper::pushAlert(ALERT_SUCCESS, 'Files created successfully !');
+			
+			} else { Helper::pushAlert(ALERT_ERROR, $error); }
+			
+			header('Location:index.php?p='.PAGE_ID_CONFIG);		
+		break;
+		
+//////// DELETE HTACCESS AND HTPASSWD FILES
+	case 'deleteHtFiles' :
+			$error = null;
+			$reportDir = 'report/';
+		
+			if (@file_exists($reportDir.'.htaccess') && !@unlink($reportDir.'.htaccess')) {
+				$error = '<p>Unable to delete .htaccess file ! You should delete it by hand : <em>'.getcwd().'/'.$reportDir.'.htaccess</em></p>';
+			}
+			if (@file_exists($reportDir.'.htpasswd') && !@unlink($reportDir.'.htpasswd')) {
+				$error .= '<p>Unable to delete .htpasswd file ! You should delete it by hand : <em>'.getcwd().'/'.$reportDir.'.htpasswd</em></p>';
+			}
+			
+			if ($error==null) {
+				Helper::pushAlert(ALERT_SUCCESS, 'Files deleted successfully !');
+					
+			} else { Helper::pushAlert(ALERT_ERROR, $error); }
+			
+			header('Location:index.php?p='.PAGE_ID_CONFIG);
+		break;
+		
 //////// UPDATE CONFIG
 	case 'updateconfig' :
 			$cfg = CfgHelper::getInstance();
@@ -42,7 +107,9 @@ switch ($action) {
 					}
 				}
 			}
+			
 			Debug::logd($_POST);
+			// http auth enabled
 			if (array_key_exists('report-basicauth', $_POST)) {
 				$tmpCfg['report.basicauth'] = true;
 
@@ -54,12 +121,13 @@ switch ($action) {
 										);
 
 				$tmpCfg['report.basicauth.accounts'] = array($account);
+				$tmpCfg['report.basicauth.method'] = intval($_POST['report-basicauth-method']);
 				
 			} else { $tmpCfg['report.basicauth'] = false; }
 						
 			$error = CfgHelper::writeConfig($tmpCfg);
 			if ($error==null) {
-				CfgHelper::init(true);
+				CfgHelper::init(true);				
 				Helper::pushAlert(ALERT_SUCCESS, 'Configuration saved.');
 						
 			} else { Helper::pushAlert(ALERT_ERROR, $error); }

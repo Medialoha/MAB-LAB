@@ -137,7 +137,7 @@ class Report {
 	public function getFormatedAvailMemSize() { return ReportHelper::formatMemSize($this->available_mem_size); }
 	
 	public function getFormatedCustomData() { 
-		require_once('includes/customdataformatter.class.php');
+		require_once(BASE_PATH.'includes/customdataformatter.class.php');
 		
 		return CustomDataFormatter::format($this->custom_data); 
 	}

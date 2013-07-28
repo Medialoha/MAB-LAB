@@ -11,8 +11,8 @@
  */
 
 define('APP_NAME', 'MAB-LAB');
-define('VERSION_NAME', '1.1.1-Abby');
-define('VERSION_CODE', 2);
+define('VERSION_NAME', '1.1.2-Abby');
+define('VERSION_CODE', 4);
 
 define('LOG_SEVERITY', 1); // could be 0=>DEBUG, 1=>INFO, 2=>WARNING, 3=>ERROR
 
@@ -25,3 +25,6 @@ define('PAGE_ID_USERS', 'u');
 
 define('ALERT_SUCCESS', 'alert-success');
 define('ALERT_ERROR', 'alert-error');
+
+if (!defined('BASE_PATH'))
+	define('BASE_PATH', '');

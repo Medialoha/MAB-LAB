@@ -10,6 +10,8 @@
  *     EIRL DEVAUX J. - Medialoha - initial API and implementation
  */ 
 
+session_start();
+
 require_once('includes/define.php');
 require_once('includes/config.php');
 require_once('includes/confighelper.class.php');
@@ -18,8 +20,6 @@ require_once('includes/debug.class.php');
 require_once('includes/dbhelper.class.php');
 require_once('includes/reporthelper.class.php');
 require_once('includes/report.class.php');
-
-session_start();
 
 // get page to display
 $pageId = isset($_GET['p'])?$_GET['p']:PAGE_ID_HOME;

@@ -10,7 +10,7 @@
  *     EIRL DEVAUX J. - Medialoha - initial API and implementation
  */
 
-$mLogFile = getcwd().'/logs/mablab.log';
+$mLogFile = BASE_PATH.'/logs/mablab.log';
 $mMaxLogFileSize = 3145728;
 $mSupportMailAddr = '';
 $mMailSubject = 'Website log report: %s';
