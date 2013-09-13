@@ -18,6 +18,9 @@ define('REPORT_PHONE_MODEL', 'phone_model');
 define('REPORT_BRAND', 'brand');
 define('REPORT_PRODUCT', 'product');
 
+define('REPORT_STACK_TRACE', 'stack_trace');
+define('REPORT_ST_LAST_CRASH_DATE', 'last_crash_date');
+
 define('REPORT_STATE', 'report_state');
 define('REPORT_TAG', 'report_tag');
 
@@ -116,6 +119,46 @@ class DBHelper {
 	public static function fetchReport($reportId) {
 		$arr = self::selectRow(TBL_REPORTS, REPORT_ID."='".$reportId."'");
 		return Report::createFromArray($arr);
+	}
+
+	public static function fetchStackTrace($reportId)
+	{
+		$arr = self::selectRows(TBL_REPORTS,  REPORT_STACK_TRACE." = (SELECT ".REPORT_STACK_TRACE." FROM ".self::getTblName(TBL_REPORTS)." WHERE ".REPORT_ID."='".$reportId."')", REPORT_PACKAGE_NAME.", ".REPORT_VERSION_NAME, REPORT_ID.", ".REPORT_PACKAGE_NAME.", ".REPORT_VERSION_NAME.", ".REPORT_STACK_TRACE.", ".REPORT_VERSION_CODE.", COUNT(*) AS count, MAX(".REPORT_CRASH_DATE.") AS ".REPORT_ST_LAST_CRASH_DATE, REPORT_STACK_TRACE.", ".REPORT_PACKAGE_NAME.", ".REPORT_VERSION_NAME, 1, false);
+
+		if(is_array($arr) && sizeof($arr) > 0)
+		{
+			return StackTrace::createFromArray($arr[0]);
+		}
+		else
+		{
+			return null;
+		}
+	}
+	
+	public static function fetchStackTraces($limit)
+	{
+		$arr = self::selectRows(TBL_REPORTS, REPORT_STATE.'!='.REPORT_STATE_ARCHIVED, "count DESC, ".REPORT_PACKAGE_NAME.", ".REPORT_VERSION_NAME, REPORT_ID.", ".REPORT_PACKAGE_NAME.", ".REPORT_VERSION_NAME.", SUBSTRING_INDEX( ".REPORT_STACK_TRACE.",  '\n', 1 ) AS  '".REPORT_STACK_TRACE."', COUNT(*) AS  count, MAX(".REPORT_CRASH_DATE.") AS ".REPORT_ST_LAST_CRASH_DATE, REPORT_STACK_TRACE.", ".REPORT_PACKAGE_NAME.", ".REPORT_VERSION_NAME, $limit, false);
+		$result = array();
+		if(is_array($arr) && sizeof($arr) > 0)
+		{
+			foreach ($arr as $values)
+			{
+				$result[] = StackTrace::createFromArray($values);
+			}
+		}
+		return $result;
+	}
+	
+	public static function deleteReportsByStacktrace($id) {
+		$where = REPORT_STACK_TRACE.' = (SELECT '.REPORT_STACK_TRACE.' FROM (SELECT * FROM '.self::getTblName(TBL_REPORTS).' WHERE '.REPORT_ID.' = "'.$id.'") AS t)';
+		
+		return mysqli_query(self::$dbo, 'DELETE FROM '.self::getTblName(TBL_REPORTS).' WHERE '.$where);
+	}
+	
+	public static function updateReportsStateByStacktrace($id, $stateId) {
+
+		$where = REPORT_STACK_TRACE.' = (SELECT '.REPORT_STACK_TRACE.' FROM (SELECT * FROM '.self::getTblName(TBL_REPORTS).' WHERE '.REPORT_ID.' = "'.$id.'") AS t)';
+		return mysqli_query(self::$dbo, 'UPDATE '.self::getTblName(TBL_REPORTS).' SET '.REPORT_STATE.'='.$stateId.' WHERE '.$where);
 	}
 	
 	public static function insertReport($values) {

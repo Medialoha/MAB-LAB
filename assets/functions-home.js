@@ -26,9 +26,10 @@ function loadAll() {
 	loadChart('#chart2-1', REPORTS_EVOLUTION_LINE_CHART_ID, LINE_CHART_TYPE_ID);
 
 	loadLastReports();
+	loadMostErrorReports();
 	
 	// Refresh chart each 10min
-	setTimeout(function() { loadAll(); }, 60000 );
+	setTimeout(function() { loadAll(); }, 600000 );
 }
 
 function loadLastReports() {
@@ -37,6 +38,15 @@ function loadLastReports() {
 	$.ajax({ url:"?a=getlastreports", type:"get" })
 	 .done(function(data) {
 		 $('#lastreports').html(data);
+	 });	
+}
+
+function loadMostErrorReports() {
+	showLoaderIfEmpty('#mosterrorreports');
+	
+	$.ajax({ url:"?a=getmosterrorreports", type:"get" })
+	 .done(function(data) {
+		 $('#mosterrorreports').html(data);
 	 });	
 }
 

@@ -24,6 +24,21 @@ function showReportDetails(id) {
 		});	
 }
 
+function showStackTraceDetails(id) {
+	$('#loader').show();
+
+	$.ajax({ url:"?a=getstacktrace", type:"post", data:{reportId:id} })
+		.done(function(data) {
+			try {
+				$('#stackTraceDialog').html(data);
+								
+			} catch (err) { console.error(err); }
+			
+			$('#stackTraceDialog').modal('show');
+			$('#loader').hide();
+		});	
+}
+
 function delReports() {
 	var arr = $('input[name="itemChecked"]');
 	var ids = ''; var sep = '';
@@ -77,6 +92,38 @@ function archiveReport(ids, loaderId) {
 		alert(data);
 		$('#reportDialog').modal('hide');
 		$('#reportDialog').html('');
+
+		$(loaderId).hide();
+		
+		window.location.reload();
+	});
+}
+
+function delReportByStacktrace(id, loaderId) {
+	if (!confirm('Do you really want to delete these report ?')) return;
+	
+	$(loaderId).show();
+
+	$.ajax({ url:"?a=delreportsbystacktrace", type:"post", data:{reportId:id} })
+	.done(function(data) {
+		alert(data);
+		$('#stackTraceDialog').modal('hide');
+		$('#stackTraceDialog').html('');
+
+		$(loaderId).hide();
+		
+		window.location.reload();
+	});
+}
+
+function archiveReportByStacktrace(id, loaderId) {
+	$(loaderId).show();
+
+	$.ajax({ url:"?a=archreportsbystacktrace", type:"post", data:{reportId:id} })
+	.done(function(data) {
+		alert(data);
+		$('#stackTraceDialog').modal('hide');
+		$('#stackTraceDialog').html(data);
 
 		$(loaderId).hide();
 		

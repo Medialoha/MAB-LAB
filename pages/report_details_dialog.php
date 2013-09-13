@@ -121,8 +121,8 @@
   			<dt>Settings Secure</dt><dd><br/><?php echo ReportHelper::displayObjectValuesToHTMLArray($report->settings_secure); ?></dd>
   		</dl>
   	</div>
-  	
-  	<div class="tab-pane" id="report-stacktrace" ><?php echo $report->stack_trace; ?></div>
+	
+  	<div class="tab-pane" id="report-stacktrace" style="color:red" ><?php echo $report->getFormatedSystrace(); ?></div>
   	<div class="tab-pane" id="report-logcat" ><?php echo $report->getFormatedLogCat(); ?></div>
   	<div class="tab-pane" id="report-eventslog" ><?php echo $report->eventslog; ?></div>
   	<div class="tab-pane" id="report-meminfo" ><?php echo $report->getFormatedMemInfo(); ?></div>

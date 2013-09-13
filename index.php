@@ -20,6 +20,10 @@ require_once('includes/debug.class.php');
 require_once('includes/dbhelper.class.php');
 require_once('includes/reporthelper.class.php');
 require_once('includes/report.class.php');
+require_once('includes/logcatline.class.php');
+require_once('includes/logcatlinehelper.class.php');
+require_once('includes/stacktrace.class.php');
+require_once('includes/stacktracehelper.class.php');
 
 // get page to display
 $pageId = isset($_GET['p'])?$_GET['p']:PAGE_ID_HOME;

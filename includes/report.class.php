@@ -123,9 +123,7 @@ class Report {
 	}
 	
 	public function getFormatedLogCat() {
-		$search = '--------- beginning of ';
-		
-		return str_replace($search, '<hr/>', substr($this->logcat, strlen($search)));
+		return ReportHelper::getFormatedLogCatAsTable($this->logcat);
 	}
 	
 	public function getFormatedMemInfo() {
@@ -140,6 +138,10 @@ class Report {
 		require_once(BASE_PATH.'includes/customdataformatter.class.php');
 		
 		return CustomDataFormatter::format($this->custom_data); 
+	}
+	
+	public function getFormatedSystrace() {
+		return ReportHelper::translateQuoted($this->stack_trace);
 	}
 	
 	public function hasCustomData() { return (empty($this->custom_data)?false:true); }
