@@ -41,5 +41,3 @@ $arr = DBHelper::selectRows(TBL_REPORTS, REPORT_STATE.'!='.REPORT_STATE_ARCHIVED
 	} else { ?><tr><td colspan="5" class="muted" >No repords recorded yet...</td></tr><?php } ?>
 </tbody>
 </table>
-
-<div id="reportDialog" class="modal hide fade" style="width:900px; margin-left:-450px;" ></div>

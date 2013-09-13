@@ -41,6 +41,14 @@ require_once('includes/charthelper.class.php');
 	</div> 
 </div>
 
+<div class="row" style="margin-top:30px;" >
+	<div class="span12" >
+		<h4>Most error reports</h4>
+		<div id="mosterrorreports" ></div>
+	</div> 
+</div>
+
+<div id="stackTraceDialog" class="modal hide fade" style="width:900px; margin-left:-450px;" ></div>
 <div id="reportDialog" class="modal hide fade" style="width:1000px; margin-left:-500px; height:700px;" ></div>
 
 <!--[if lte IE 8]><script language="javascript" type="text/javascript" src="libs/flot/excanvas.min.js"></script><![endif]-->

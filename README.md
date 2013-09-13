@@ -9,6 +9,11 @@ If you update, don't forget to remove the includes/config.php file from the new 
 
 ## Change Log ##
 
+**Version 1.1.3-Abby**
+
+- *Add grouping and review reports by the same reports (by stacktraces). Now you can viewing/archiving/deleting reports by the same error*
+- *Formating LogCat and StackTrace logs*
+
 **Version 1.1.2-Abby**
 
 - *Add two methods for HTTP basic auth : PHP or htaccess/htpasswd files*

@@ -149,6 +149,17 @@ switch ($action) {
 				
 			} else { echo 'Report id is not valid !'; }
 		break;
+		
+//////// GET STACKTRACE
+	case 'getstacktrace' :
+			$reportId = @$_POST['reportId'];
+			if (!empty($reportId)) {
+				$stacktrace = DBHelper::fetchStackTrace($reportId);
+				
+				require_once('pages/stack_trace_details_dialog.php');
+				
+			} else { echo 'Report id is not valid !'; }
+		break;
 	
 //////// ARCHIVE REPORTS
 	case 'archreports' :
@@ -162,12 +173,34 @@ switch ($action) {
 			} else { echo 'Report id(s) is not valid !'; }
 		break;
 	
+//////// ARCHIVE REPORTS BY STACKTRACE
+	case 'archreportsbystacktrace' :
+			$reportId = @$_POST['reportId'];
+			if (!empty($reportId)) {			
+				$result = DBHelper::updateReportsStateByStacktrace($reportId, REPORT_STATE_ARCHIVED);
+				
+				echo 'Report(s) archived with success !';
+				
+			} else { echo 'Report id(s) is not valid !'; }
+		break;
+	
 //////// DEL REPORTS
 	case 'delreports' :
 			$reportIds = @$_POST['reportIds'];
 			if (!empty($reportIds)) {
 				$reportIds = explode(',', $reportIds);		
 				DBHelper::deleteReports($reportIds);
+				
+				echo 'Report(s) deleted with success !';
+				
+			} else { echo 'Report id(s) is not valid !'; }
+		break;
+	
+//////// DEL REPORTS BY STACKTRACE
+	case 'delreportsbystacktrace' :
+			$reportId = @$_POST['reportId'];
+			if (!empty($reportId)) {
+				DBHelper::deleteReportsByStacktrace($reportId);
 				
 				echo 'Report(s) deleted with success !';
 				
@@ -221,6 +254,11 @@ switch ($action) {
 //////// GET LAST REPORTS BOX
 	case 'getlastreports' :
 			require_once('pages/last_reports_box.php');
+		break;
+		
+//////// GET MOST ERROR REPORTS BOX
+	case 'getmosterrorreports' :
+			require_once('pages/most_error_reports_box.php');
 		break;
 		
 //////// GET CHART DATA

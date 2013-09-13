@@ -40,5 +40,3 @@ $arr = DBHelper::selectRows(TBL_REPORTS, null, 'count DESC', REPORT_PHONE_MODEL.
 	} else { ?><tr><td colspan="2" class="muted" >No reports recorded yet...</td></tr><?php } ?>
 </tbody>
 </table>
-
-<div id="reportDialog" class="modal hide fade" style="width:900px; margin-left:-450px;" ></div>

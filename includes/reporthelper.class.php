@@ -131,4 +131,44 @@ class ReportHelper {
 			</table><?php 
 		}
 	}
+	public static function getFormatedLogCatAsTable($logcatText) {
+		$search = '--------- beginning of ';
+		
+		$log = str_replace($search, '<hr/>', substr($logcatText, strlen($search)));
+    
+		$array = array();
+		$lines = explode("\n", $log);
+		foreach($lines as $line)
+		{
+			$logcat = new LogCatLine();
+			$logcat->parse($line);
+			$array[] = $logcat;
+		}
+		
+		// check if first log line is broken if it is then remove it
+		if(count($array) >= 2)
+		{		
+			if(!$array[0]->isValid() && $array[1]->isValid())
+			{
+				array_splice($array, 0, 1);
+			}
+		}
+		
+		$result = '';
+		$result .= '<table>';
+		$result .= '<tr><th>Time</th><th>Tag</th><th>Type</th><th>Message</th></tr>';
+		foreach($array as $logcatLine)
+		{
+			$logcatLine->message = ReportHelper::translateQuoted($logcatLine->message);
+			$result .= LogcatLineHelper::formatLineAsTableRow($logcatLine);
+		}
+		$result .= '</table>';
+		return $result;
+	}
+	
+	public static function translateQuoted($string) {
+		$search  = array("\t", "\n");
+		$replace = array("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;",  "<br />");
+		return str_replace($search, $replace, $string);
+	}
 }
