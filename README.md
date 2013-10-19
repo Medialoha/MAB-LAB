@@ -10,6 +10,14 @@ If you update, don't forget to remove the includes/config.php file from the new 
 ## Change Log ##
 
 **Version 1.2.0-Lester**
+Updating from 1.x : 
+- Backup your data
+- Edit the new configuration file : /inclues/config.php
+- Upload new files on your server
+- Launch script file at /install/update-to-4/update.php
+- Remove install directory
+
+What's new ?
 - *Formatted stack trace*
 - *Formatted Log cat*
 - *Issues management*
