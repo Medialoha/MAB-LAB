@@ -102,6 +102,7 @@ $cfg = CfgHelper::getInstance();
 	var REFRESH_INTERVAL = <?php echo $cfg->getDashboardRefreshIntervalInMillis(); ?>;
 	var HOME_PAGE = true;
 </script>
+<script type="text/javascript" src="assets/functions-core.js" ></script>
 <script type="text/javascript" src="assets/functions-chart.js" ></script>
 <script type="text/javascript" src="assets/functions-issues.js" ></script>
 <script type="text/javascript" src="assets/functions-home.js" ></script>

@@ -371,6 +371,7 @@ $currentPage = ($opts['start']/$opts['limit'])+1;
 
 <div id="reportDialog" class="modal hide fade" style="width:1000px; margin-left:-500px; height:700px;" ></div>
 
+<script type="text/javascript" src="assets/functions-core.js" ></script>
 <script type="text/javascript" src="assets/functions-issues.js" ></script>
 <script type="text/javascript" >
 var HOME_PAGE = false;
