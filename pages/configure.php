@@ -19,16 +19,13 @@ $cfg = CfgHelper::getInstance();
 	<input type="hidden" id="action" name="a" value="" />
 	<input type="hidden" name="in-report-tags" value="" />
 
-  <fieldset><legend>Display Options</legend>
+  <fieldset><legend><img src="assets/images/ic_config_display.png" class="fieldset-icon" />Display Options</legend>
 	  <div class="control-group">
 	    <label class="control-label" for="reportDateFormat">Date format</label>
 	    <div class="controls">
 	      <input type="text" id="reportDateFormat" name="in-date-format" value="<?php echo $cfg->getDateFormat(); ?>" >
-	    </div>
-	  </div>
-	  <div class="control-group">
-	    <label class="control-label" for="reportDateFormat">Default timezone</label>
-	    <div class="controls">
+	      
+	      <label class="control-label-inline" for="reportDateFormat" style="width:175px;" >Default timezone</label>
 	      <input type="text" id="reportDateFormat" name="in-date-timezone" value="<?php echo $cfg->getDateTimezone(); ?>" >
 	    </div>
 	  </div>
@@ -41,13 +38,25 @@ $cfg = CfgHelper::getInstance();
 	      </select>
 	    </div>
 	  </div>
+	  
+  	<h5 style="padding-left:15px;" ><i class="icon-th-large" ></i>&nbsp;Dashboard Options :</h5>
+	  
+	  <div class="control-group">
+	    <label class="control-label" for="dashboardRefreshInterval">Refresh interval (ms)</label>
+	    <div class="controls">
+	      <input type="text" id="dashboardRefreshInterval" name="in-dashboard-refresh-interval" value="<?php echo $cfg->getDashboardRefreshIntervalInMillis(); ?>" >
+	      
+	      <label class="control-label-inline" for="" style="width:175px;" >New issues to display</label>
+	      <input type="text" id="dashboardNbIssues" name="in-dashboard-issues-nb" value="<?php echo $cfg->getDashboardNewIssuesToDisplay(); ?>" >
+	    </div>
+	  </div>
   </fieldset>
 
   <?php 
   	$account = $cfg->getBasicAuthAccount(); 
   	$disabled = $cfg->isReportBasicAuthEnabled()?null:'disabled="disabled"'; 
   ?>
-  <fieldset><legend>Report Authentication</legend>
+  <fieldset><legend><img src="assets/images/ic_config_report_auth.png" class="fieldset-icon" />Report Authentication</legend>
 	  <div class="control-group">
 	    <label class="control-label" for="reportBasicAuthEnabled">Enable HTTP basic auth</label>
 	    <div class="controls">
@@ -111,7 +120,7 @@ $cfg = CfgHelper::getInstance();
 	  </div>
   </fieldset>
 
-  <fieldset><legend>Mail Options</legend>
+  <fieldset><legend><img src="assets/images/ic_config_email.png" class="fieldset-icon" />Mail Options</legend>
 	  <div class="control-group">
 	    <label class="control-label" for="reportSendMail" >On report received</label>
 	    <div class="controls">
@@ -144,7 +153,7 @@ $cfg = CfgHelper::getInstance();
 	  </div>
   </fieldset>
   
-  <fieldset><legend>Database Configuration</legend>
+  <fieldset><legend><img src="assets/images/ic_config_db.png" class="fieldset-icon" />Database Configuration</legend>
 	  <div class="control-group">
 	    <label class="control-label" for="reportDbHost">Host</label>
 	    <div class="controls">

@@ -10,13 +10,29 @@
  *     EIRL DEVAUX J. - Medialoha - initial API and implementation
  */
 
+$r = DBHelper::fetchReport($reportId);
+
+if (empty($r->report_key)) {
+	?><b class="color:red;" >Report with id <?php echo $reportId; ?> not found !!!</b><?php
+	exit();
+}
+
+$priority = new IssuePriority($r->issue_priority);
 ?>
 <div class="modal-header">
-	<img id="dlgloader" src="assets/images/loader.gif" style="float:right; height:25px; margin-right:0px;" />
+	<span style="float:right; width:60px;" >&nbsp;
+		<img id="dlgloader" src="assets/images/loader.gif" style="float:right; height:25px;" />
+	</span>
 	<script >$('#dlgloader').hide();</script>
 	
-  <h3>ID <?php echo $report->report_id; ?>
-  	<?php if ($report->isArchived()) { ?><span class="label" style="float:right; margin:5px 370px 0px 0px;" >ARCHIVED</span><?php } ?>
+  <h3>ID <?php echo $r->report_key; ?>  
+  	<?php if ($r->isArchived()) { 
+  					?><span class="label" style="float:right; margin:5px 0px 0px 20px;" >ARCHIVED</span>
+  	<?php } else if (!$r->isOpen()) { 
+  					?><span class="label label-success" style="float:right; margin:5px 0px 0px 20px;" >RESOLVED</span>
+  	<?php } ?>
+
+		<span style="float:right; margin:-5px 0px 0px 0px;" ><?php echo $priority->getLabel();	?></span>
   </h3>
 </div>
 <div class="modal-body" style="clear:both; height:800px; max-height:620px;" >
@@ -30,48 +46,62 @@
 	  <li><a href="#report-eventslog" data-toggle="tab" >Events Log</a></li>
 	  <li><a href="#report-meminfo" data-toggle="tab" >Mem Info</a></li>
 	  <li><a href="#report-radiolog" data-toggle="tab" >Radio Log</a></li>
-	  <?php echo $report->hasCustomData()?'<li><a href="#report-custom" data-toggle="tab" >Custom</a></li>':''; ?>
+	  <?php echo $r->hasCustomData()?'<li><a href="#report-custom" data-toggle="tab" >Custom</a></li>':''; ?>
 	</ul>
 	
 	<div class="tab-content">	
-  	<div class="tab-pane active" id="report-details" >
+  	<div class="tab-pane active" id="report-details" >			
   		<dl class="dl-horizontal" >
-				<dt>Crash Date</dt><dd><?php echo $report->getFormatedDate(); ?></dd>
+				<dt>Crash Date</dt>
+				<dd><?php echo $r->getFormattedDate(); ?>&nbsp;<?php echo Helper::getBadge($r->isNew()); ?></dd>
 			</dl>
+  	
+  		<div class="row-fluid" >
+  			<div class="span12" >
+  				<dl class="dl-horizontal">
+  					<dt>Cause</dt>
+  					<dd><?php 
+  						$cause = explode(':', $r->issue_cause);
+							$cause[0] = '<b class="priority-critical-text-color" >'.$cause[0].'</b>';
+  						echo implode(':<br/>', $cause);
+  					?></dd>
+  				</dl>
+  			</div>
+  		</div>
   	
   		<div class="row-fluid" >
   			<div class="span7" >  			
   				<dl class="dl-horizontal">
-  					<dt>Application</dt><dd><?php echo $report->getApplicationDesc(); ?></dd>
-  					<dt>Package</dt><dd><?php echo $report->package_name; ?></dd>
-  					<dt>Installation ID</dt><dd><?php echo $report->installation_id; ?></dd>
-  					<dt>App. Start Date</dt><dd><?php echo $report->getFormatedAppStartDate(); ?></dd>
+  					<dt>Application</dt><dd><?php echo $r->getApplicationDesc(); ?></dd>
+  					<dt>Package</dt><dd><?php echo $r->package_name; ?></dd>
+  					<dt>Installation ID</dt><dd><?php echo $r->installation_id; ?></dd>
+  					<dt>App. Start Date</dt><dd><?php echo $r->getFormattedAppStartDate(); ?></dd>
 					</dl>
 					
 					<dl class="dl-horizontal" >
-						<dt>Android Version</dt><dd><?php echo $report->android_version; ?></dd>
+						<dt>Android Version</dt><dd><?php echo $r->android_version; ?></dd>
 					</dl>
 					
 					<dl class="dl-horizontal" >
-  					<dt>Device</dt><dd><?php echo $report->getDeviceDesc(); ?></dd>
-  					<dt>Device ID</dt><dd><?php echo empty($report->device_id)?'-':$report->device_id; ?></dd>
-  					<dt>Memory</dt><dd><?php echo $report->getFormatedAvailMemSize()." / ".$report->getFormatedTotalMemSize(); ?></dd>
+  					<dt>Device</dt><dd><?php echo $r->getDeviceDesc(); ?></dd>
+  					<dt>Device ID</dt><dd><?php echo empty($r->device_id)?'-':$r->device_id; ?></dd>
+  					<dt>Memory</dt><dd><?php echo $r->getFormattedAvailMemSize()." / ".$r->getFormattedTotalMemSize(); ?></dd>
 					</dl>
   			</div>
   			<div class="span5" >
   				<dl>
-  					<dt>User Comment</dt><dd><blockquote><?php echo $report->user_comment; ?></blockquote></dd>
-  					<dt>User Mail</dt><dd><a href="mailto:<?php echo $report->user_email; ?>" ><?php echo $report->user_email; ?></a></dd>
+  					<dt>User Comment</dt><dd><blockquote><?php echo $r->user_comment; ?></blockquote></dd>
+  					<dt>User Mail</dt><dd><a href="mailto:<?php echo $r->user_email; ?>" ><?php echo $r->user_email; ?></a></dd>
   				</dl>
   			</div>
   		</div>
   		
   		<dl>
   			<dt>Display</dt>
-  			<dd><br/><?php echo ReportHelper::displayDeviceDisplayValues($report->display); ?></dd>
+  			<dd><br/><?php echo ReportHelper::displayDeviceDisplayValues($r->display); ?></dd>
   		
   			<dt>Features</dt>
-  			<dd><br/><?php echo ReportHelper::displayObjectValuesToHTMLArray($report->device_features); ?></dd>
+  			<dd><br/><?php echo ReportHelper::displayObjectValuesToHTMLArray($r->device_features); ?></dd>
   		</dl>
   	</div>
   	
@@ -86,10 +116,10 @@
   			</thead>
   			<tbody>
 	  		<?php 
-	  			if (is_object($report->initial_configuration)) {
+	  			if (is_object($r->initial_configuration)) {
 	  		
-		  			$initial = get_object_vars($report->initial_configuration); ksort($initial);
-		  			$crash = get_object_vars($report->crash_configuration);
+		  			$initial = get_object_vars($r->initial_configuration); ksort($initial);
+		  			$crash = get_object_vars($r->crash_configuration);
 		  			
 		  			foreach($initial as $key=>$initialValue) {
 		  				$crashValue =& $crash[$key];
@@ -103,7 +133,7 @@
 		  									str_replace('+', '<br/>', $crashValue).'</td></tr>';
 		  			}
 		  			
-	  			} else { ?><tr><td colspan="3" ><p class="muted" ><i>Nothing recorded</i></p></td></tr><?php } 
+	  			} else { ?><tr><td colspan="3" ><p class="muted" ><i>No data collected</i></p></td></tr><?php } 
 	  		?>
   			</tbody>
   		</table>
@@ -111,25 +141,25 @@
   	
   	<div class="tab-pane" id="report-prefs" >
   		<dt>Shared Preferences</dt>
-  		<dd><br/><?php	ReportHelper::displayPreferences($report->shared_preferences); ?></dd>
+  		<dd><br/><?php	ReportHelper::displayPreferences($r->shared_preferences); ?></dd>
   	</div>
   	
   	<div class="tab-pane" id="report-settings" >
   		<dl>
-  			<dt>Settings Global</dt><dd><br/><?php echo ReportHelper::displayObjectValuesToHTMLArray($report->settings_global); ?></dd>
-  			<dt>Settings System</dt><dd><br/><?php echo ReportHelper::displayObjectValuesToHTMLArray($report->settings_system); ?></dd>
-  			<dt>Settings Secure</dt><dd><br/><?php echo ReportHelper::displayObjectValuesToHTMLArray($report->settings_secure); ?></dd>
+  			<dt>Settings Global</dt><dd><br/><?php echo ReportHelper::displayObjectValuesToHTMLArray($r->settings_global); ?></dd>
+  			<dt>Settings System</dt><dd><br/><?php echo ReportHelper::displayObjectValuesToHTMLArray($r->settings_system); ?></dd>
+  			<dt>Settings Secure</dt><dd><br/><?php echo ReportHelper::displayObjectValuesToHTMLArray($r->settings_secure); ?></dd>
   		</dl>
   	</div>
   	
-  	<div class="tab-pane" id="report-stacktrace" ><?php echo $report->stack_trace; ?></div>
-  	<div class="tab-pane" id="report-logcat" ><?php echo $report->getFormatedLogCat(); ?></div>
-  	<div class="tab-pane" id="report-eventslog" ><?php echo $report->eventslog; ?></div>
-  	<div class="tab-pane" id="report-meminfo" ><?php echo $report->getFormatedMemInfo(); ?></div>
-  	<div class="tab-pane" id="report-radiolog" ><?php echo $report->radiolog; ?></div>
+  	<div class="tab-pane" id="report-stacktrace" ><?php echo $r->getFormattedStackTrace(); ?></div>
+  	<div class="tab-pane" id="report-logcat" ><?php echo $r->getFormattedLogCat(); ?></div>
+  	<div class="tab-pane" id="report-eventslog" ><?php echo $r->getFormattedEventsLog(); ?></div>
+  	<div class="tab-pane" id="report-meminfo" ><?php echo $r->getFormattedMemInfo(); ?></div>
+  	<div class="tab-pane" id="report-radiolog" ><?php echo $r->getFormattedRadioLog(); ?></div>
   	
-  	<?php if ($report->hasCustomData()) { ?>
-  		<div class="tab-pane" id="report-custom" ><?php echo $report->getFormatedCustomData(); ?></div>
+  	<?php if ($r->hasCustomData()) { ?>
+  		<div class="tab-pane" id="report-custom" ><?php echo $r->getFormattedCustomData(); ?></div>
   	<?php } ?>
 	</div>
  
@@ -138,11 +168,8 @@
 	</script>
 </div>
 <div class="modal-footer">
-  <a href="#" class="btn" data-dismiss="modal" >Close</a>
-  
-  <a href="#" class="btn" onclick="archiveReport('<?php echo $report->report_id; ?>', '#dlgloader');" >
-  	<i class="icon-folder-open" ></i>&nbsp;Archive</a>
-  	
-  <a href="#" class="btn btn-danger" onclick="delReport('<?php echo $report->report_id; ?>', '#dlgloader');" >
+  <a href="javascript:hideReportDetailsDialog()" class="btn" >Close</a>
+ 	
+  <a href="#" class="btn btn-danger" onclick="delReports('<?php echo $r->report_id; ?>');" >
   	<i class="icon-trash icon-white" ></i>&nbsp;Delete</a>
 </div>

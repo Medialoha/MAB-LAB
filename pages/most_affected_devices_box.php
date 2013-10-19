@@ -10,13 +10,25 @@
  *     EIRL DEVAUX J. - Medialoha - initial API and implementation
  */
 
-$arr = DBHelper::selectRows(TBL_REPORTS, null, 'count DESC', REPORT_PHONE_MODEL.', '.REPORT_BRAND.', '.REPORT_PRODUCT.', COUNT(*) count', REPORT_PHONE_MODEL, '5', false);
+$arr = DBHelper::selectRows(DBHelper::getTblName(TBL_ISSUES).' LEFT JOIN '.DBHelper::getTblName(TBL_REPORTS).' ON '.REPORT_ISSUE.'='.ISSUE_ID,
+														// where 
+														null, 
+														// order 
+														'distinct_count DESC, count DESC',
+														// projection
+														REPORT_PHONE_MODEL.', '.REPORT_BRAND.', '.REPORT_PRODUCT.', COUNT(DISTINCT issue_id) distinct_count, COUNT(*) count',
+														// group by 
+														'CONCAT('.REPORT_PHONE_MODEL.', '.REPORT_BRAND.', '.REPORT_PRODUCT.')',
+														// limit 
+														'5', 
+														true);
 ?>
 <table class="table table-condensed most-affected" >
 <thead>
 	<tr>
 		<th>Devices</th>
-		<th style="text-align:center;" >Reports</th>
+		<th style="text-align:center;" >Issues</th>
+		<th>Reports</th>
 	</tr>		
 </thead>
 <tbody>
@@ -29,15 +41,19 @@ $arr = DBHelper::selectRows(TBL_REPORTS, null, 'count DESC', REPORT_PHONE_MODEL.
 ?>
 	<tr>
 		<td>
-			<span class="device <?php echo $class; ?>" ><?php echo $row[0]; ?></span><br/>
+			<span class="device <?php echo $class; ?>" ><?php echo $row->phone_model; ?></span><br/>
 			<small>
-				<span class="brand" ><?php echo ucfirst($row[1]); ?></span>&nbsp;&nbsp;<span class="muted" ><?php echo ucfirst($row[2]); ?></span>
+				<span class="brand" ><?php echo ucfirst($row->brand); ?></span>&nbsp;&nbsp;<span class="muted" ><?php echo ucfirst($row->product); ?></span>
 			</small>
 		</td>
-	 	<td class="count <?php echo $class; ?>" ><?php echo $row[3]; ?></td>
+	 	<td class="count <?php echo $class; ?>" ><?php echo $row->distinct_count; ?></td>
+	 	<td class="count <?php echo $class; ?>" ><?php echo $row->count; ?></td>
 	</tr>
-<?php } 
-	} else { ?><tr><td colspan="2" class="muted" >No reports recorded yet...</td></tr><?php } ?>
+<?php } ?>
+
+	<tr class="actions" ><td colspan="3" ><a href="javascript:showMostAffectedDevicesFullList()" ><i class="icon-eye-open" ></i>&nbsp;View all</a></td></tr>
+
+<?php } else { ?><tr><td colspan="3" class="muted" >No reports recorded yet...</td></tr><?php } ?>
 </tbody>
 </table>
 

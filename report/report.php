@@ -14,12 +14,13 @@ session_start();
 
 define('BASE_PATH', '../');
 
-require_once(BASE_PATH.'/includes/define.php');
+require_once(BASE_PATH.'includes/define.php');
 require_once(BASE_PATH.'includes/config.php');
 require_once(BASE_PATH.'includes/confighelper.class.php');
 require_once(BASE_PATH.'includes/helper.class.php');
 require_once(BASE_PATH.'includes/debug.class.php');
 require_once(BASE_PATH.'includes/dbhelper.class.php');
+require_once(BASE_PATH.'includes/issue.class.php');
 require_once(BASE_PATH.'includes/reporthelper.class.php');
 require_once(BASE_PATH.'includes/mailhelper.class.php');
 

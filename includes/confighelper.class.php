@@ -33,6 +33,10 @@ class CfgHelper {
 	
 	private $mMailSender;
 	
+	// dashboard options
+	private $mDashboardRefresh;
+	private $mDashboardNbNewIssues;
+	
 	
 	// CONSTRUCTOR
 	public static function getInstance() {
@@ -51,6 +55,8 @@ class CfgHelper {
 		global $mGlobalCfg;
 		
 		$obj = new CfgHelper();
+		
+		self::safeGlobalConfig($mGlobalCfg);
 		
 		$obj->mTablePrefix = $mGlobalCfg['tbl.prefix'];		
 		
@@ -72,7 +78,31 @@ class CfgHelper {
 		
 		$obj->mMailSender = array($mGlobalCfg['mail.from.addr'], $mGlobalCfg['mail.from.name']);
 		
+		$obj->mDashboardRefresh = $mGlobalCfg['dashboard.refresh.interval'];
+		$obj->mDashboardNbNewIssues = $mGlobalCfg['dashboard.issues.nb'];
+		
 		return $obj;
+	}
+	
+	private static function safeGlobalConfig(&$configArr) { 
+		$keys = array('db.host', 'db.name', 'db.user', 'db.pwd', 'tbl.prefix', 
+									'date.format', 'date.timezone', 
+									'report.packagename.shrink', 'report.sendmail', 'report.sendmail.recipients', 'report.basicauth', 'report.basicauth.method', 'report.basicauth.accounts', 
+									'mail.from.addr', 'mail.from.name', 
+									'dashboard.refresh.interval', 'dashboard.issues.nb', 
+									'report.tags');
+		$defaultValues = array('', '', '', '', 'mabl_', 
+														'Y-m-d H:i', 'Europe/Berlin', 
+														true, false, '', 
+														false, 0, array(), 
+														'', 'MAB-LAB', 
+														60000, 5, 
+														array());
+		
+		foreach ($keys as $i=>$k) {
+			if (!isset($configArr[$k]))
+				$configArr[$k] = $defaultValues[$i];
+		}
 	}
 	
 	public static function checkConfigArr($arr) {
@@ -150,6 +180,9 @@ class CfgHelper {
 																				$accounts,
 																	
 																				$arr['mail.from.addr'], $arr['mail.from.name'],
+																	
+																				$arr['dashboard.refresh.interval'], $arr['dashboard.issues.nb'],
+																	
 																				$arr['report.tags']
 																			))) {
 					
@@ -212,4 +245,8 @@ class CfgHelper {
 	public function shrinkPackageName() { return $this->mShrinkPackageName; }
 	
 	public function sendMailOnReportReceived() { return $this->mSendMailOnReportReceived; }
+	
+	public function getDashboardRefreshIntervalInMillis() { return $this->mDashboardRefresh; }
+	
+	public function getDashboardNewIssuesToDisplay() { return $this->mDashboardNbNewIssues; }
 }

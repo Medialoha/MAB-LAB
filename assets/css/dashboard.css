@@ -1,0 +1,125 @@
+@CHARSET "UTF-8";
+
+TABLE.newreports-tbl .cause {
+	-ms-word-break: break-all;
+	word-break: break-all;
+
+	/* Non standard for webkit */
+ 	word-break: break-word;
+
+	-webkit-hyphens: auto;
+  -moz-hyphens: auto;
+  -ms-hyphens: auto;
+  hyphens: auto;
+}
+
+TABLE.newreports-tbl .count-new {
+	text-align:center;
+	font-weight:bold;
+	color:#ff4444;
+}
+
+TABLE.newreports-tbl .count-reports {
+	text-align:center;
+}
+
+TABLE.newreports-tbl .viewmore {
+	padding:7px 15px;
+	text-align:right;
+}
+
+TABLE.newreports-tbl .viewmore A {
+	color:#999;
+}
+
+TABLE.newreports-tbl .viewmore A:hover {
+	text-decoration:none;
+	color:#000;
+}
+
+
+TABLE.most-affected .device {
+	display:inline-block;
+}
+
+TABLE.most-affected .brand {
+	display:inline-block;	
+}
+
+TABLE.most-affected TD.count { 
+	font-size:22px;
+	text-align:center; 
+}
+
+.most-affected-1 {
+	color:#F15151;	
+}
+
+.most-affected-2 {
+	color:#F3755C;	
+}
+
+.most-affected-3 {
+	color:#F18B5E;	
+}
+
+.most-affected-4 {
+	color:#EFA564;	
+}
+
+.most-affected-5 {
+	color:#EFA564;	
+}
+
+TABLE.most-affected TR.actions TD { 
+	padding:7px 15px;
+	text-align:right;
+}
+
+TABLE.most-affected TR.actions A {
+	color:#999;
+}
+
+TABLE.most-affected TR.actions A:hover {
+	text-decoration:none;
+	color:#000;
+}
+
+.states-tbl {}
+
+.states-tbl .percent {
+	text-align:center;
+	font-size:17px;
+}
+
+.states-tbl .count {
+	text-align:center;
+	font-size:12px;
+}
+
+.states-tbl .notfixed-tag TD {
+	font-style:italic;
+ 	font-size:14px;
+}
+
+.states-tbl .name {
+	font-size:16px; 	
+}
+
+.states-tbl .archived {
+	color:#999999;
+	font-style:italic;
+}
+
+.states-tbl .notfixed-tag .name {
+ 	text-align:right;
+ 	padding-right:30px;
+} 
+
+.issues-resolved {
+	color:#99cc00;
+}
+
+.issues-notfixed {
+	color:#ff4444;
+}

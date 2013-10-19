@@ -1,0 +1,93 @@
+@CHARSET "UTF-8";
+.issues-tbl TH {
+	text-align:center;
+}
+
+.issues-tbl TD {
+	vertical-align:middle;
+}
+
+.issues-tbl TR.archived TD, .issues-tbl TR.archived TD.cause A {
+	color:#999999;
+}
+
+.issues-tbl TR.closed TD.cause A {
+	text-decoration:line-through;
+}
+
+.issues-tbl TR.closed TD, .issues-tbl TR.closed .reports-tbl {
+	color:#999999;
+}
+
+.issues-tbl .datetime {
+	text-align:left;
+}
+
+.issues-tbl .cause {
+	text-align:left;
+}
+
+.issues-tbl .priority {
+	text-align:center;
+}
+
+.issues-tbl .cause A, .issues-tbl .cause A:hover, .issues-tbl .cause A:visited {
+	text-decoration:none;
+	color:#333333;
+}
+
+.issues-tbl .count {
+	text-align:center
+}
+
+.issues-tbl .reports-tbl .datetime {
+	width:160px;
+	text-align:left;
+}
+
+.issues-tbl .reports-tbl .android-version {
+	width:60px;
+	text-align:center;
+}
+
+.issues-tbl .reports-tbl .phone-model {
+	width:230px;
+}	
+
+.issues-tbl .reports-tbl .user-comment {
+	
+}	
+
+.issues-tbl TR.report {
+	cursor:pointer;
+}
+
+.label-priority-low, .label-priority-normal, .label-priority-critical {
+	min-width:15px;
+	text-align:center;
+}
+
+.label-priority-low {
+	background-color:#33B5E5;
+}
+
+.label-priority-normal {
+/* 	background-color:#999999; */
+	background-color:#FFBB33;
+}
+
+.label-priority-critical {
+	background-color:#FF4444;
+}
+
+.priority-low-text-color {
+/* 	color:#33B5E5; */
+}
+
+.priority-normal-text-color {
+	color:#FFBB33;
+}
+
+.priority-critical-text-color {
+	color:#FF4444;
+}

@@ -9,6 +9,15 @@ If you update, don't forget to remove the includes/config.php file from the new 
 
 ## Change Log ##
 
+**Version 1.2.0-Lester**
+- *Formatted stack trace*
+- *Formatted Log cat*
+- *Issues management*
+- *New issues filtering options*
+- *New dashboard layout*
+- *Dashboard refresh interval and number of new issues are now configurable*
+- *Some improvements and minor bugs fixed*
+
 **Version 1.1.2-Abby**
 
 - *Add two methods for HTTP basic auth : PHP or htaccess/htpasswd files*

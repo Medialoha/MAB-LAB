@@ -1,66 +1,77 @@
 @CHARSET "UTF-8";
 
-.reports-tbl TH {
+.nodata {
+	padding:7px 15px;
+	font-style:italic;
+	color:#999999;
+}
+
+.stacktrace-at {
+	padding-left:20px;
+	font-size:14px;
+}
+
+.stacktrace-at .line-number {
+/* 	color:#B94A48; */
+/* 	color:#c09853; */
+	color:#FF8800;
+}
+
+.stacktrace-more {
+	padding-left:20px;
+	margin-bottom:15px;
+	font-size:14px;
+	font-style:italic;
+	color:#666666;
+}
+
+.stacktrace-causedby {
+	margin:15px 0px 3px 0px;
+	font-size:16px;
+}
+
+.stacktrace-message {
+	margin:15px 0px 3px 0px;
+	font-weight:bolder;
+}
+
+.stacktrace-exception {
+	color:#FF4444;
+}
+
+.logcat-tbl {
+	width:100%;
+/* 	overflow-x:scroll; */
+}
+
+.logcat-tbl TD {
+	vertical-align:top;
+	padding:2px 5px;
+/* 	white-space:nowrap; */
+}
+
+.logcat-tbl TD.datetime {
+	white-space:nowrap;
+}
+
+.logcat-tbl TR.V TD { /* 	font-style:italic; */ color:#999999; }
+.logcat-tbl TR.D TD { /* 	font-style:italic; */ color:#666666; }
+.logcat-tbl TR.I TD { color:#33B5E5; }
+.logcat-tbl TR.W TD { /*color:#FFBB33; */ color:#FF8800; }
+.logcat-tbl TR.E TD { color:#FF4444; }
+
+.label {
+	min-width:15px;
 	text-align:center;
 }
 
-.reports-tbl .date {
-	text-align:center;
+.label-priority-verbose { background-color:#999; }
+.label-priority-debug { background-color:#666; }
+.label-priority-info { background-color:#33B5E5; }
+.label-priority-warning { background-color:#FFBB33; }
+.label-priority-error { background-color:#FF4444; }
+ 
+.logcat-filename {
+	font-size:16px;
+	font-weight:bold;
 }
-
-.reports-tbl .package-name {
-	
-}
-
-.reports-tbl .version-name {
-	text-align:center;
-}
-
-.reports-tbl .version-code {
-	text-align:center;
-}
-
-.reports-tbl .android-version {
-	text-align:center;
-}
-
-.reports-tbl .phone-model {
-	
-}
-
-TABLE.most-affected TD {
-}
-
-TABLE.most-affected .device {
-	display:inline-block;
-}
-
-TABLE.most-affected .brand {
-	display:inline-block;	
-}
-
-TABLE.most-affected TD.count { 
-	font-size:22px;
-	text-align:center; 
-}
-
-.most-affected-1 {
-	color:#F15151;	
-}
-
-.most-affected-2 {
-	color:#F3755C;	
-}
-
-.most-affected-3 {
-	color:#F18B5E;	
-}
-
-.most-affected-4 {
-	color:#EFA564;	
-}
-
-.most-affected-5 {
-	color:#EFA564;	
-}
-

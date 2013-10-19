@@ -16,8 +16,33 @@ class ReportHelper {
 	public static $mSerializedFields = array('SETTINGS_GLOBAL', 'SETTINGS_SECURE', 'SETTINGS_SYSTEM', 'DEVICE_FEATURES', 'SHARED_PREFERENCES', 'CRASH_CONFIGURATION', 'BUILD', 'DISPLAY', 'CUSTOM_DATA', 'INITIAL_CONFIGURATION', 'ENVIRONMENT' );
 	
 	
-	public static function formatDate($date, $format) {
-		return date($format, strtotime($date));
+	public static function checkState($state) {
+		switch ($state) {
+			case REPORT_STATE_NEW : 
+			case REPORT_STATE_VIEWED :
+			case REPORT_STATE_CLOSED :
+			case REPORT_STATE_ARCHIVED :
+				break;
+			
+			default : return false;
+		}	
+		
+		return true;
+	}
+	
+	public static function getStateTitle($state) {
+		switch ($state) {
+			case REPORT_STATE_NEW :
+				return 'new';
+			case REPORT_STATE_VIEWED :
+				return 'open';
+			case REPORT_STATE_CLOSED :
+				return 'resolved';
+			case REPORT_STATE_ARCHIVED :
+				return 'archived';
+					
+			default : return 'unknown';
+		}
 	}
 	
 	public static function formatPackageName($name, $shrink) {
@@ -50,26 +75,30 @@ class ReportHelper {
 		return $date;
 	}
 	
-	public static function getBadge($isNew) {
-		return $isNew?'<span class="badge badge-important small"><small>NEW</small></span>':'';
-	}
-	
 	public static function buildMySQLValuesArr($json) {
 		$json['USER_CRASH_DATE'] = self::convertRFCDateToMySQLTimestamp($json['USER_CRASH_DATE']);
 		
 		$values = array();
 		foreach ($json as $k=>$v) {
+			$k = strtolower($k);
+			
 			if (in_array($k, self::$mSerializedFields)) {
 				 $values[$k] = base64_encode(serialize($v));
 				
-			} else { $values[$k] = DBHelper::escapeString($v); }
+			} else {
+				// report_id is translate to report_key
+				if (strcmp($k, 'report_id')==0) {
+					$values['report_key'] = DBHelper::escapeString($v);
+					
+				} else { $values[$k] = DBHelper::escapeString($v); } 
+			}
 		}
 		
 		return $values;
 	}
 	
 	public static function displayObjectValuesToHTMLArray($obj) {
-		if ($obj==null) { ?><p class="muted" ><i>Nothing recorded</i></p><?php return; }
+		if ($obj==null) { ?><p class="muted" ><i>No data collected</i></p><?php return; }
 		
 		$values = get_object_vars($obj);
 		?><table class="table table-condensed table-hover" ><?php
@@ -83,7 +112,7 @@ class ReportHelper {
 	}
 	
 	public static function displayPreferences($prefs) { 
-		if (!is_array($prefs)) { ?><p class="muted" ><i>Nothing recorded</i></p><?php return; }
+		if (!is_array($prefs)) { ?><p class="muted" ><i>No data collected</i></p><?php return; }
 		
 		?><table class="table table-condensed table-hover" ><?php
 		

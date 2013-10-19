@@ -20,6 +20,9 @@ require_once('includes/debug.class.php');
 require_once('includes/dbhelper.class.php');
 require_once('includes/reporthelper.class.php');
 require_once('includes/report.class.php');
+require_once('includes/issue.class.php');
+require_once('includes/issuehelper.php');
+
 
 // get page to display
 $pageId = isset($_GET['p'])?$_GET['p']:PAGE_ID_HOME;
@@ -55,8 +58,10 @@ if ($page!=null) { // start content
     <!-- Le styles -->
     <link href="libs/bootstrap/css/bootstrap.css" rel="stylesheet" />
     <link href="libs/bootstrap/css/bootstrap-responsive.css" rel="stylesheet" />
+   
     <link href="assets/css/layout.css" rel="stylesheet" />
-    
+    <link href="assets/css/dashboard.css" rel="stylesheet" />
+    <link href="assets/css/issues.css" rel="stylesheet" />
     <link href="assets/css/reports.css" rel="stylesheet" />
 
     <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
@@ -89,8 +94,8 @@ if ($page!=null) { // start content
               <li <?php echo $pageId==PAGE_ID_HOME?'class="active"':''; ?> >
               	<a href="index.php"><i class="icon-th-large icon-white" ></i>&nbsp;Dashboard</a>
               </li>
-              <li <?php echo $pageId==PAGE_ID_REPORTS?'class="active"':''; ?> >
-              	<a href="index.php?p=<?php echo PAGE_ID_REPORTS; ?>"><i class="icon-list-alt icon-white" ></i>&nbsp;Reports list</a>
+              <li <?php echo $pageId==PAGE_ID_ISSUES?'class="active"':''; ?> >
+              	<a href="index.php?p=<?php echo PAGE_ID_ISSUES; ?>"><i class="icon-tags icon-white" ></i>&nbsp;Issues</a>
               </li>
               <li <?php echo $pageId==PAGE_ID_CONFIG?'class="active"':''; ?> >
               	<a href="index.php?p=<?php echo PAGE_ID_CONFIG; ?>"><i class="icon-wrench icon-white" ></i>&nbsp;Settings</a>

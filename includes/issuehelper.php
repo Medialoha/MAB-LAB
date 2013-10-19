@@ -1,3 +1,4 @@
+<?php defined('DIRECT_ACCESS_CHECK') or die('DIRECT ACCESS NOT ALLOWED');
 /**
  * Copyright (c) 2013 EIRL DEVAUX J. - Medialoha.
  * All rights reserved. This program and the accompanying materials
@@ -9,8 +10,9 @@
  *     EIRL DEVAUX J. - Medialoha - initial API and implementation
  */
 
-var LOADER_HTML = '<div class="boxloader" ><img src="assets/images/loader.gif" /></div>';
 
-function doRequest(action, data, onRequestDoneFunc) {
-	$.ajax({ url:"?a="+action, type:"post", data:data }).done(onRequestDoneFunc);
+class IssueHelper {
+	
+
+	
 }

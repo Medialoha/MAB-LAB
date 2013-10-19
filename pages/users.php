@@ -17,7 +17,7 @@ $users = DBHelper::fetchUsers();
 	<input type="hidden" id="userId" name="userId" value="" />
 	<input type="hidden" id="count" value="<?php echo sizeof($users); ?>" />
 		
-  <fieldset><legend>Users List</legend>
+  <fieldset><legend><img src="assets/images/ic_users.png" class="fieldset-icon" />Users List</legend>
   	<table class="table table-condensed table-striped" >
 			<thead><tr><th style="width:160px;" >Username</th><th>Email</th><th style="width:65px;" ></th></tr></thead>
 			<tbody>
@@ -41,7 +41,7 @@ $users = DBHelper::fetchUsers();
 	<input type="hidden" name="a" value="edituser" />
 	<input type="hidden" id="user_id" name="user_id" value="" />
 	
-	<fieldset><legend>User Editor</legend>
+	<fieldset><legend><img src="assets/images/ic_user.png" class="fieldset-icon" />User Editor</legend>
 		<div class="control-group">
 	    <label class="control-label" for="user_name">Username</label>
 	    <div class="controls">

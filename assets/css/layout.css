@@ -25,3 +25,17 @@
 	width:100px; margin-right:10px;
 	text-align:right;
 }
+
+IMG.fieldset-icon {
+	height:35px;
+	margin-right:7px;
+}
+
+H4.with-icon {
+	line-height:25px;
+}	
+
+H4.with-icon IMG {
+	height:25px;
+	margin-right:7px;
+}

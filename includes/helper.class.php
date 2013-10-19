@@ -19,12 +19,14 @@ class Helper {
 				return 'about.php';
 			case PAGE_ID_CONTACT : 
 				return 'contact.php';
-			case PAGE_ID_REPORTS : 
-				return 'reports.php';
+			case PAGE_ID_ISSUES : 
+				return 'issues.php';
 			case PAGE_ID_CONFIG : 
 				return 'configure.php';
 			case PAGE_ID_USERS : 
 				return 'users.php';
+			case PAGE_ID_LOGS : 
+				return 'logs.php';
 						
 			default : return 'home.php';
 		}
@@ -73,5 +75,24 @@ class Helper {
 		}		
 		
 		return $default;
+	}
+	
+	public static function shrinkString($string, $maxlen) {		
+		if (strlen($string)>$maxlen) {
+			return substr($string, 0, $maxlen-4).'...';
+		}
+		
+		return $string;
+	}
+	
+	public static function getBadge($isNew) {
+		return $isNew?'<span class="badge badge-important small"><small>NEW</small></span>':'';
+	}
+	
+	public static function formatDate($date, $format, $isNew=false) {
+		if ($isNew)
+			return date($format, strtotime($date)).'&nbsp;'.self::getBadge(true);
+		
+		return date($format, strtotime($date));
 	}
 }

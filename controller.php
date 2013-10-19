@@ -26,7 +26,7 @@ switch ($action) {
 		break;
 		
 //////// CREATE HTACCESS AND HTPASSWD FILES
-	case 'createHtFiles' : 
+	case 'createHtFiles' :
 			$cfg = CfgHelper::getInstance();
 			$error = null;
 			$reportDir = 'report/';
@@ -108,7 +108,7 @@ switch ($action) {
 				}
 			}
 			
-			Debug::logd($_POST);
+			//Debug::logd($_POST);
 			// http auth enabled
 			if (array_key_exists('report-basicauth', $_POST)) {
 				$tmpCfg['report.basicauth'] = true;
@@ -139,27 +139,68 @@ switch ($action) {
 	case 'getreport' :
 			$reportId = @$_POST['reportId'];
 			if (!empty($reportId)) {
-				$report = DBHelper::fetchReport($reportId);
-				
 				require_once('pages/report_details_dialog.php');
-				
-				// set report as viewd
-				if ($report->isNew())
-					DBHelper::updateReportsState($reportId, REPORT_STATE_VIEWED);
 				
 			} else { echo 'Report id is not valid !'; }
 		break;
 	
-//////// ARCHIVE REPORTS
-	case 'archreports' :
-			$reportIds = @$_POST['reportIds'];
-			if (!empty($reportIds)) {
-				$reportIds = explode(',', $reportIds);				
-				DBHelper::updateReportsState($reportIds, REPORT_STATE_ARCHIVED);
+//////// UPDATE ISSUES STATE
+	case 'setissuesstate' :
+			$issueIds = @$_POST['issueIds'];
+			$state = @$_POST['state'];
+			
+			if (ReportHelper::checkState($state)) {
+				if (!empty($issueIds)) {					
+					if (DBHelper::updateIssuesState(explode(',', $issueIds), $state)) {
+						echo 'O:Issue(s) state updated to '.ReportHelper::getStateTitle($state).' with success !';
+						
+					} else { echo "K:Error occured while trying to update issue(s) state :\n\n".DBHelper::getLastError(); }
+					
+				} else { echo 'K:Issue id(s) is not valid !'; }
 				
-				echo 'Report(s) archived with success !';
+			} else { echo 'K:This state is not valid and can\'t be applyed !'; }
+		break;
+	
+//////// UPDATE ISSUES PRIORITY
+	case 'setissuespriority' :
+			$issueIds = @$_POST['issueIds'];
+			$priority = new IssuePriority(@$_POST['priority']);
+
+			if (!empty($issueIds)) {
+				DBHelper::updateIssuesPriority(explode(',', $issueIds), $priority->getId());
+					
+				echo 'O:Issue(s) state updated to '.$priority->getName().' with success !:'.$priority->getLabel(false);
+					
+			} else { echo 'K:Issue id(s) is not valid !'; }
+		break;
+	
+//////// UPDATE REPORTS STATE
+// 	case 'setstate' :
+// 			$reportIds = @$_POST['reportIds'];
+// 			$state = @$_POST['state'];
+			
+// 			if (ReportHelper::checkState($state)) {
+// 				if (!empty($reportIds)) {
+// 					$reportIds = explode(',', $reportIds);
+// 					DBHelper::updateReportsState($reportIds, $state);
+					
+// 					echo 'Report(s) state updated to '.ReportHelper::getStateTitle($state).' with success !';
+					
+// 				} else { echo 'Report id(s) is not valid !'; }
 				
-			} else { echo 'Report id(s) is not valid !'; }
+// 			} else { echo 'This state is not valid and can\'t be applyed !'; }
+// 		break;
+	
+//////// DEL ISSUES
+	case 'delissues' :
+			$issueIds = @$_POST['issueIds'];
+			if (!empty($issueIds)) {
+				$reportIds = explode(',', $issueIds);		
+				DBHelper::deleteIssues($issueIds);
+	
+				echo 'O:Issue(s) deleted with success !';
+				
+			} else { echo 'K:Issue id(s) is not valid !'; }
 		break;
 	
 //////// DEL REPORTS
@@ -168,10 +209,10 @@ switch ($action) {
 			if (!empty($reportIds)) {
 				$reportIds = explode(',', $reportIds);		
 				DBHelper::deleteReports($reportIds);
+	
+				echo 'O:Report(s) deleted with success !';
 				
-				echo 'Report(s) deleted with success !';
-				
-			} else { echo 'Report id(s) is not valid !'; }
+			} else { echo 'K:Report id(s) is not valid !'; }
 		break;
 	
 //////// DEL USER
