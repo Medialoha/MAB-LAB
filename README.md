@@ -1,11 +1,25 @@
-MAB-LAB
+MABL
 =======
 
-My ACRA Backend Laboratory
+#### Installation ####
 
-Installation how to is here : [medialoha.net](http://medialoha.net/index.php/en/menu-mablab-en)
+You can find a complete procedure here : [medialoha.net](http://medialoha.net/index.php/en/menu-mablab-en)
 
-If you update, don't forget to remove the includes/config.php file from the new package. Or your configuration will be overloaded.
+#### Update procedure ####
+
+1. Backup your data
+- Edit the configuration file */includes/config.php* from the new release 
+- Upload new files on your server
+- Launch script file at /install/update-to-*VERSION_CODE*/update.php
+- Remove install directory
+
+#### How to help us ? ####
+
+Join our discussion forum here [mabl group](https://groups.google.com/d/forum/mabl) and share your ideas.
+
+#### How to Support us ? ####
+
+Have a look on our web site and check out our other products.
 
 ## Change Log ##
 
@@ -15,7 +29,6 @@ If you update, don't forget to remove the includes/config.php file from the new 
 
 **Version 1.2.0-Lester**
 
-What's new ?
 - *Formatted stack trace*
 - *Formatted Log cat*
 - *Issues management*
@@ -23,13 +36,6 @@ What's new ?
 - *New dashboard layout*
 - *Dashboard refresh interval and number of new issues are now configurable*
 - *Some improvements and minor bugs fixed*
-
-Updating from 1.x : 
-- *Backup your data*
-- *Edit the new configuration file : /includes/config.php*
-- *Upload new files on your server*
-- *Launch script file at /install/update-to-4/update.php*
-- *Remove install directory*
 
 **Version 1.1.2-Abby**
 
