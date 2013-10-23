@@ -386,7 +386,12 @@ class DBHelper {
 		
 		if (isset(self::$dbo) && self::$dbo instanceof mysqli) return;
 		
-		self::$dbo = new mysqli($mGlobalCfg['db.host'], $mGlobalCfg['db.user'], $mGlobalCfg['db.pwd'], $mGlobalCfg['db.name']);
+		if (empty($mGlobalCfg['db.port']) || !is_integer($mGlobalCfg['db.port']))
+			$dbPort = ini_get("mysqli.default_port");
+		else
+			$dbPort = $mGlobalCfg['db.port'];
+		
+		self::$dbo = new mysqli($mGlobalCfg['db.host'], $mGlobalCfg['db.user'], $mGlobalCfg['db.pwd'], $mGlobalCfg['db.name'], $dbPort);
 
 		if (self::$dbo->connect_error) {
 			die('CONNECT ERROR #'.self::$dbo->connect_errno.' : '.self::$dbo->connect_error);

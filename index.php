@@ -30,7 +30,9 @@ $page = Helper::getPage($pageId);
 
 // open db connection
 DBHelper::open();
-//CfgHelper::init(true);
+
+if (isset($_GET['reloadcfg']))
+	CfgHelper::init(true);
 
 // if user not logged in the nshow login form
 if (!isset($_SESSION['LOGGEDIN'])) {
@@ -97,30 +99,29 @@ if ($page!=null) { // start content
               <li <?php echo $pageId==PAGE_ID_ISSUES?'class="active"':''; ?> >
               	<a href="index.php?p=<?php echo PAGE_ID_ISSUES; ?>"><i class="icon-tags icon-white" ></i>&nbsp;Issues</a>
               </li>
-              <li <?php echo $pageId==PAGE_ID_CONFIG?'class="active"':''; ?> >
-              	<a href="index.php?p=<?php echo PAGE_ID_CONFIG; ?>"><i class="icon-wrench icon-white" ></i>&nbsp;Settings</a>
+              
+              <li class="dropdown" >
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" style="<?php echo $pageId==PAGE_ID_USERS||$pageId==PAGE_ID_CONFIG||$pageId==PAGE_ID_LOGS?'color:#e5e5e5':'';?>" ><i class="icon-cog icon-white" ></i>&nbsp;Admin tools&nbsp;<b class="caret"></b></a>
+                <ul class="dropdown-menu">
+              		<li <?php echo $pageId==PAGE_ID_USERS?'class="active"':''; ?> >
+              			<a href="index.php?p=<?php echo PAGE_ID_USERS; ?>"><i class="icon-user" ></i>&nbsp;Manage Users</a>
+              		</li>
+              		<li <?php echo $pageId==PAGE_ID_LOGS?'class="active"':''; ?> >
+              			<a href="index.php?p=<?php echo PAGE_ID_LOGS; ?>"><i class="icon-list-alt" ></i>&nbsp;View Logs</a>
+              		</li>
+              		<li class="divider" ></li>
+                	<li <?php echo $pageId==PAGE_ID_CONFIG?'class="active"':''; ?> >
+              			<a href="index.php?p=<?php echo PAGE_ID_CONFIG; ?>"><i class="icon-wrench" ></i>&nbsp;Edit Settings</a>
+              		</li>
+                </ul>
               </li>
-              <li <?php echo $pageId==PAGE_ID_USERS?'class="active"':''; ?> >
-              	<a href="index.php?p=<?php echo PAGE_ID_USERS; ?>"><i class="icon-user icon-white" ></i>&nbsp;Users</a>
-              </li>
+
               <li <?php echo $pageId==PAGE_ID_CONTACT?'class="active"':''; ?> >
               	<a href="http://www.medialoha.net/" target="_blank" ><i class="icon-envelope icon-white" ></i>&nbsp;Contact</a>
               </li>
               <li <?php echo $pageId==PAGE_ID_ABOUT?'class="active"':''; ?> >
               	<a href="index.php?p=<?php echo PAGE_ID_ABOUT; ?>"><i class="icon-info-sign icon-white" ></i>&nbsp;About</a>
-              </li>
-<!--               <li class="dropdown"> -->
-<!--                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown <b class="caret"></b></a> -->
-<!--                 <ul class="dropdown-menu"> -->
-<!--                   <li><a href="#">Action</a></li> -->
-<!--                   <li><a href="#">Another action</a></li> -->
-<!--                   <li><a href="#">Something else here</a></li> -->
-<!--                   <li class="divider"></li> -->
-<!--                   <li class="nav-header">Nav header</li> -->
-<!--                   <li><a href="#">Separated link</a></li> -->
-<!--                   <li><a href="#">One more separated link</a></li> -->
-<!--                 </ul> -->
-<!--               </li> -->
+              </li>              
               <li>
               	<a href="index.php?a=logout" ><i class="icon-off icon-white" ></i>&nbsp;Logout</a>
               </li>
@@ -160,7 +161,6 @@ if ($page!=null) { // start content
     </div>
 
     <script src="libs/bootstrap/js/bootstrap.min.js" ></script>
-    <script src="assets/functions-core.js" ></script>
     <script >$('#loader').hide();</script>
   </body>
 </html>
@@ -168,5 +168,4 @@ if ($page!=null) { // start content
 
 // close db connection
 DBHelper::close(); 
-
 ?>

@@ -9,6 +9,10 @@ If you update, don't forget to remove the includes/config.php file from the new 
 
 ## Change Log ##
 
+**Version 1.2.1-Lester**
+
+- *Support of custom MySQL connection port added*
+
 **Version 1.2.0-Lester**
 
 What's new ?

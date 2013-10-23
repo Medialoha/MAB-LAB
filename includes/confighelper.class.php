@@ -85,7 +85,7 @@ class CfgHelper {
 	}
 	
 	private static function safeGlobalConfig(&$configArr) { 
-		$keys = array('db.host', 'db.name', 'db.user', 'db.pwd', 'tbl.prefix', 
+		$keys = array('db.host', 'db.name', 'db.port', 'db.user', 'db.pwd', 'tbl.prefix', 
 									'date.format', 'date.timezone', 
 									'report.packagename.shrink', 'report.sendmail', 'report.sendmail.recipients', 'report.basicauth', 'report.basicauth.method', 'report.basicauth.accounts', 
 									'mail.from.addr', 'mail.from.name', 
@@ -167,8 +167,12 @@ class CfgHelper {
 
 			if (!file_put_contents($configFile,
 															sprintf($tmpl,
-																				$arr['db.host'], $arr['db.name'], $arr['db.user'], $arr['db.pwd'],
+																				$arr['db.host'], (empty($arr['db.port'])?'false':$arr['db.port']), 
+																				$arr['db.name'], 
+																				$arr['db.user'], $arr['db.pwd'],
+																	
 																				$arr['tbl.prefix'],
+																	
 																				$arr['date.format'], $arr['date.timezone'],
 																	
 																				$arr['report.packagename.shrink']?'true':'false',
@@ -200,30 +204,35 @@ class CfgHelper {
 	public function isBasicAuthPHPMethodEnabled() { return $this->mBasicAuthMethod==AUTH_METHOD_PHP; }
 	
 	public function isReportBasicAuthGranted($login, $password) {
-		Debug::logd('Check access for '.$login.' / '.$password, 'CONFIG');
+		Debug::logi('Check access for '.$login.' / '.$password, 'CONFIG');
 		
-		foreach ($this->mBasicAuthAccounts as $account) {
-			if (strcmp($login, $account['login'])==0) {
-				Debug::logd('  |_ login found !', 'CONFIG');
-				
-				if (!$account['clear']) {
-					$requiredPassword = md5($account['password']);
-					Debug::logd('  |_ obfuscated password enabled', 'CONFIG');
+		if (empty($login) || empty($password)) {
+			Debug::loge("Login and/or password empty ! Can't continue... Check your application configuration", 'CONFIG');
+			
+		} else {
+			foreach ($this->mBasicAuthAccounts as $account) {
+				if (strcmp($login, $account['login'])==0) {
+					Debug::logd('  |_ login found !', 'CONFIG');
 					
-				} else { $requiredPassword = $account['password']; }
-				
-				if (strcmp($password, $requiredPassword)==0)
-					return true;
-			} 
+					if (!$account['clear']) {
+						$requiredPassword = md5($account['password']);
+						Debug::logd('  |_ obfuscated password enabled', 'CONFIG');
+						
+					} else { $requiredPassword = $account['password']; }
+					
+					if (strcmp($password, $requiredPassword)==0)
+						return true;
+				} 
+			}
 		}
 		
 		return false;
 	}
 	
-	public function getBasicAuthAccount() {
+	public function getBasicAuthAccount() { 
 		if (sizeof($this->mBasicAuthAccounts)>0)
 			return (object)$this->mBasicAuthAccounts[0];
-		
+				
 		return (object)array('login'=>null, 'password'=>null, 'clear'=>false);
 	}
 	

@@ -1,6 +1,7 @@
 <?php
 $mGlobalCfg = array(
 	'db.host'=>'localhost',
+	'db.port'=>false,
 	'db.name'=>'mabl',
 	'db.user'=>'mabluser',
 	'db.pwd'=>'password',

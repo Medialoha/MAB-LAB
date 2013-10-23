@@ -84,7 +84,7 @@ $cfg = CfgHelper::getInstance();
 	 			<small class="muted" >
 	 				<i>If you use obfuscated password, type your clear password here. 
 	 				<br/>And, under your app, use the obfuscated password : </i>
-	 				<b id="obfpwd" ><?php if (!$account->clear) echo md5($account->password); else echo ' - '; ?></b>
+	 				<b id="obfpwd" ><?php if (!$account->clear && !$disabled) echo md5($account->password); else echo ' - '; ?></b>
 	 			</small>
 	 		</div>
 	  </div>
@@ -156,19 +156,20 @@ $cfg = CfgHelper::getInstance();
   <fieldset><legend><img src="assets/images/ic_config_db.png" class="fieldset-icon" />Database Configuration</legend>
 	  <div class="control-group">
 	    <label class="control-label" for="reportDbHost">Host</label>
+	    
 	    <div class="controls">
 	      <input type="text" id="reportDbHost" name="in-db-host" value="<?php echo $mGlobalCfg['db.host']; ?>" >
+	      
+	      <label class="control-label-inline" for="reportDbPort">Port</label>
+	      <input type="text" id="reportDbPort" name="in-db-port" value="<?php echo $mGlobalCfg['db.port']==null?'':$mGlobalCfg['db.port']; ?>" style="width:60px;" >
 	    </div>
 	  </div>
 	  <div class="control-group">
 	    <label class="control-label" for="reportDbUser">User</label>
 	    <div class="controls">
 	      <input type="text" id="reportDbUser" name="in-db-user" value="<?php echo $mGlobalCfg['db.user']; ?>" >
-	    </div>
-	  </div>
-	  <div class="control-group">
-	    <label class="control-label" for="reportDbPwd">Password</label>
-	    <div class="controls">
+
+	    	<label class="control-label-inline" for="reportDbPwd">Password</label>
 	      <input type="password" id="reportDbPwd" name="in-db-pwd" value="<?php echo $mGlobalCfg['db.pwd']; ?>" placeholder="Password" >
 	    </div>
 	  </div>
@@ -178,7 +179,6 @@ $cfg = CfgHelper::getInstance();
 	      <input type="text" id="reportDbName" name="in-db-name" value="<?php echo $mGlobalCfg['db.name']; ?>" >
 	    </div>
 	  </div>
-	  
 	  <div class="control-group">
 	    <label class="control-label" for="reportTblPrefix">Table prefix</label>
 	    <div class="controls">
