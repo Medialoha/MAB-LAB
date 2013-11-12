@@ -208,9 +208,10 @@ switch ($action) {
 			$reportIds = @$_POST['reportIds'];
 			if (!empty($reportIds)) {
 				$reportIds = explode(',', $reportIds);		
-				DBHelper::deleteReports($reportIds);
-	
-				echo 'O:Report(s) deleted with success !';
+				if (DBHelper::deleteReports($reportIds))
+					echo 'O:Report(s) deleted with success !';
+				else
+					echo 'K:Error occured while deleting report(s) !';
 				
 			} else { echo 'K:Report id(s) is not valid !'; }
 		break;
@@ -259,9 +260,9 @@ switch ($action) {
 			header('Location:index.php?p='.PAGE_ID_USERS);
 		break;
 		
-//////// GET LAST REPORTS BOX
-	case 'getlastreports' :
-			require_once('pages/last_reports_box.php');
+//////// GET NEW ISSUES BOX
+	case 'getnewreports' :
+			require_once('pages/new_issues_box.php');
 		break;
 		
 //////// GET CHART DATA
@@ -297,13 +298,15 @@ switch ($action) {
 					break;
 					
 				case REPORTS_EVOLUTION_LINE_CHART_ID :
-					$projection = 'DATE(user_crash_date) date, (SELECT COUNT(*) FROM '.DBHelper::getTblName(TBL_REPORTS).' WHERE DATE(user_crash_date)=date) count';
-					$groupby = 'date';
-					$orderby = 'date DESC LIMIT 7';
+					$projection = 'DATE(NOW()-INTERVAL '.INC_VALUE.' DAY) date, '.
+												'DATE_FORMAT(DATE(NOW()-INTERVAL '.INC_VALUE.' DAY),"%m-%d") formatted_date, '.
+												'(SELECT COUNT(*) FROM '.DBHelper::getTblName(TBL_REPORTS).' WHERE DATE(user_crash_date)=date) reports,'.
+												'(SELECT COUNT(*) FROM '.DBHelper::getTblName(TBL_ISSUES).' WHERE DATE(issue_datetime)=date) issues';
+					$orderby = 'inc ASC LIMIT 15';
 					
-						$arr = DBHelper::selectRows(TBL_REPORTS, null, $orderby, $projection, $groupby, null, false);
+						$arr = DBHelper::selectRows(TBL_INCREMENTS, null, $orderby, $projection, null, null, true);
 						if ($arr!=null) {
-							$data = ChartHelper::convertMySQLArrToBarChartJSON($arr);
+							$data = ChartHelper::convertMySQLArrToReportsEvolChartJSON($arr);
 							
 						} else { $message = 'No data yet recorded.|'; }
 					break;
@@ -314,6 +317,24 @@ switch ($action) {
 			
 			echo $message.'|'.$data;
 		
+		break;
+		
+//////// CLEAR LOGS
+	case 'clearlogs' :
+		if (strcmp($_POST['tab'], 'tabFile')==0) {
+			$mDebug = new Debug();
+			$mDebug->clearLogFile();
+			
+		} else { DBHelper::deleteLogs(); }
+		
+//////// GET LOGS TAB CONTENT
+	case 'getlogs' :
+			$mDebug = new Debug();
+			
+			if (strcmp($_POST['tab'], 'tabFile')==0)
+				echo $mDebug->getFormattedLogs();
+			else
+				echo $mDebug->getFormattedDBLogs();
 		break;
 	
 	
