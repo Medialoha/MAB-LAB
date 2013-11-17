@@ -78,8 +78,9 @@ if ($page!=null) { // start content
     <link rel="apple-touch-icon-precomposed" href="../assets/ico/apple-touch-icon-57-precomposed.png" >
     
 		<link rel="shortcut icon" href="assets/images/favicon.png" >
-
-    <script src="libs/jquery/jquery-1.10.2.min.js" ></script>
+		
+    <script type="text/javascript" src="libs/jquery/jquery-1.10.2.min.js" ></script>
+    <script type="text/javascript" src="assets/functions-core.js" ></script>
   </head>
   <body>
     <div class="navbar navbar-inverse navbar-fixed-top">
@@ -160,8 +161,10 @@ if ($page!=null) { // start content
       <div class="container"></div>
     </div>
 
-    <script src="libs/bootstrap/js/bootstrap.min.js" ></script>
-    <script >$('#loader').hide();</script>
+    <script type="text/javascript" src="libs/bootstrap/js/bootstrap.min.js" ></script>
+    <script type="text/javascript" >
+    	$('#loader').hide();
+    </script>
   </body>
 </html>
 <?php } // end content

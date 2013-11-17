@@ -10,6 +10,8 @@
  *     EIRL DEVAUX J. - Medialoha - initial API and implementation
  */
 
+define('TBL_NAME_PREFIX', '%PREFIX%');
+
 define('TBL_USERS', 'users');
 define('USER_ID', 'user_id');
 define('USER_NAME', 'user_name');
@@ -45,6 +47,9 @@ define('REPORT_ISSUE', 'report_issue');
 
 define('TBL_LOGS', 'logs');
 define('LOG_TIMESTAMP', 'log_timestamp');
+
+define('TBL_INCREMENTS', 'increments');
+define('INC_VALUE', 'inc');
 
 
 class DBHelper {
@@ -163,14 +168,15 @@ class DBHelper {
 	}
 	
 	public static function deleteIssues($ids) {
-		$where = ISSUE_ID;
+		$where = '';
 		
 		if (is_array($ids))
-			$where .= ' IN ('.implode(',', $ids).')';
+			$where = ' IN ('.implode(',', $ids).')';
 		else
-			$where .= '='.$ids;
+			$where = '='.$ids;
 		
-		return mysqli_query(self::$dbo, 'DELETE FROM '.self::getTblName(TBL_ISSUES).' WHERE '.$where);
+		mysqli_query(self::$dbo, 'DELETE FROM '.self::getTblName(TBL_REPORTS).' WHERE '.REPORT_ISSUE.$where);
+		mysqli_query(self::$dbo, 'DELETE FROM '.self::getTblName(TBL_ISSUES).' WHERE '.ISSUE_ID.$where);
 	}
 	
 	public static function deleteReports($ids) {
@@ -196,24 +202,34 @@ class DBHelper {
 		return ($count==0);
 	}
 	
-	public static function updateIssuesState($ids, $stateId) {		
-		// new or viewed state is updated on report state update (trigger) then update issue reports state
-		if ($stateId==ISSUE_STATE_NEW || $stateId==ISSUE_STATE_VIEWED) {
-			$query = 'UPDATE '.self::getTblName(TBL_REPORTS).' SET '.REPORT_STATE.'='.$stateId.' WHERE '.REPORT_ISSUE;
-			
-		// else update the issue state then trigger will update the reports state
-		} else { $query = 'UPDATE '.self::getTblName(TBL_ISSUES).' SET '.ISSUE_STATE.'='.$stateId.' WHERE '.ISSUE_ID; }
+	public static function updateIssuesState($ids, $stateId) {
+		$res = false;
 		
-		Debug::logd($query, '');
+		switch ($stateId) {
+			case ISSUE_STATE_NEW : $reportState = REPORT_STATE_NEW;
+				break;
+			case ISSUE_STATE_VIEWED : $reportState = REPORT_STATE_VIEWED;
+				break;
+			case ISSUE_STATE_CLOSED : $reportState = REPORT_STATE_CLOSED;
+				break;
+			case ISSUE_STATE_ARCHIVED : $reportState = REPORT_STATE_ARCHIVED;
+				break;
+		}
 		
-		if (is_array($ids))
-			$query .= ' IN ('.implode(',', $ids).')';
-		else
-			$query .= '='.$ids;
+		if (!is_array($ids)) {
+			$ids = array($ids);
+		}
 		
-		Debug::logd($query, '');
+		for ($i=0; $i<sizeOf($ids); ++$i) {
+			$issueId = $ids[$i];
+
+			// update issue reports state
+			if (mysqli_query(self::$dbo, 'UPDATE '.self::getTblName(TBL_REPORTS).' SET '.REPORT_STATE.'='.$reportState.' WHERE '.REPORT_ISSUE.'='.$issueId))
+				// update issue state
+				$res = mysqli_query(self::$dbo, 'UPDATE '.self::getTblName(TBL_ISSUES).' SET '.ISSUE_STATE.'='.$stateId.' WHERE '.ISSUE_ID.'='.$issueId);
+		}
 		
-		return mysqli_query(self::$dbo, $query);
+		return $res;
 	}
 	
 	public static function updateIssuesPriority($ids, $priorityId) {
@@ -228,14 +244,26 @@ class DBHelper {
 	}
 	
 	public static function updateReportsState($ids, $stateId) {
-		$where = REPORT_ID;
-		
-		if (is_array($ids))
-			$where .= ' IN ('.implode(',', $ids).')';
-		else
-			$where .= '='.$ids;
-		
-		return mysqli_query(self::$dbo, 'UPDATE '.self::getTblName(TBL_REPORTS).' SET '.REPORT_STATE.'='.$stateId.' WHERE '.$where);
+		if (!is_array($ids))
+			$ids = array($ids);
+
+		for ($i=0; $i<sizeOf($ids); ++$i) {
+			$reportId = $ids[$i];
+			
+			// update report state
+			mysqli_query(self::$dbo, 'UPDATE '.self::getTblName(TBL_REPORTS).' SET '.REPORT_STATE.'='.$stateId.' WHERE '.REPORT_ID.'='.$reportId);
+			
+			// if new report state is VIEWED then update issue state if needed
+			if ($stateId==REPORT_STATE_VIEWED) {
+				// check if issue has reports sill not viewed
+				$count = self::countRows(TBL_REPORTS, REPORT_STATE.'='.REPORT_STATE_NEW.' AND '.REPORT_ISSUE.'=(SELECT '.REPORT_ISSUE.' FROM '.self::getTblName(TBL_REPORTS).' WHERE '.REPORT_ID.'='.$reportId.')');
+					
+				// update to viewed if true
+				if ($count==0)
+					mysqli_query(self::$dbo, 'UPDATE '.self::getTblName(TBL_ISSUES).' SET '.ISSUE_STATE.'='.ISSUE_STATE_NEW.
+																		' WHERE '.ISSUE_ID.'=(SELECT '.REPORT_ISSUE.' FROM '.self::getTblName(TBL_REPORTS).' WHERE '.REPORT_ID.'='.$reportId.')');
+			}
+		}
 	}
 	
 	public static function updateReportsIssue($reportIds, $issueId) {
@@ -290,6 +318,7 @@ class DBHelper {
 			$newIssue = true;
 			
 			Debug::logd('New issue id #'.$issue[ISSUE_ID], 'INSERT REPORT');
+			
 		}
 
 		$values[REPORT_ISSUE] = $issue[ISSUE_ID];
@@ -303,6 +332,10 @@ class DBHelper {
 			
 				// remove newly inserted issue if report insertion failed
 				self::deleteIssues($issue[ISSUE_ID]);
+				
+			} else if ($result && !$newIssue) {
+				// update issue state as new
+				self::updateIssuesState($issue[ISSUE_ID], ISSUE_STATE_NEW);
 			}
 			
 		} else { $result = false; }
@@ -311,9 +344,16 @@ class DBHelper {
 	}
 	
 	public static function getReportIssueKey(&$reportArr) {
-		$arr = explode("\n", $reportArr[REPORT_STACK_TRACE]);
+// 		$arr = explode("\n", $reportArr[REPORT_STACK_TRACE]);
+// 		return md5($reportArr[REPORT_VERSION_CODE].$reportArr[REPORT_VERSION_NAME].$reportArr[REPORT_PACKAGE_NAME].$arr[0]);
+
+		$stack = preg_replace('#^([^\t]+\n)#m', "", $reportArr[REPORT_STACK_TRACE]);
+		if ($stack!=null) {
+			$stack = preg_replace('#\t(at (com\.android|android|java)\..*?)\n#', "", $stack);
+			$stack = preg_replace('#\t\.\.\. \d+ more\n#', "", $stack);
+		}
 		
-		return md5($reportArr[REPORT_VERSION_CODE].$reportArr[REPORT_VERSION_NAME].$reportArr[REPORT_PACKAGE_NAME].$arr[0]);
+		return md5($reportArr[REPORT_VERSION_CODE].$reportArr[REPORT_VERSION_NAME].$reportArr[REPORT_PACKAGE_NAME].$stack);
 	}
 	
 	public static function fetchUsers() {
@@ -359,7 +399,7 @@ class DBHelper {
 		return mysqli_query(self::$dbo, 'DELETE FROM '.self::getTblName(TBL_LOGS));
 	}
 	
-	public static function exec($sql, $multi=false) {
+	public static function exec($sql, $multi=false) {		
 		if ($multi) {
 			if (mysqli_multi_query(self::$dbo, $sql)===true) { return null; }
 			

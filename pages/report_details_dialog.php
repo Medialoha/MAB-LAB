@@ -38,9 +38,10 @@ $priority = new IssuePriority($r->issue_priority);
 <div class="modal-body" style="clear:both; height:800px; max-height:620px;" >
 	<ul id="reportTabs" class="nav nav-tabs" >
 	  <li class="active" ><a href="#report-details" data-toggle="tab" >Details</a></li>
-	  <li><a href="#report-config" data-toggle="tab" >Configuration</a></li>
-	  <li><a href="#report-prefs" data-toggle="tab" >Preferences</a></li>
+	  <li><a href="#report-config" data-toggle="tab" >Config.</a></li>
+	  <li><a href="#report-prefs" data-toggle="tab" >Pref.</a></li>
 	  <li><a href="#report-settings" data-toggle="tab" >Settings</a></li>
+	  <li><a href="#report-environments" data-toggle="tab" >Environments</a></li>
 	  <li><a href="#report-stacktrace" data-toggle="tab" >Stack Trace</a></li>
 	  <li><a href="#report-logcat" data-toggle="tab" >Log</a></li>
 	  <li><a href="#report-eventslog" data-toggle="tab" >Events Log</a></li>
@@ -140,15 +141,24 @@ $priority = new IssuePriority($r->issue_priority);
   	</div>
   	
   	<div class="tab-pane" id="report-prefs" >
-  		<dt>Shared Preferences</dt>
-  		<dd><br/><?php	ReportHelper::displayPreferences($r->shared_preferences); ?></dd>
+  		<dl>
+  			<dt>Shared Preferences</dt>
+  			<dd><br/><?php	ReportHelper::displayPreferences($r->shared_preferences); ?></dd>
+  		</dl>
   	</div>
   	
   	<div class="tab-pane" id="report-settings" >
   		<dl>
-  			<dt>Settings Global</dt><dd><br/><?php echo ReportHelper::displayObjectValuesToHTMLArray($r->settings_global); ?></dd>
-  			<dt>Settings System</dt><dd><br/><?php echo ReportHelper::displayObjectValuesToHTMLArray($r->settings_system); ?></dd>
-  			<dt>Settings Secure</dt><dd><br/><?php echo ReportHelper::displayObjectValuesToHTMLArray($r->settings_secure); ?></dd>
+  			<dt>Settings Global</dt><dd><br/><?php echo ReportHelper::displayObjectValuesToHTMLArray($r->settings_global, FORMAT_SETTINGS_KEY); ?></dd>
+  			<dt>Settings System</dt><dd><br/><?php echo ReportHelper::displayObjectValuesToHTMLArray($r->settings_system, FORMAT_SETTINGS_KEY); ?></dd>
+  			<dt>Settings Secure</dt><dd><br/><?php echo ReportHelper::displayObjectValuesToHTMLArray($r->settings_secure, FORMAT_SETTINGS_KEY); ?></dd>
+  		</dl>
+  	</div>
+  	
+  	<div class="tab-pane" id="report-environments" >
+  		<dl>
+  			<dt>Environments</dt>
+  			<dd><br/><?php echo ReportHelper::displayObjectValuesToHTMLArray($r->environment, FORMAT_ENV_KEY); ?></dd>
   		</dl>
   	</div>
   	

@@ -23,6 +23,18 @@ Have a look on our web site and check out our other products.
 
 ## Change Log ##
 
+**Version 1.2.2-Lester**
+
+- *New reports evolution chart enhanced*
+- *Added environments tab in report report details dialog*
+- *Settings keys now formatted and ordered*
+- *New issue key method which prevent wrong grouping*
+- *No more use of triggers, procedures or functions*
+
+Run *update-to-5 update* script from any preivous version of MABL. Issues table will be **dropped** and recreated to group reports correctly.
+
+Thanks to **xeno010** for his help !
+
 **Version 1.2.1-Lester**
 
 - *Support of custom MySQL connection port added*

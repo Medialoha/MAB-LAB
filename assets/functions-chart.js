@@ -63,12 +63,18 @@ function drawBarChart(containerId, data) {
 }
 
 function drawLineChart(containerId, data) {
-	$.plot(containerId,	[{ label: "",
-	                       data: data.data,
+	$.plot(containerId,	[{ label: "Reports",
+	                       data: data.reports,
 	                       color: "#33b5e5",
-	                       lines: { show:true, barWidth:0.7, align:"center" }
-
-	                     }],
+	                       lines: { show:true, align:"center" }},
+	                     { label: "Issues",
+	                       data: data.issues,
+	                       color: "#FFBB33",
+	                       lines: { show:true, align:"center" }},
+	                     { label: "Avg per day "+(new Date().getFullYear()),
+		                     data: data.avg,
+		                     color: "#9440ed",
+		                     lines: { show:true, align:"center" }}],
 	                    { xaxis: { ticks:data.ticks },
         				  grid: { show:true, color:"#666666", backgroundColor:"#ffffff", borderColor:"#666666", borderWidth:{top:0, right:0, bottom:1, left:1} }    	
 	                    });	

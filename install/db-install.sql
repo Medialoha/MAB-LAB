@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS `%PREFIX%reports`, `%PREFIX%users`, `%PREFIX%issues`, `%PREFIX%logs`;
+DROP TABLE IF EXISTS `%PREFIX%reports`, `%PREFIX%users`, `%PREFIX%issues`, `%PREFIX%logs`, `%PREFIX%increments`;
 
 CREATE TABLE `%PREFIX%users` (
   `user_id` INT NOT NULL AUTO_INCREMENT,
@@ -13,7 +13,7 @@ CREATE TABLE `%PREFIX%reports` (
   `report_id` INT NOT NULL AUTO_INCREMENT,
   `report_key` VARCHAR( 50 ) NOT NULL,
   
-  `app_version_code` float DEFAULT NULL,
+  `app_version_code` int(11) DEFAULT NULL,
   `app_version_name` varchar(50) DEFAULT NULL,
   `package_name` varchar(255) DEFAULT NULL,
   `file_path` varchar(255) DEFAULT NULL,
@@ -76,60 +76,65 @@ CREATE TABLE `%PREFIX%logs` (
   PRIMARY KEY (`log_id`)
 ) DEFAULT CHARSET=utf8;
 
+CREATE TABLE `%PREFIX%increments` (
+  `inc` int(11) NOT NULL,
+  UNIQUE KEY `inc_UNIQUE` (`inc`)
+  
+) DEFAULT CHARSET=utf8;
 
 #### PROCEDURES
 
-DROP PROCEDURE IF EXISTS `LogD`;
-DROP FUNCTION IF EXISTS `FctDeleteReport`;
+#DROP PROCEDURE IF EXISTS `LogD`;
+#DROP FUNCTION IF EXISTS `FctDeleteReport`;
 
 # create procedure to log message
-CREATE PROCEDURE LogD (IN tag VARCHAR(50), IN message TEXT)
-  INSERT INTO %PREFIX%logs (log_tag, log_message) VALUES (tag, message);
+#CREATE PROCEDURE LogD (IN tag VARCHAR(50), IN message TEXT)
+#  INSERT INTO %PREFIX%logs (log_tag, log_message) VALUES (tag, message);
   
 # create procedure to delete report
-CREATE FUNCTION `FctDeleteReport` (reportId INTEGER)
-RETURNS INTEGER
-BEGIN
-	DECLARE issueId INTEGER DEFAULT 0;
-	DECLARE res INTEGER DEFAULT 0;
+#CREATE FUNCTION `FctDeleteReport` (reportId INTEGER)
+#RETURNS INTEGER
+#BEGIN
+#	DECLARE issueId INTEGER DEFAULT 0;
+#	DECLARE res INTEGER DEFAULT 0;
 
-	SET @issueId = (SELECT %PREFIX%issue FROM %PREFIX%reports WHERE report_id=reportId);
+#	SET @issueId = (SELECT %PREFIX%issue FROM %PREFIX%reports WHERE report_id=reportId);
 
-	DELETE FROM %PREFIX%reports WHERE report_id=reportId;
-	SELECT ROW_COUNT() INTO @res;
+#	DELETE FROM %PREFIX%reports WHERE report_id=reportId;
+#	SELECT ROW_COUNT() INTO @res;
 
-	CALL LogD("FCT_DEL_REPORT", CONCAT("Delete report #", reportId, " result : ", @res));
+#	CALL LogD("FCT_DEL_REPORT", CONCAT("Delete report #", reportId, " result : ", @res));
 
-	IF (@res=1) THEN
-		CALL LogD("FCT_DEL_REPORT", CONCAT("Report deleted with success, check if issue #", @issueId, " must be deleted..."));
+#	IF (@res=1) THEN
+#		CALL LogD("FCT_DEL_REPORT", CONCAT("Report deleted with success, check if issue #", @issueId, " must be deleted..."));
 
-		IF ((SELECT COUNT(*) FROM %PREFIX%reports WHERE report_issue=@issueId)=0) THEN
-			CALL LogD("FCT_DEL_REPORT", "No more reports for this issue then delete it now");
-			DELETE FROM %PREFIX%issues WHERE issue_id=@issueId;
+#		IF ((SELECT COUNT(*) FROM %PREFIX%reports WHERE report_issue=@issueId)=0) THEN
+#			CALL LogD("FCT_DEL_REPORT", "No more reports for this issue then delete it now");
+#			DELETE FROM %PREFIX%issues WHERE issue_id=@issueId;
 
-			SELECT ROW_COUNT()+@res INTO @res;
-		END IF;
-	END IF;
+#			SELECT ROW_COUNT()+@res INTO @res;
+#		END IF;
+#	END IF;
 
-	RETURN @res;
-END;
+#	RETURN @res;
+#END;
 
 
 #### TRIGGERS 
 
-DROP TRIGGER IF EXISTS `trigger_1_delete_issue_reports_on_delete_issue`;
-DROP TRIGGER IF EXISTS `trigger_2_update_issue_reports_state`;
-DROP TRIGGER IF EXISTS `trigger_3_update_issue_state_on_new_report_viewed`;
-DROP TRIGGER IF EXISTS `trigger_4_update_issue_state_on_new_report_insert`;
+#DROP TRIGGER IF EXISTS `trigger_1_delete_issue_reports_on_delete_issue`;
+#DROP TRIGGER IF EXISTS `trigger_2_update_issue_reports_state`;
+#DROP TRIGGER IF EXISTS `trigger_3_update_issue_state_on_new_report_viewed`;
+#DROP TRIGGER IF EXISTS `trigger_4_update_issue_state_on_new_report_insert`;
 
 # delete issue reports on issue delete
-CREATE TRIGGER `trigger_1_delete_issue_reports_on_delete_issue`
-BEFORE DELETE ON `%PREFIX%issues` 
-FOR EACH ROW
-BEGIN
-  CALL LogD("TRIGGER #1", CONCAT("Before deleting issue #", OLD.issue_id, ", delete issue reports"));
-  DELETE FROM %PREFIX%reports WHERE report_issue=OLD.issue_id;
-END;
+#CREATE TRIGGER `trigger_1_delete_issue_reports_on_delete_issue`
+#BEFORE DELETE ON `%PREFIX%issues` 
+#FOR EACH ROW
+#BEGIN
+#  CALL LogD("TRIGGER #1", CONCAT("Before deleting issue #", OLD.issue_id, ", delete issue reports"));
+#  DELETE FROM %PREFIX%reports WHERE report_issue=OLD.issue_id;
+#END;
   
 # /!\ Use a function delete_report instead
 #CREATE TRIGGER `trigger_2_delete_issue_on_delete_report`
@@ -147,34 +152,34 @@ END;
 
 # update issue reports state on issue state update to resolved or archived
 # new or viewed state is only set on reports state update to viewed (cf trigger below)
-CREATE TRIGGER `trigger_2_update_issue_reports_state`
-BEFORE UPDATE ON `%PREFIX%issues`
-FOR EACH ROW
-BEGIN
-  IF (OLD.issue_state<>NEW.issue_state AND (NEW.issue_state=0 OR NEW.issue_state=3)) THEN
-    CALL LogD("TRIGGER #2", CONCAT("Update reports state to ", NEW.issue_state, " with report_issue ", NEW.issue_id));
+#CREATE TRIGGER `trigger_2_update_issue_reports_state`
+#BEFORE UPDATE ON `%PREFIX%issues`
+#FOR EACH ROW
+#BEGIN
+#  IF (OLD.issue_state<>NEW.issue_state AND (NEW.issue_state=0 OR NEW.issue_state=3)) THEN
+#    CALL LogD("TRIGGER #2", CONCAT("Update reports state to ", NEW.issue_state, " with report_issue ", NEW.issue_id));
   
-    UPDATE %PREFIX%reports SET report_state=NEW.issue_state WHERE report_issue=NEW.issue_id;
-  END IF;
-END;
+#    UPDATE %PREFIX%reports SET report_state=NEW.issue_state WHERE report_issue=NEW.issue_id;
+#  END IF;
+#END;
 
 # update issue state from new to viewed on report state change from new to viewed
-CREATE TRIGGER `trigger_3_update_issue_state_on_new_report_viewed`
-AFTER UPDATE ON `%PREFIX%reports`
-FOR EACH ROW 
-BEGIN  
-  CALL LogD("TRIGGER #4", CONCAT("Report #", NEW.report_id, " state updated to ", NEW.report_state));
+#CREATE TRIGGER `trigger_3_update_issue_state_on_new_report_viewed`
+#AFTER UPDATE ON `%PREFIX%reports`
+#FOR EACH ROW 
+#BEGIN  
+#  CALL LogD("TRIGGER #4", CONCAT("Report #", NEW.report_id, " state updated to ", NEW.report_state));
 
-  IF (NEW.report_state=2) THEN    
-    IF ((SELECT COUNT(*) FROM %PREFIX%reports WHERE report_issue=NEW.report_issue AND report_state=1)=0) THEN
-      CALL LogD("TRIGGER #4", "Issue state must be updated");
-      UPDATE %PREFIX%issues SET issue_state=2 WHERE issue_id=NEW.report_issue;
-    END IF;
-  END IF;
-END;
+#  IF (NEW.report_state=2) THEN    
+#    IF ((SELECT COUNT(*) FROM %PREFIX%reports WHERE report_issue=NEW.report_issue AND report_state=1)=0) THEN
+#      CALL LogD("TRIGGER #4", "Issue state must be updated");
+#      UPDATE %PREFIX%issues SET issue_state=2 WHERE issue_id=NEW.report_issue;
+#    END IF;
+#  END IF;
+#END;
 
 # update issue state to new when a new report is inserted 
-CREATE TRIGGER `trigger_4_update_issue_state_on_new_report_insert`
-AFTER INSERT ON `%PREFIX%reports`
-FOR EACH ROW 
-  UPDATE %PREFIX%issues SET issue_state=1 WHERE issue_id=NEW.report_issue;
+#CREATE TRIGGER `trigger_4_update_issue_state_on_new_report_insert`
+#AFTER INSERT ON `%PREFIX%reports`
+#FOR EACH ROW 
+#  UPDATE %PREFIX%issues SET issue_state=1 WHERE issue_id=NEW.report_issue;

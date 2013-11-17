@@ -29,22 +29,21 @@ $cfg = CfgHelper::getInstance();
 	</div>
 
 	<div class="span8" >
-		<h4>Evolution</h4>
+		<h4>New Reports Evolution</h4>
 		<div id="chart2-1" class="home-chart-row2-height" ></div>
 		
 		<ul class="inline" style="margin-top:20px;" >
 		<?php 
 			$currentYear = date('Y');
 			$res = DBHelper::selectRows(TBL_REPORTS, null, null, 
-																	'(SELECT count(*) FROM `'.DBHelper::getTblName(TBL_REPORTS).'` WHERE DATE_FORMAT('.REPORT_CRASH_DATE.',"%Y")=\''.$currentYear.'\') current, '.
-																	'(SELECT count(*) FROM `'.DBHelper::getTblName(TBL_REPORTS).'` WHERE DATE_FORMAT('.REPORT_CRASH_DATE.',"%Y")=\''.($currentYear-1).'\') past, '.
+																	'ROUND((SELECT count(*)/DAYOFYEAR(DATE_FORMAT('.REPORT_CRASH_DATE.', "%Y-%m-%d")) FROM '.DBHelper::getTblName(TBL_REPORTS).' WHERE DATE_FORMAT('.REPORT_CRASH_DATE.',"%Y")=\''.$currentYear.'\'), 2) current, '.
+																	'ROUND((SELECT count(*)/365 FROM `'.DBHelper::getTblName(TBL_REPORTS).'` WHERE DATE_FORMAT('.REPORT_CRASH_DATE.',"%Y")=\''.($currentYear-1).'\'), 2) past, '.
 																	'(SELECT count(*) FROM `'.DBHelper::getTblName(TBL_REPORTS).'` WHERE DATE('.REPORT_CRASH_DATE.')=CURDATE()) today',
 																	null, '1', false);
 			$res = $res[0];
 
-
-			$current = round($res[0]/365, 2);
-			$past = round($res[1]/365, 2);
+			$current = $res[0];
+			$past = $res[1];
 			$today = $res[2];
 		?>
 			<li>New reports average</li><li><i class="<?php if ($current>$past) echo 'icon-arrow-up'; else if ($current<$past) echo 'icon-arrow_down'; else echo 'icon-minus'; ?>" ></i>&nbsp;<?php echo $current; ?>/day</li>

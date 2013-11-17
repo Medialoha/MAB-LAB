@@ -301,7 +301,8 @@ switch ($action) {
 					$projection = 'DATE(NOW()-INTERVAL '.INC_VALUE.' DAY) date, '.
 												'DATE_FORMAT(DATE(NOW()-INTERVAL '.INC_VALUE.' DAY),"%m-%d") formatted_date, '.
 												'(SELECT COUNT(*) FROM '.DBHelper::getTblName(TBL_REPORTS).' WHERE DATE(user_crash_date)=date) reports,'.
-												'(SELECT COUNT(*) FROM '.DBHelper::getTblName(TBL_ISSUES).' WHERE DATE(issue_datetime)=date) issues';
+												'(SELECT COUNT(*) FROM '.DBHelper::getTblName(TBL_ISSUES).' WHERE DATE(issue_datetime)=date) issues, '.
+												'(SELECT count(*)/DAYOFYEAR(DATE_FORMAT('.REPORT_CRASH_DATE.', "%Y-%m-%d")) FROM '.DBHelper::getTblName(TBL_REPORTS).' WHERE DATE_FORMAT('.REPORT_CRASH_DATE.',"%Y")=\''.date('Y').'\') avg_per_day_current_year';
 					$orderby = 'inc ASC LIMIT 15';
 					
 						$arr = DBHelper::selectRows(TBL_INCREMENTS, null, $orderby, $projection, null, null, true);
