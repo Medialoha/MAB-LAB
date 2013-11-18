@@ -9,6 +9,8 @@ CREATE TABLE `%PREFIX%users` (
   PRIMARY KEY (`user_id`)
 ) ENGINE MyISAM DEFAULT CHARSET=utf8;
 
+INSERT INTO mabl_users (user_name, user_password, user_email) VALUES ('admin', MD5('password'), '');
+
 CREATE TABLE `%PREFIX%reports` (
   `report_id` INT NOT NULL AUTO_INCREMENT,
   `report_key` VARCHAR( 50 ) NOT NULL,
