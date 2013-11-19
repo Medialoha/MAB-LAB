@@ -77,6 +77,7 @@ class ReportHelper {
 	
 	public static function buildMySQLValuesArr($json) {
 		$json['USER_CRASH_DATE'] = self::convertRFCDateToMySQLTimestamp($json['USER_CRASH_DATE']);
+		$json['USER_APP_START_DATE'] = self::convertRFCDateToMySQLTimestamp($json['USER_APP_START_DATE']);
 		
 		$values = array();
 		foreach ($json as $k=>$v) {
