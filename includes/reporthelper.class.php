@@ -83,7 +83,7 @@ class ReportHelper {
 		foreach ($json as $k=>$v) {
 			$k = strtolower($k);
 			
-			if (in_array($k, self::$mSerializedFields)) {
+			if (in_array(strtoupper($k), self::$mSerializedFields)) {
 				 $values[$k] = base64_encode(serialize($v));
 				
 			} else {
