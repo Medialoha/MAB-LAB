@@ -11,8 +11,8 @@
  */
 
 define('APP_NAME', 'MAB-LAB');
-define('VERSION_NAME', '1.2.0-Lester');
-define('VERSION_CODE', 4);
+define('VERSION_NAME', '1.2.3-Lester');
+define('VERSION_CODE', 5);
 
 define('LOG_SEVERITY', 0); // could be 0=>DEBUG, 1=>INFO, 2=>WARNING, 3=>ERROR
 

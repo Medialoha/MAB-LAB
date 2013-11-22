@@ -55,18 +55,22 @@ $cfg = CfgHelper::getInstance();
 		<?php 
 			$res = DBHelper::selectRows(TBL_REPORTS, null, null, 'count(*)', REPORT_INSTALLATION_ID, null, false);
 						
-			$max = 0; $sum = 0;
-			foreach ($res as $row) {
-				$count =& $row[0];
+			$avg = 0; $max = 0; $sum = 0; $count = sizeOf($res);
+			if ($count>0) {
+				$avg = round($sum/$count, 2);
 
-				if ($count>$max)
-					$max = $count;
-				
-				$sum += $count;
+				foreach ($res as $row) {
+					$count =& $row[0];
+	
+					if ($count>$max)
+						$max = $count;
+					
+					$sum += $count;
+				}
 			}
 		?>
 			<li>Reports per installation</li>
-			<li>Avg <?php echo round($sum/sizeOf($res), 2); ?> / Max <?php echo $max; ?></li>
+			<li>Avg <?php echo $avg; ?> / Max <?php echo $max; ?></li>
 <!-- 			<li>Distinct reports per installation</li> -->
 <!-- 			<li>Avg 1,2 / Max 2,1</li> -->
 		</ul>

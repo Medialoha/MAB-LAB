@@ -23,6 +23,12 @@ Have a look on our web site and check out our other products.
 
 ## Change Log ##
 
+**Version 1.2.3-Lester**
+
+- *Issue #31: Division by zero in /pages/home.php*
+- *Issue #28 #29: Serializing values*
+- *Issue #30: Missing users table prefix in db install script*
+
 **Version 1.2.2-Lester**
 
 - *New reports evolution chart enhanced*
