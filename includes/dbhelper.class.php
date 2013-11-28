@@ -185,17 +185,30 @@ class DBHelper {
 		if (!is_array($ids))
 			$ids = array($ids);
 		
+		// number of reports to delete
 		$count = sizeOf($ids);
 		
 		foreach ($ids as $id) {
-			$res = mysqli_query(self::$dbo, 'SELECT FctDeleteReport('.$id.');');
+			// get report issue id
+			$issueId = self::selectRow(TBL_REPORTS, REPORT_ID."=".$id, REPORT_ISSUE);
 			
+			// if report issue is not valid then do nothing
+			if (empty($issueId) || !($issueId[0]>0))
+				continue;
+			
+			$issueId = $issueId[0];
+			
+			// delete report
+			$res = mysqli_query(self::$dbo, 'DELETE FROM '.self::getTblName(TBL_REPORTS).' WHERE '.REPORT_ID.'='.$id);
 			if ($res) {
-				if (mysqli_num_rows($res)>0) {
-					$res = mysqli_fetch_array($res);
-					if ($res[0]>0)
-						--$count;
-				}
+				// check if issue should be deleted
+				$res = self::countRows(TBL_REPORTS, REPORT_ISSUE.'='.$issueId);
+				
+				// if no more reports for this issue then delete it
+				if ($res==0)
+					mysqli_query(self::$dbo, 'DELETE FROM '.self::getTblName(TBL_ISSUES).' WHERE '.ISSUE_ID.'='.$issueId);
+				
+				--$count;
 			}
 		}
 		

@@ -12,8 +12,6 @@
 
 session_start();
 
-define('BASE_PATH', '../../');
-
 require_once(BASE_PATH.'includes/define.php');
 require_once(BASE_PATH.'includes/config.php');
 require_once(BASE_PATH.'includes/confighelper.class.php');

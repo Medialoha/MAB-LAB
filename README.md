@@ -23,6 +23,11 @@ Have a look on our web site and check out our other products.
 
 ## Change Log ##
 
+**Version 1.2.4-Lester**
+
+- *Installation script*
+- *Issue #32: Problem deleting reports*
+
 **Version 1.2.3-Lester**
 
 - *Issue #31: Division by zero in /pages/home.php*

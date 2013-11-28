@@ -1,5 +1,7 @@
-<?php
-define('DIRECT_ACCESS_CHECK', true); 
+<?php 
+define('DIRECT_ACCESS_CHECK', true);
+
+define('BASE_PATH', '../../');
 
 define('_REPORT_ID', 0);
 define('_APP_VERSION_CODE', 1);
