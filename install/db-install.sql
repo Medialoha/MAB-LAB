@@ -1,6 +1,6 @@
-DROP TABLE IF EXISTS `%PREFIX%reports`, `%PREFIX%users`, `%PREFIX%issues`, `%PREFIX%logs`, `%PREFIX%increments`;
+DROP TABLE IF EXISTS `mabl_reports`, `mabl_users`, `mabl_issues`, `mabl_logs`, `mabl_increments`;
 
-CREATE TABLE `%PREFIX%users` (
+CREATE TABLE `mabl_users` (
   `user_id` INT NOT NULL AUTO_INCREMENT,
   `user_name` varchar(50) NOT NULL,
   `user_password` char(32) NOT NULL,
@@ -9,9 +9,9 @@ CREATE TABLE `%PREFIX%users` (
   PRIMARY KEY (`user_id`)
 ) ENGINE MyISAM DEFAULT CHARSET=utf8;
 
-INSERT INTO `%PREFIX%users` (user_name, user_password, user_email) VALUES ('admin', MD5('password'), '');
+INSERT INTO `mabl_users` (user_name, user_password, user_email) VALUES ('admin', MD5('password'), '');
 
-CREATE TABLE `%PREFIX%reports` (
+CREATE TABLE `mabl_reports` (
   `report_id` INT NOT NULL AUTO_INCREMENT,
   `report_key` VARCHAR( 50 ) NOT NULL,
   
@@ -57,7 +57,7 @@ CREATE TABLE `%PREFIX%reports` (
   UNIQUE (`report_key`)
 ) ENGINE MyISAM DEFAULT CHARSET=utf8;
 
-CREATE TABLE `%PREFIX%issues` (
+CREATE TABLE `mabl_issues` (
   `issue_id` INT NOT NULL AUTO_INCREMENT,
   `issue_key` VARCHAR(50) NOT NULL,
   `issue_datetime` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -68,7 +68,7 @@ CREATE TABLE `%PREFIX%issues` (
   PRIMARY KEY (`issue_id`)
 ) DEFAULT CHARSET=utf8;
 
-CREATE TABLE `%PREFIX%logs` (
+CREATE TABLE `mabl_logs` (
   `log_id` INT NOT NULL AUTO_INCREMENT,
   `log_timestamp` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `log_severity` CHAR(1) NOT NULL DEFAULT 'D',
@@ -78,7 +78,7 @@ CREATE TABLE `%PREFIX%logs` (
   PRIMARY KEY (`log_id`)
 ) DEFAULT CHARSET=utf8;
 
-CREATE TABLE `%PREFIX%increments` (
+CREATE TABLE `mabl_increments` (
   `inc` int(11) NOT NULL,
   UNIQUE KEY `inc_UNIQUE` (`inc`)
   
