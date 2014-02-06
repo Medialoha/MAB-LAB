@@ -19,7 +19,14 @@ Join our discussion forum here [mabl group](https://groups.google.com/d/forum/ma
 
 #### How to Support us ? ####
 
-Have a look on our web site and check out our other products.
+Try our Android applications :
+
+[![Google Play Store](http://www.medialoha.net/images/get-it-on-google-play-small.png)](https://play.google.com/store/apps/developer?id=Medialoha)
+
+Support us can be as simple as a like on Facebook :
+
+[![Like us on Facebook](http://www.medialoha.net/images/like-us-on-facebook-small.png)](https://www.facebook.com/pages/Medialoha/1414959965409936 "Like us on Facebook") 
+
 
 ## Change Log ##
 
