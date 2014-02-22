@@ -1,6 +1,56 @@
 @CHARSET "UTF-8";
+
+.table-hover tbody tr:hover > td,
+.table-hover tbody tr:hover > th {
+  background-color: #CEE9F2;
+}
+
 .issues-tbl TH {
 	text-align:center;
+/* 	background-color:#d6d6d6; */
+/* 	color:#ffffff; */
+}
+
+.issues-tbl TR.odd {
+/* 	background-color:#f6f6f6; */
+}
+
+.issues-tbl TR.even {
+/* 	background-color:#fefefe; */
+}
+
+.issues-tbl TD.issue-hilitecol {
+	width:3px;
+	min-width:2px;
+	padding:0px;
+}
+
+.issues-tbl TD.issue-hilitecol-archived {
+	background-color:#cccccc;
+}
+
+.issues-tbl TD.issue-hilitecol-closed {
+	background-color:#999999;
+}
+
+.issues-tbl TD.issue-hilitecol-testing {
+	background-color:#3A7DDA;
+}
+
+.issues-tbl TD.issue-hilitecol-normal {
+	background-color:#FFBB33;
+}
+
+.issues-tbl TD.issue-hilitecol-critical {
+	background-color:#FF4444;
+}
+
+.issues-tbl TD.issue-hilitecol-low {
+	background-color:#33B5E5;
+}
+
+.issues-tbl TD.issue-hilitecol-new {
+	
 }
 
 .issues-tbl TD {
@@ -29,6 +79,11 @@
 
 .issues-tbl .priority {
 	text-align:center;
+}
+
+.issues-tbl .state {
+	text-align:center;
+	width:80px;
 }
 
 .issues-tbl .cause A, .issues-tbl .cause A:hover, .issues-tbl .cause A:visited {
@@ -62,7 +117,8 @@
 	cursor:pointer;
 }
 
-.label-priority-low, .label-priority-normal, .label-priority-critical {
+.label-priority-low, .label-priority-normal, .label-priority-critical, 
+.label-state-open, .label-state-archived, .label-state-closed {
 	min-width:15px;
 	text-align:center;
 }
@@ -90,4 +146,22 @@
 
 .priority-critical-text-color {
 	color:#FF4444;
+}
+
+.label-state-open  {
+	background-color:#FFBB33;
+/* 	background-color:#FF4446;	 */
+/* 	background-color:#FF7778;	 */
+}
+	
+.label-state-archived  {
+
+}
+
+.label-state-testing {
+	background-color:#3A7DDA;
+}
+
+.label-state-closed {
+	background-color:#86E42E;
 }

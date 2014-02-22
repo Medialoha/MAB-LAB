@@ -10,46 +10,7 @@
  *     EIRL DEVAUX J. - Medialoha - initial API and implementation
  */
 
-define('TBL_NAME_PREFIX', '%PREFIX%');
-
-define('TBL_USERS', 'users');
-define('USER_ID', 'user_id');
-define('USER_NAME', 'user_name');
-define('USER_PASSWORD', 'user_password');
-define('USER_EMAIL', 'user_email');
-
-define('TBL_ISSUES', 'issues');
-define('ISSUE_ID', 'issue_id');
-define('ISSUE_KEY', 'issue_key');
-define('ISSUE_DATETIME', 'issue_datetime');
-define('ISSUE_CAUSE', 'issue_cause');
-define('ISSUE_STATE', 'issue_state');
-define('ISSUE_PRIORITY', 'issue_priority');
-
-define('TBL_REPORTS', 'reports');
-define('REPORT_ID', 'report_id');
-define('REPORT_KEY', 'report_key');
-define('REPORT_CRASH_DATE', 'user_crash_date');
-define('REPORT_PACKAGE_NAME', 'package_name');
-define('REPORT_VERSION_NAME', 'app_version_name');
-define('REPORT_VERSION_CODE', 'app_version_code');
-define('REPORT_ANDROID_VERSION', 'android_version');
-define('REPORT_PHONE_MODEL', 'phone_model');
-define('REPORT_BRAND', 'brand');
-define('REPORT_PRODUCT', 'product');
-define('REPORT_USER_COMMENT', 'user_comment');
-define('REPORT_STACK_TRACE', 'stack_trace');
-define('REPORT_LOGCAT', 'logcat');
-define('REPORT_INSTALLATION_ID', 'installation_id');
-
-define('REPORT_STATE', 'report_state');		 // 1 new => 2 viewed => 3 closed => 0 archived
-define('REPORT_ISSUE', 'report_issue');
-
-define('TBL_LOGS', 'logs');
-define('LOG_TIMESTAMP', 'log_timestamp');
-
-define('TBL_INCREMENTS', 'increments');
-define('INC_VALUE', 'inc');
+require_once(BASE_PATH.'includes/dbdescriptor.php');
 
 
 class DBHelper {
@@ -63,9 +24,6 @@ class DBHelper {
 	
 	public static function countRows($table, $where=null, $noPrefix=false) {
 		$count = -1;
-		
-		if (!$noPrefix && !strpos($table, ' '))
-			$table = self::getTblName($table);
 		
 		$result = mysqli_query(self::$dbo, 'SELECT COUNT(*) FROM '.$table.(empty($where)?'':' WHERE '.$where), MYSQLI_USE_RESULT);
 		if ($result) {
@@ -82,15 +40,13 @@ class DBHelper {
 	public static function selectRows($table, $where=null, $order=null, $projection='*', $groupby=null, $limit=null, $returnAsObjects=true) {
 		$arr = null;
 		
-		if (!strpos($table, ' '))
-			$table = self::getTblName($table);
-		
 		$result = mysqli_query(self::$dbo, 'SELECT '.$projection.
 																				' FROM '.$table.
 																				(empty($where)?'':' WHERE '.$where).
 																				($groupby==null?'':' GROUP BY '.$groupby).
 																				($order==null?'':' ORDER BY '.$order).
 																				($limit==null?'':' LIMIT '.$limit));
+		
 		if ($result) {
 			if (mysqli_num_rows($result)>0) {
 				if ($returnAsObjects) {
@@ -114,9 +70,6 @@ class DBHelper {
 	
 	public static function selectRow($table, $where=null, $projection='*') {
 		$arr = null;
-		
-		if (!strpos($table, ' '))
-			$table = self::getTblName($table);
 
 		$result = mysqli_query(self::$dbo, 'SELECT '.$projection.' FROM '.$table.(empty($where)?'':' WHERE '.$where));
 		if ($result) {
@@ -131,11 +84,46 @@ class DBHelper {
 		return $arr;	
 	}
 	
-	public static function insertIssue($values) {
-		$query = 'INSERT INTO '.self::getTblName(TBL_ISSUES).self::convertArrToInsertValues($values);
+	public static function fetchMilestones($where=null, $order=null) {
+		return self::selectRows(TBL_MILESTONES.' LEFT JOIN '.TBL_APPLICATIONS.' ON '.APP_ID.'='.MILE_APP_ID,
+														$where,
+														$order==null?MILE_DUEDATE.' ASC':$order,
+														TBL_MILESTONES.'.*, '.
+														APP_NAME.', '.
+														'(SELECT COUNT(*) FROM '.TBL_ISSUES.' WHERE '.ISSUE_MILESTONE_ID.'='.MILE_ID.' AND '.ISSUE_STATE.'<>'.IssueState::STATE_ARCHIVED.') count_all, '.
+														'(SELECT COUNT(*) FROM '.TBL_ISSUES.' WHERE '.ISSUE_MILESTONE_ID.'='.MILE_ID.' AND '.ISSUE_STATE.'='.IssueState::STATE_CLOSED.') count_closed, '.
+														'(SELECT COUNT(*) FROM '.TBL_ISSUES.' WHERE '.ISSUE_MILESTONE_ID.'='.MILE_ID.' AND '.ISSUE_STATE.'='.IssueState::STATE_TESTING.') count_testing',
+														null, null, false);
+	}
+	
+	public static function fetchOrInsertApplication($packageName, $appName) {
+		// check if application already exists
+		$res = self::selectRow(TBL_APPLICATIONS, APP_ID.'=(SELECT '.APP_ID.' FROM '.TBL_APPLICATIONS.' WHERE '.APP_PACKAGE.'="'.$packageName.'")', APP_ID);
+		if ($res!=null)
+			return $res[0];		
+		
+		// if not then insert
+		$query = 'INSERT INTO '.TBL_APPLICATIONS.' ('.APP_PACKAGE.', '.APP_NAME.') VALUE ("'.$packageName.'", "'.$appName.'")';
 		
 		if (mysqli_query(self::$dbo, $query)) {
-			$res = self::selectRow(TBL_ISSUES, ISSUE_ID.'=(SELECT MAX('.ISSUE_ID.') FROM '.self::getTblName(TBL_ISSUES).')', ISSUE_ID);
+			$res = self::selectRow(TBL_APPLICATIONS, APP_ID.'=(SELECT '.APP_ID.' FROM '.TBL_APPLICATIONS.' WHERE '.APP_PACKAGE.'="'.$packageName.'")', APP_ID);
+			
+			if ($res!=null)
+				return $res[0];
+		}
+		
+		return -1;
+	}
+	
+	public static function updateApplicationName($id, $name) {
+		return self::exec('UPDATE '.TBL_APPLICATIONS.' SET '.APP_NAME.'="'.$name.'" WHERE '.APP_ID.'='.$id, false);
+	}
+	
+	public static function insertIssue($values) {
+		$query = 'INSERT INTO '.TBL_ISSUES.self::convertArrToInsertValues($values);
+		
+		if (mysqli_query(self::$dbo, $query)) {
+			$res = self::selectRow(TBL_ISSUES, ISSUE_ID.'=(SELECT MAX('.ISSUE_ID.') FROM '.TBL_ISSUES.')', ISSUE_ID);
 			
 			if ($res!=null)
 				return $res[0];
@@ -145,26 +133,25 @@ class DBHelper {
 	}
 	
 	public static function fetchIssues($where=null, $orderBy=null, $groupBy=null, $limit=null, $projection=null) {
-		$tbl = self::getTblName(TBL_ISSUES).' LEFT JOIN '.self::getTblName(TBL_REPORTS).' ON '.REPORT_ISSUE.'='.ISSUE_ID;
+		$tbl = TBL_ISSUES.' LEFT JOIN '.TBL_APPLICATIONS.' ON '.APP_ID.'='.ISSUE_APP_ID;
 		
 		if ($projection==null) {
-			$projection = self::getTblName(TBL_ISSUES).'.*, '.REPORT_PACKAGE_NAME.', '.REPORT_VERSION_NAME.', '.REPORT_VERSION_CODE;
+			$projection = TBL_ISSUES.'.*, '.APP_PACKAGE.', '.APP_NAME;
 		}
 		
 		return self::selectRows($tbl, $where, $orderBy, $projection, $groupBy, $limit, false);
 	}
 	
-	public static function fetchNewReports($limit=null) {
-		$reportsTbl = self::getTblName(TBL_REPORTS);
-		
-		$tables = $reportsTbl.' LEFT JOIN '.self::getTblName(TBL_ISSUES).' ON '.ISSUE_ID.'='.REPORT_ISSUE;
-
-		$projection = 'MAX('.REPORT_ID.') last_report_id, MAX('.REPORT_CRASH_DATE.') last_crash_date,'.REPORT_STATE.','.REPORT_PACKAGE_NAME.', '.REPORT_VERSION_NAME.', '.REPORT_VERSION_CODE.','.
-									ISSUE_ID.','.ISSUE_PRIORITY.','.ISSUE_CAUSE.
-									', (SELECT COUNT(*) FROM '.$reportsTbl.' WHERE '.REPORT_ISSUE.'='.ISSUE_ID.' AND '.REPORT_STATE.'='.REPORT_STATE_NEW.') count_new'.
-									', (SELECT COUNT(*) FROM '.$reportsTbl.' WHERE '.REPORT_ISSUE.'='.ISSUE_ID.') count_reports';
-
-		return self::selectRows($tables, REPORT_STATE.'='.REPORT_STATE_NEW, REPORT_CRASH_DATE.' DESC', $projection, ISSUE_ID, $limit, true);
+	public static function fetchNewIssues($limit=null) {
+		return self::fetchIssues(	
+											ISSUE_STATE.'='.IssueState::STATE_NEW,
+											ISSUE_DATETIME.' DESC',
+											null,
+											$limit,
+											TBL_ISSUES.'.*, '.APP_NAME.', '.
+											'(SELECT COUNT(*) FROM '.TBL_REPORTS.' WHERE '.REPORT_ISSUE.'='.ISSUE_ID.' AND '.REPORT_STATE.'='.REPORT_STATE_NEW.') count_new_reports,'.
+											'(SELECT COUNT(*) FROM '.TBL_REPORTS.' WHERE '.REPORT_ISSUE.'='.ISSUE_ID.') count_reports'
+										);
 	}
 	
 	public static function deleteIssues($ids) {
@@ -175,8 +162,8 @@ class DBHelper {
 		else
 			$where = '='.$ids;
 		
-		mysqli_query(self::$dbo, 'DELETE FROM '.self::getTblName(TBL_REPORTS).' WHERE '.REPORT_ISSUE.$where);
-		mysqli_query(self::$dbo, 'DELETE FROM '.self::getTblName(TBL_ISSUES).' WHERE '.ISSUE_ID.$where);
+		mysqli_query(self::$dbo, 'DELETE FROM '.TBL_REPORTS.' WHERE '.REPORT_ISSUE.$where);
+		mysqli_query(self::$dbo, 'DELETE FROM '.TBL_ISSUES.' WHERE '.ISSUE_ID.$where);
 	}
 	
 	public static function deleteReports($ids) {
@@ -199,14 +186,14 @@ class DBHelper {
 			$issueId = $issueId[0];
 			
 			// delete report
-			$res = mysqli_query(self::$dbo, 'DELETE FROM '.self::getTblName(TBL_REPORTS).' WHERE '.REPORT_ID.'='.$id);
+			$res = mysqli_query(self::$dbo, 'DELETE FROM '.TBL_REPORTS.' WHERE '.REPORT_ID.'='.$id);
 			if ($res) {
 				// check if issue should be deleted
 				$res = self::countRows(TBL_REPORTS, REPORT_ISSUE.'='.$issueId);
 				
 				// if no more reports for this issue then delete it
 				if ($res==0)
-					mysqli_query(self::$dbo, 'DELETE FROM '.self::getTblName(TBL_ISSUES).' WHERE '.ISSUE_ID.'='.$issueId);
+					mysqli_query(self::$dbo, 'DELETE FROM '.TBL_ISSUES.' WHERE '.ISSUE_ID.'='.$issueId);
 				
 				--$count;
 			}
@@ -215,7 +202,7 @@ class DBHelper {
 		return ($count==0);
 	}
 	
-	public static function updateIssuesState($ids, $stateId) {
+	public static function updateIssuesState($ids, $stateId, $updateReports=true) {
 		$res = false;
 		
 		switch ($stateId) {
@@ -224,6 +211,8 @@ class DBHelper {
 			case ISSUE_STATE_VIEWED : $reportState = REPORT_STATE_VIEWED;
 				break;
 			case ISSUE_STATE_CLOSED : $reportState = REPORT_STATE_CLOSED;
+				break;
+			case ISSUE_STATE_TESTING : $reportState = REPORT_STATE_TESTING;
 				break;
 			case ISSUE_STATE_ARCHIVED : $reportState = REPORT_STATE_ARCHIVED;
 				break;
@@ -236,10 +225,16 @@ class DBHelper {
 		for ($i=0; $i<sizeOf($ids); ++$i) {
 			$issueId = $ids[$i];
 
-			// update issue reports state
-			if (mysqli_query(self::$dbo, 'UPDATE '.self::getTblName(TBL_REPORTS).' SET '.REPORT_STATE.'='.$reportState.' WHERE '.REPORT_ISSUE.'='.$issueId))
-				// update issue state
-				$res = mysqli_query(self::$dbo, 'UPDATE '.self::getTblName(TBL_ISSUES).' SET '.ISSUE_STATE.'='.$stateId.' WHERE '.ISSUE_ID.'='.$issueId);
+			$updateIssue = true;
+			if ($updateReports) {
+				// update issue reports state
+				$updateIssue = mysqli_query(self::$dbo, 'UPDATE '.TBL_REPORTS.' SET '.REPORT_STATE.'='.$reportState.' WHERE '.REPORT_ISSUE.'='.$issueId);
+			}
+
+			// update issue state
+			if ($updateIssue) {
+				$res = mysqli_query(self::$dbo, 'UPDATE '.TBL_ISSUES.' SET '.ISSUE_STATE.'='.$stateId.' WHERE '.ISSUE_ID.'='.$issueId);
+			}
 		}
 		
 		return $res;
@@ -253,7 +248,7 @@ class DBHelper {
 		else
 			$where .= '='.$ids;
 		
-		return mysqli_query(self::$dbo, 'UPDATE '.self::getTblName(TBL_ISSUES).' SET '.ISSUE_PRIORITY.'='.$priorityId.' WHERE '.$where);
+		return mysqli_query(self::$dbo, 'UPDATE '.TBL_ISSUES.' SET '.ISSUE_PRIORITY.'='.$priorityId.' WHERE '.$where);
 	}
 	
 	public static function updateReportsState($ids, $stateId) {
@@ -264,17 +259,17 @@ class DBHelper {
 			$reportId = $ids[$i];
 			
 			// update report state
-			mysqli_query(self::$dbo, 'UPDATE '.self::getTblName(TBL_REPORTS).' SET '.REPORT_STATE.'='.$stateId.' WHERE '.REPORT_ID.'='.$reportId);
+			mysqli_query(self::$dbo, 'UPDATE '.TBL_REPORTS.' SET '.REPORT_STATE.'='.$stateId.' WHERE '.REPORT_ID.'='.$reportId);
 			
 			// if new report state is VIEWED then update issue state if needed
 			if ($stateId==REPORT_STATE_VIEWED) {
 				// check if issue has reports sill not viewed
-				$count = self::countRows(TBL_REPORTS, REPORT_STATE.'='.REPORT_STATE_NEW.' AND '.REPORT_ISSUE.'=(SELECT '.REPORT_ISSUE.' FROM '.self::getTblName(TBL_REPORTS).' WHERE '.REPORT_ID.'='.$reportId.')');
+				$count = self::countRows(TBL_REPORTS, REPORT_STATE.'='.REPORT_STATE_NEW.' AND '.REPORT_ISSUE.'=(SELECT '.REPORT_ISSUE.' FROM '.TBL_REPORTS.' WHERE '.REPORT_ID.'='.$reportId.')');
 					
 				// update to viewed if true
 				if ($count==0)
-					mysqli_query(self::$dbo, 'UPDATE '.self::getTblName(TBL_ISSUES).' SET '.ISSUE_STATE.'='.ISSUE_STATE_NEW.
-																		' WHERE '.ISSUE_ID.'=(SELECT '.REPORT_ISSUE.' FROM '.self::getTblName(TBL_REPORTS).' WHERE '.REPORT_ID.'='.$reportId.')');
+					mysqli_query(self::$dbo, 'UPDATE '.TBL_ISSUES.' SET '.ISSUE_STATE.'='.IssueState::STATE_VIEWED.
+																		' WHERE '.ISSUE_ID.'=(SELECT '.REPORT_ISSUE.' FROM '.TBL_REPORTS.' WHERE '.REPORT_ID.'='.$reportId.')');
 			}
 		}
 	}
@@ -288,14 +283,13 @@ class DBHelper {
 		
 		} else { return false; }
 		
-		return mysqli_query(self::$dbo, 'UPDATE '.self::getTblName(TBL_REPORTS).' SET '.REPORT_ISSUE.'='.$issueId.' WHERE '.$where);
+		return mysqli_query(self::$dbo, 'UPDATE '.TBL_REPORTS.' SET '.REPORT_ISSUE.'='.$issueId.' WHERE '.$where);
 	}
 		
 	public static function fetchReport($reportId) {
-		$reportsTbl = self::getTblName(TBL_REPORTS);
-		$arr = self::selectRow($reportsTbl.' LEFT JOIN '.self::getTblName(TBL_ISSUES).' ON '.ISSUE_ID.'='.REPORT_ISSUE, 
+		$arr = self::selectRow(TBL_REPORTS.' LEFT JOIN '.TBL_ISSUES.' ON '.ISSUE_ID.'='.REPORT_ISSUE, 
 														REPORT_ID."=".$reportId,
-														$reportsTbl.'.*, '.ISSUE_PRIORITY.', '.ISSUE_CAUSE);
+														TBL_REPORTS.'.*, '.ISSUE_PRIORITY.', '.ISSUE_CAUSE);
 		$report = Report::createFromArray($arr);
 		
 		if ($report->isNew()) {
@@ -305,8 +299,30 @@ class DBHelper {
 		return $report;
 	}
 	
-	public static function insertReport($values) {		
+	public static function fetchIssue($id) {
+		$arr = self::fetchIssues(ISSUE_ID.'='.$id);
+		if (count($arr)==1) {
+			$issue = Issue::createFromArray($arr[0]);
+			
+			if ($issue->getState()->isNew())
+				self::updateIssuesState($id, IssueState::STATE_VIEWED, true);
+			
+			return $issue;
+		}
+		
+		return null;
+	}
+	
+	public static function insertReport($values) {
 		$newIssue = false;
+		
+		$packageName = $values[REPORT_PACKAGE_NAME];
+		
+		Debug::logd('Application package '.$packageName, 'INSERT REPORT');
+		
+		// check if application exists
+		$appId = DbHelper::fetchOrInsertApplication($packageName, ReportHelper::formatPackageName($packageName, true));
+		Debug::logd('Application id #'.$appId, 'INSERT REPORT');
 	
 		// search for issue id
 		$issue_key = self::getReportIssueKey($values);
@@ -325,13 +341,14 @@ class DBHelper {
 											ISSUE_DATETIME=>$values[REPORT_CRASH_DATE],
 											ISSUE_CAUSE=>$stacktrace[0],
 											ISSUE_PRIORITY=>IssuePriority::NORMAL,
-											ISSUE_STATE=>ISSUE_STATE_NEW);
+											ISSUE_STATE=>ISSUE_STATE_NEW,
+											ISSUE_APP_ID=>$appId
+										);
 			
 			$issue[ISSUE_ID] = self::insertIssue($issue);
 			$newIssue = true;
 			
 			Debug::logd('New issue id #'.$issue[ISSUE_ID], 'INSERT REPORT');
-			
 		}
 
 		$values[REPORT_ISSUE] = $issue[ISSUE_ID];
@@ -339,7 +356,7 @@ class DBHelper {
 		if (intval($values[REPORT_ISSUE])>0) {
 			Debug::logd('Insert new report', 'INSERT REPORT');
 						
-			$result = mysqli_query(self::$dbo, 'INSERT INTO '.self::getTblName(TBL_REPORTS).self::convertArrToInsertValues($values));
+			$result = mysqli_query(self::$dbo, 'INSERT INTO '.TBL_REPORTS.self::convertArrToInsertValues($values));
 			if (!$result && $newIssue) {
 				Debug::logd('Insert failed, remove newly inserted issue...', 'INSERT REPORT');
 			
@@ -347,13 +364,43 @@ class DBHelper {
 				self::deleteIssues($issue[ISSUE_ID]);
 				
 			} else if ($result && !$newIssue) {
-				// update issue state as new
-				self::updateIssuesState($issue[ISSUE_ID], ISSUE_STATE_NEW);
+				Debug::logd('Update issue #'.$issue[ISSUE_ID].' state to new and date to '.$values[REPORT_CRASH_DATE], 'INSERT REPORT');
+				
+				// update issue state as new and date
+				$error = self::exec('UPDATE '.TBL_ISSUES.
+															' SET '.ISSUE_STATE.'='.IssueState::STATE_NEW.', '.ISSUE_DATETIME.'="'.$values[REPORT_CRASH_DATE].'"'.
+														' WHERE '.ISSUE_ID.'='.$issue[ISSUE_ID]);
+				
+				if ($error!=null) {
+					Debug::logd(is_string($error)?$error:'Error while updating issue state and date !', 'INSERT REPORT');
+					$result = false;
+				}
 			}
 			
 		} else { $result = false; }
 		
 		return $result;
+	}
+	
+	public static function insertSale($values) {
+		$error = null;
+		$packageName = $values[SALE_PRODUCT_ID];
+		
+		$appId = DbHelper::fetchOrInsertApplication($packageName, ReportHelper::formatPackageName($packageName, true));
+		Debug::logd('Application id #'.$appId, 'INSERT SALE');
+		
+		if ($appId>0) {
+			$values[SALE_APP_ID] = $appId;
+		
+			$error = self::exec('REPLACE INTO '.TBL_SALES.' '.self::convertArrToInsertValues($values));
+			if ($error!=null) {
+				if (self::countRows(TBL_SALES, SALE_ORDER_NUMBER.'='.$values[SALE_ORDER_NUMBER])==0)
+					$error = 'Row insertion check failed !';
+			}
+			
+		} else { $error = 'Retreive or insert application failed !'; }
+		
+		return $error;
 	}
 	
 	public static function getReportIssueKey(&$reportArr) {
@@ -366,7 +413,8 @@ class DBHelper {
 			$stack = preg_replace('#\t\.\.\. \d+ more\n#', "", $stack);
 		}
 		
-		return md5($reportArr[REPORT_VERSION_CODE].$reportArr[REPORT_VERSION_NAME].$reportArr[REPORT_PACKAGE_NAME].$stack);
+		return md5(/*$reportArr[REPORT_VERSION_CODE].$reportArr[REPORT_VERSION_NAME].*/
+								(isset($reportArr[IS_SILENT])?$reportArr[IS_SILENT]:0).$reportArr[REPORT_PACKAGE_NAME].$stack);
 	}
 	
 	public static function fetchUsers() {
@@ -386,10 +434,10 @@ class DBHelper {
 				$values .= $sep.USER_EMAIL.'="'.$email.'"'; 
 			}
 			
-			$result = mysqli_query(self::$dbo, 'UPDATE '.self::getTblName(TBL_USERS).' SET '.$values.' WHERE '.USER_ID.'='.$user_id);
+			$result = mysqli_query(self::$dbo, 'UPDATE '.TBL_USERS.' SET '.$values.' WHERE '.USER_ID.'='.$user_id);
 			
 		} else { 
-			$result = mysqli_query(self::$dbo, 'INSERT INTO '.self::getTblName(TBL_USERS).
+			$result = mysqli_query(self::$dbo, 'INSERT INTO '.TBL_USERS.
 																					' ('.USER_NAME.', '.USER_PASSWORD.', '.USER_EMAIL.') '.
 																					' VALUES ("'.$name.'", "'.md5($clear_password).'", "'.$email.'")');
 		}
@@ -405,11 +453,11 @@ class DBHelper {
 		else
 			$where .= '="'.$ids.'"';
 		
-		return mysqli_query(self::$dbo, 'DELETE FROM '.self::getTblName(TBL_USERS).' WHERE '.$where);
+		return mysqli_query(self::$dbo, 'DELETE FROM '.TBL_USERS.' WHERE '.$where);
 	}
 	
 	public static function deleteLogs() {
-		return mysqli_query(self::$dbo, 'DELETE FROM '.self::getTblName(TBL_LOGS));
+		return mysqli_query(self::$dbo, 'DELETE FROM '.TBL_LOGS);
 	}
 	
 	public static function exec($sql, $multi=false) {		
@@ -426,13 +474,10 @@ class DBHelper {
 		$limit = ($total>$maxRows?$total-$maxRows:0).', '.$maxRows;
 		
 		return self::selectRows(TBL_LOGS, null, LOG_TIMESTAMP.' ASC', '*', null, $limit, false);
-	}
+	}	
 	
-	public static function getTblName($name) {
-		$cfg = CfgHelper::getInstance();
-		
-		return $cfg->getTablePrefix().$name;
-	}
+	
+	
 	
 	public static function open() {
 		global $mGlobalCfg;

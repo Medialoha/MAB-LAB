@@ -1,0 +1,25 @@
+@CHARSET "UTF-8";
+.app-stat-box {
+	margin-bottom:20px;
+}
+
+
+.app-stat-box H4 .appname {
+	float:right; 
+	margin:0px 20px 10px 0px;
+	font-size:13px; font-weight:normal;
+}
+
+.app-stat-box .show-tbl-row {
+	width:100%; height:30px; 
+	margin:15px 0px;
+	text-align:center;
+}
+
+.app-stat-box .show-tbl-row .btn {
+	margin-right:0px;
+}
+
+.tbl-dailysalesavgevo TH, .tbl-dailysalesavgevo TD {
+	text-align:center;
+}

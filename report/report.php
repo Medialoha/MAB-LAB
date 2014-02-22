@@ -71,7 +71,7 @@ if (!empty($data)) {
 	Debug::logi("Seems to be a valid request... Try to decode JSON and save to DB.", 'REPORT');
 
 	$json = json_decode($data, true);
-	
+		
 	// open db connection
 	DBHelper::open();
 	
@@ -80,16 +80,16 @@ if (!empty($data)) {
 	$result = DBHelper::insertReport($values);
 	if (!$result) {
 		Debug::loge('Inserting report data failed ! '.DBHelper::getLastError(), 'REPORT');
-		Debug::loge('Report content '.print_r($values, r), 'REPORT');
+		Debug::loge('Report content '.print_r($values, true), 'REPORT');
 		
 	} else { Debug::logi('Report inserted with success !', 'REPORT'); }
 
 	if ($cfg->sendMailOnReportReceived()) {
+		$package = explode('.', $json['PACKAGE_NAME']);
+		
 		MailHelper::sendMail($cfg->getReportMailRecipients(),
-													'New report received !',
-													($result?
-															'New report received !':
-															'New report received but <b>not inserted</b> due to unhandled error !!!').' <br/> '.$json['USER_COMMENT'].'<br/>'.$json['STACK_TRACE']);
+													'[MABL] New '.($json['IS_SILENT']>0?'SILENT ':'').'report received for '.$package[count($package)-1].' !',
+													ReportHelper::createMailContent(!$result, $package, $json));
 	}
 	
 	DBHelper::close();

@@ -149,14 +149,15 @@ class Debug {
 						}
 						
 						switch ($cols[1]) {
-							case 'DEBUG' : $severity = 'D'; $label = '<span class="label label-priority-debug" >D</span>';
-								break;
 							case 'INFO' : $severity = 'I'; $label = '<span class="label label-priority-info" >I</span>';
 								break;
 							case 'WARNING' : $severity = 'W'; $label = '<span class="label label-priority-warning" >W</span>';
 								break;
 							case 'ERROR' : $severity = 'E'; $label = '<span class="label label-priority-error" >E</span>';
 								break;
+								
+
+							default : $severity = 'D'; $label = '<span class="label label-priority-debug" >D</span>';
 						}
 
 						$html .= '<tr class="'.$severity.'" >';

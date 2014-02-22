@@ -12,10 +12,15 @@
 
 define('ISSUE_STATE_NEW', 1);
 define('ISSUE_STATE_VIEWED', 2);
-define('ISSUE_STATE_CLOSED', 3);
+define('ISSUE_STATE_TESTING', 3);
+define('ISSUE_STATE_CLOSED', 4);
 define('ISSUE_STATE_ARCHIVED', 0);
 
-define('REPORT_PROJECTION', REPORT_ID.','.REPORT_KEY.','.REPORT_STATE.','.REPORT_PACKAGE_NAME.','.REPORT_VERSION_NAME.','.REPORT_VERSION_CODE.','.REPORT_ANDROID_VERSION.','.REPORT_PHONE_MODEL.','.REPORT_CRASH_DATE.','.REPORT_USER_COMMENT);
+define('ISSUE_PRIORITY_LOW', 0);
+define('ISSUE_PRIORITY_NORMAL', 1);
+define('ISSUE_PRIORITY_CRITICAL', 9);
+
+define('REPORT_PROJECTION', REPORT_ID.','.REPORT_KEY.','.REPORT_STATE.','.REPORT_PACKAGE_NAME.','.REPORT_VERSION_NAME.','.REPORT_VERSION_CODE.','.REPORT_ANDROID_VERSION.','.REPORT_PHONE_MODEL.','.REPORT_CRASH_DATE.','.REPORT_USER_COMMENT.','.REPORT_INSTALLATION_ID.','.REPORT_DEVICE_ID.','.REPORT_IS_SILENT);
 
 
 class Issue {
@@ -27,10 +32,13 @@ class Issue {
 	
 	private $issue_state;
 	private $issue_priority;
+	
+	public $issue_comment;
 
-	private $package_name;
-	private $app_version_name;
-	private $app_version_code;
+	public $issue_app_id;
+	
+	public $app_package;
+	public $app_name;
 	
 	private $issue_reports;
 	
@@ -38,7 +46,7 @@ class Issue {
 	// CONSTRUCTOR
 	public function Issue() {
 		$this->issue_id = 0;
-		$this->issue_state = ISSUE_STATE_NEW;
+		$this->issue_state = new IssueState(IssueState::STATE_NEW);
 		$this->issue_priority = new IssuePriority(IssuePriority::NORMAL);		
 		$this->issue_reports = null;
 	}
@@ -52,6 +60,9 @@ class Issue {
 
 			if (strcmp($k, 'issue_priority')==0) { 
 				$obj->setPriority($v);
+				
+			} else if (strcmp($k, 'issue_state')==0) { 
+				$obj->setState($v);
 				
 			} else { $obj->{$k} = $v; }
 		}
@@ -89,26 +100,17 @@ class Issue {
 		return 0;
 	}
 	
-	public function getApplicationDesc() {		
-		if (!empty($this->package_name))
-			return ReportHelper::formatPackageName($this->package_name, true)." ".$this->app_version_name." #".$this->app_version_code;
-		
-		$r = self::getLastReport();
-		if ($r!=null)
-			return $r->getApplicationDesc();
-		
-		return null;
-	}
-	
-	public function getPackageName() {
-		if (!empty($this->package_name))
-			return $this->package_name;
+	public function getReportIds() {
+		$s = ''; $sep = '';
 		
 		$reports = $this->getReports();
-		if (!empty($reports))
-			return $reports[0]->package_name;
-		
-		return ' - ';
+		if (!empty($reports)) {
+			foreach ($reports as $r) {
+				$s .= $sep.$r->report_id; $sep = ','; 
+			}
+		}
+
+		return $s;
 	}
 	
 	public function getReportsCount() {
@@ -119,6 +121,10 @@ class Issue {
 		return $this->issue_state;
 	}
 	
+	public function setState($stateId) { 
+		$this->issue_state->setState($stateId);
+	}
+	
 	public function getPriority() {
 		return $this->issue_priority;
 	}
@@ -127,25 +133,117 @@ class Issue {
 		$this->issue_priority->setPriority($priorityId);
 	}
 	
-	public function isNew() { return ($this->issue_state==REPORT_STATE_NEW); }
+}
+
+
+class IssueState {
+
+	const STATE_NEW 				= ISSUE_STATE_NEW;
+	const STATE_VIEWED 			= ISSUE_STATE_VIEWED;
+	const STATE_CLOSED			= ISSUE_STATE_CLOSED;
+	const STATE_TESTING			= ISSUE_STATE_TESTING;
+	const STATE_ARCHIVED		= ISSUE_STATE_ARCHIVED;
+
+	private $id = self::STATE_NEW;
+
+
+	// CONSTRUCTOR
+	public function IssueState($stateId) {
+		$this->setState($stateId);
+	}
+
+
+	public function getId() {
+		return $this->id;
+	}
 	
-	public function isArchived() { return ($this->issue_state==REPORT_STATE_ARCHIVED); }
+	public function setState($stateId) {
+		switch ($stateId) {
+			case self::STATE_VIEWED :
+			case self::STATE_CLOSED : 
+			case self::STATE_TESTING : 
+			case self::STATE_ARCHIVED : 
+				break;
+		
+			default : $stateId = self::STATE_NEW;
+		}
+		
+		$this->id = $stateId;
+	}
 	
-	public function isOpen() { return ($this->issue_state==REPORT_STATE_NEW || $this->issue_state==REPORT_STATE_VIEWED); }
+	public function isNew() { 
+		return ($this->id==self::STATE_NEW);
+	}
+	
+	public function isViewed() { 
+		return ($this->id==self::STATE_VIEWED);
+	}
+	
+	public function isTesting() { 
+		return ($this->id==self::STATE_TESTING);
+	}
+	
+	public function isArchived() { 
+		return ($this->id==self::STATE_ARCHIVED); 
+	}
+	
+	public function isOpen() { 
+		return ($this->id==self::STATE_NEW || $this->id==self::STATE_VIEWED || $this->id==self::STATE_TESTING); 
+	}
+	
+	public function getName() {
+		switch ($this->id) {
+			case self::STATE_NEW :
+				return 'New';
+			case self::STATE_VIEWED :
+				return 'Open';
+			case self::STATE_CLOSED :
+				return 'Closed';
+			case self::STATE_TESTING :
+				return 'Testing';
+			case self::STATE_ARCHIVED :
+				return 'Archived';
+				
+			default : return 'Unkown';
+		}
+	}
+	
+	public function getLabel($fullname=true) {
+		$name = 'Open';
+		$icon = 'icon-hand-right';
+		
+		if ($this->id==self::STATE_CLOSED) {
+			$name = 'Closed';
+			$icon = 'icon-thumbs-up';
+			
+		} else if ($this->id==self::STATE_ARCHIVED) {
+			$name = 'Archived';
+			$icon = 'icon-folder-close';
+			
+		} else if ($this->id==self::STATE_TESTING) {
+			$name = 'Testing';
+			$icon = 'icon-cog';
+		}
+		
+		return '<span class="label label-state-'.strtolower($name).'"><i class="'.$icon.' icon-white" ></i>&nbsp;&nbsp;'.
+							($fullname?$name:substr($name, 0, 1)).
+						'&nbsp;&nbsp;</span>';
+	}
 	
 }
 
+
 class IssuePriority {
 	
-	const LOW 				= 0;
-	const NORMAL 			= 1;
-	const CRITICAL		= 9;
+	const LOW 				= ISSUE_PRIORITY_LOW;
+	const NORMAL 			= ISSUE_PRIORITY_NORMAL;
+	const CRITICAL		= ISSUE_PRIORITY_CRITICAL;
 	
 	private $id = self::NORMAL;
 	
 	
 	// CONSTRUCTOR
-	public function IssuePriority($priorityId) {
+	public function IssuePriority($priorityId=self::NORMAL) {
 		$this->setPriority($priorityId);
 	} 
 	
@@ -175,13 +273,18 @@ class IssuePriority {
 				return 'Normal';
 			case self::CRITICAL :
 				return 'Critical';
+				
+			default : return 'Unkown';
 		}
 	}
 	
-	public function getLabel($fullname=true) {
+	public function getLabel($showFullname=true, $showIcon=false) {
 		$name = $this->getName();
-		
-		return '<span class="label label-priority-'.strtolower($name).'">'.($fullname?$name:substr($name, 0, 1)).'</span>';
+		$text = $showFullname?$name:substr($name, 0, 1);
+				
+		return '<span class="label label-priority-'.strtolower($name).'">'.
+							($showIcon?'<i class="icon-bullhorn icon-white" ></i>&nbsp;&nbsp;'.$text.'&nbsp;&nbsp;':$text).
+						'</span>';
 	}
 	
 	public function getTextColorClass() {

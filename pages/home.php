@@ -18,14 +18,14 @@ $cfg = CfgHelper::getInstance();
 <div class="row" style="margin-top:0px;" >
 	<div class="span12" >
 		<h4 class="with-icon" ><img src="assets/images/ic_bug.png" />New reports</h4>
-		<div id="newreports" class="well" ><?php include('pages/new_issues_box.php'); ?></div>
+		<div id="newreports" class="well" ><?php include('pages/home_new_issues_box.inc.php'); ?></div>
 	</div> 
 </div>
 
 <div class="row" style="margin-top:0px;" >
 	<div class="span4" >
 		<h4>Issues States</h4>
-		<div id="chart2-2" ><?php include('pages/issues_states_box.php'); ?></div>
+		<div id="chart2-2" ><?php include('pages/home_issues_states_box.inc.php'); ?></div>
 	</div>
 
 	<div class="span8" >
@@ -36,9 +36,9 @@ $cfg = CfgHelper::getInstance();
 		<?php 
 			$currentYear = date('Y');
 			$res = DBHelper::selectRows(TBL_REPORTS, null, null, 
-																	'ROUND((SELECT count(*)/DAYOFYEAR(DATE_FORMAT('.REPORT_CRASH_DATE.', "%Y-%m-%d")) FROM '.DBHelper::getTblName(TBL_REPORTS).' WHERE DATE_FORMAT('.REPORT_CRASH_DATE.',"%Y")=\''.$currentYear.'\'), 2) current, '.
-																	'ROUND((SELECT count(*)/365 FROM `'.DBHelper::getTblName(TBL_REPORTS).'` WHERE DATE_FORMAT('.REPORT_CRASH_DATE.',"%Y")=\''.($currentYear-1).'\'), 2) past, '.
-																	'(SELECT count(*) FROM `'.DBHelper::getTblName(TBL_REPORTS).'` WHERE DATE('.REPORT_CRASH_DATE.')=CURDATE()) today',
+																	'ROUND((SELECT count(*)/DAYOFYEAR(DATE_FORMAT('.REPORT_CRASH_DATE.', "%Y-%m-%d")) FROM '.TBL_REPORTS.' WHERE DATE_FORMAT('.REPORT_CRASH_DATE.',"%Y")=\''.$currentYear.'\'), 2) current, '.
+																	'ROUND((SELECT count(*)/365 FROM `'.TBL_REPORTS.'` WHERE DATE_FORMAT('.REPORT_CRASH_DATE.',"%Y")=\''.($currentYear-1).'\'), 2) past, '.
+																	'(SELECT count(*) FROM `'.TBL_REPORTS.'` WHERE DATE('.REPORT_CRASH_DATE.')=CURDATE()) today',
 																	null, '1', false);
 			$res = $res[0];
 
@@ -88,7 +88,7 @@ $cfg = CfgHelper::getInstance();
 	</div> 
 	<div class="span4" >
 		<h4>Most Affected Devices</h4>
-		<div id="chart1-3" class="home-chart-row1-height" ><?php include('pages/most_affected_devices_box.php'); ?></div>
+		<div id="chart1-3" class="home-chart-row1-height" ><?php include('pages/home_most_affected_devices_box.inc.php'); ?></div>
 	</div> 
 </div>
 

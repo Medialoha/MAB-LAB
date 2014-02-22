@@ -1,0 +1,9 @@
+@CHARSET "UTF-8";
+
+.text-i {
+	font-style:italic;	
+}
+
+.badge-important {
+	background-color:#FF4444;
+}

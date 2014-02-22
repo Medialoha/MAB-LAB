@@ -12,7 +12,8 @@
 
 define('REPORT_STATE_NEW', 1);
 define('REPORT_STATE_VIEWED', 2);
-define('REPORT_STATE_CLOSED', 3);
+define('REPORT_STATE_TESTING', 3);
+define('REPORT_STATE_CLOSED', 4);
 define('REPORT_STATE_ARCHIVED', 0);
 
 
@@ -65,6 +66,8 @@ class Report {
 	public $dropbox;
 	public $is_silent;
 	public $environment;
+
+	public $report_issue;
 	
 	private $report_state;
 	
@@ -115,7 +118,11 @@ class Report {
 	
 	
 	public function getApplicationDesc() {
-		return ReportHelper::formatPackageName($this->package_name, true)." ".$this->app_version_name." #".$this->app_version_code;
+		return ReportHelper::formatPackageName($this->package_name, true)." ".$this->getApplicationVersion();
+	}
+	
+	public function getApplicationVersion() {
+		return $this->app_version_name." #".$this->app_version_code;
 	}
 	
 	public function getDeviceDesc() {

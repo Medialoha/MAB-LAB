@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<description lang="English US" code="en-US" default="false">
+	<properties>
+		<property>
+			<key>DESCRIPTION</key>
+			<type>text</type>
+			<desc>Application description</desc>
+			<value></value>
+		</property>
+		<property>
+			<key>FEATURES_LIST</key>
+			<type>list</type>
+			<desc>List of the key features</desc>
+			<value></value>
+		</property>
+		<property>
+			<key>APP_NAME</key>
+			<type>input-medium</type>
+			<desc>Application name</desc>
+			<value></value>
+		</property>
+	</properties>
+</description>

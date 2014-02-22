@@ -1,0 +1,8 @@
+Refer to http://wiki.github.com/leonardoeloy/flot-valuelabels/
+
+---
+
+option: labelFormatter
+
+Function to formatter the value display. must has a return value.
+

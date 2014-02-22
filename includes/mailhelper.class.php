@@ -15,6 +15,10 @@ require_once(BASE_PATH.'libs/PHPMailer/class.phpmailer.php');
 
 class MailHelper {
 	
+	public static function formatContent($report) {
+		
+	}
+	
 	public static function sendMail($recipients, $subject, $content) {
 		$cfg = CfgHelper::getInstance();
 		$mail = new PHPMailer;

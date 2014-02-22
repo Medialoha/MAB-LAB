@@ -18,8 +18,8 @@ function loadChart(containerId, chartId, type) {
 	$.ajax({ url:"?a=getchartdata", type:"get", data: { chartId:chartId } })
 	.done(function(data) {
 		try {
-			var result = data.split('|'); 			
-			if (!(result.length==2) || result[0]!='OK') {
+			var result = data.split('|'); 						
+			if (!(result.length==2) || result[0]!='OK') { 
 				onError(containerId, result[0]);
 				return false;
 			}
@@ -30,7 +30,7 @@ function loadChart(containerId, chartId, type) {
 		} catch(err) { onError(err); return false; }
 		
 		switch (type) {
-			case PIE_CHART_TYPE_ID : drawPieChart(containerId, chartData);
+			case PIE_CHART_TYPE_ID : drawPieChart(containerId, chartData, false);
 				break;
 			case BAR_CHART_TYPE_ID : drawBarChart(containerId, chartData);
 				break;
@@ -40,13 +40,13 @@ function loadChart(containerId, chartId, type) {
 	});
 }
 
-function drawPieChart(containerId, data) {	
+function drawPieChart(containerId, data, showLegend) {	
 	$.plot(containerId, data, {
 		    series: { pie:{ show: true, 
 		    				label: { show:true }, 
 		    				combine: { color:'#ccc', threshold:0.01 }
 		    			  }},
-		    legend: { show:false }
+		    legend: { show:showLegend }
 		});	
 }
 
@@ -82,4 +82,10 @@ function drawLineChart(containerId, data) {
 
 function onError(containerId, message) {
 	$(containerId).html(message);
+}
+
+// get js date from PHP date 'yyyy-mm-dd'
+function gd(d) {
+	arr = d.split('-');
+	return new Date(arr[0], arr[1]-1, arr[2]).getTime();
 }

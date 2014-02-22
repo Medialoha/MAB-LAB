@@ -123,3 +123,8 @@ TABLE.most-affected TR.actions A:hover {
 .issues-notfixed {
 	color:#ff4444;
 }
+
+.issues-testing {
+	font-style:italic;
+	color:#3A7DDA;
+}

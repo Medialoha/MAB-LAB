@@ -12,41 +12,26 @@
 
 
 class Helper {
-		
-	public static function getPage($id) {
-		switch ($id) {
-			case PAGE_ID_ABOUT : 
-				return 'about.php';
-			case PAGE_ID_CONTACT : 
-				return 'contact.php';
-			case PAGE_ID_ISSUES : 
-				return 'issues.php';
-			case PAGE_ID_CONFIG : 
-				return 'configure.php';
-			case PAGE_ID_USERS : 
-				return 'users.php';
-			case PAGE_ID_LOGS : 
-				return 'logs.php';
-						
-			default : return 'home.php';
-		}
-	}
 	
 	public static function pushAlert($type, $message) {
-		$_SESSION['ALERT'] = array('type'=>$type, 'message'=>$message);
+		if (!isset($_SESSION['ALERT']))
+			$_SESSION['ALERT'] = array();
+		
+		$_SESSION['ALERT'][] = array('type'=>$type, 'message'=>$message);
 	}
 	
 	public static function popAlert() {
 		$res = null;
 		
 		if (isset($_SESSION['ALERT']) && is_array($_SESSION['ALERT'])) {
-			$res = (object)$_SESSION['ALERT'];
+			$res = $_SESSION['ALERT'];
 			unset($_SESSION['ALERT']);
 		}
 		
 		return $res;
 	}
 	
+	// TODO move to NavigationController class
 	public static function getHTTPGetStringValue($key, $default=null) {
 		global $_GET;
 		
@@ -59,7 +44,8 @@ class Helper {
 		
 		return $default;
 	}
-	
+
+	// TODO move to NavigationController class
 	public static function getHTTPGetBooleanValue($key, $default=false) {
 		global $_GET;
 		

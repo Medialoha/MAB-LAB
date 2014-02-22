@@ -10,7 +10,14 @@
  *     EIRL DEVAUX J. - Medialoha - initial API and implementation
  */
 
+$mNavCtl = new NavigationController();
+
 $action = $_REQUEST['a'];
+
+if (isset($_REQUEST['ctl'])) {
+	require_once(BASE_PATH.'controllers/'.$_REQUEST['ctl'].'controller.php');
+	exit;
+}
 
 
 switch ($action) {
@@ -134,88 +141,7 @@ switch ($action) {
 			
 			header('Location:index.php?p='.PAGE_ID_CONFIG);
 		break;
-		
-//////// GET REPORT
-	case 'getreport' :
-			$reportId = @$_POST['reportId'];
-			if (!empty($reportId)) {
-				require_once('pages/report_details_dialog.php');
-				
-			} else { echo 'Report id is not valid !'; }
-		break;
-	
-//////// UPDATE ISSUES STATE
-	case 'setissuesstate' :
-			$issueIds = @$_POST['issueIds'];
-			$state = @$_POST['state'];
 			
-			if (ReportHelper::checkState($state)) {
-				if (!empty($issueIds)) {					
-					if (DBHelper::updateIssuesState(explode(',', $issueIds), $state)) {
-						echo 'O:Issue(s) state updated to '.ReportHelper::getStateTitle($state).' with success !';
-						
-					} else { echo "K:Error occured while trying to update issue(s) state :\n\n".DBHelper::getLastError(); }
-					
-				} else { echo 'K:Issue id(s) is not valid !'; }
-				
-			} else { echo 'K:This state is not valid and can\'t be applyed !'; }
-		break;
-	
-//////// UPDATE ISSUES PRIORITY
-	case 'setissuespriority' :
-			$issueIds = @$_POST['issueIds'];
-			$priority = new IssuePriority(@$_POST['priority']);
-
-			if (!empty($issueIds)) {
-				DBHelper::updateIssuesPriority(explode(',', $issueIds), $priority->getId());
-					
-				echo 'O:Issue(s) state updated to '.$priority->getName().' with success !:'.$priority->getLabel(false);
-					
-			} else { echo 'K:Issue id(s) is not valid !'; }
-		break;
-	
-//////// UPDATE REPORTS STATE
-// 	case 'setstate' :
-// 			$reportIds = @$_POST['reportIds'];
-// 			$state = @$_POST['state'];
-			
-// 			if (ReportHelper::checkState($state)) {
-// 				if (!empty($reportIds)) {
-// 					$reportIds = explode(',', $reportIds);
-// 					DBHelper::updateReportsState($reportIds, $state);
-					
-// 					echo 'Report(s) state updated to '.ReportHelper::getStateTitle($state).' with success !';
-					
-// 				} else { echo 'Report id(s) is not valid !'; }
-				
-// 			} else { echo 'This state is not valid and can\'t be applyed !'; }
-// 		break;
-	
-//////// DEL ISSUES
-	case 'delissues' :
-			$issueIds = @$_POST['issueIds'];
-			if (!empty($issueIds)) {
-				$reportIds = explode(',', $issueIds);		
-				DBHelper::deleteIssues($issueIds);
-	
-				echo 'O:Issue(s) deleted with success !';
-				
-			} else { echo 'K:Issue id(s) is not valid !'; }
-		break;
-	
-//////// DEL REPORTS
-	case 'delreports' :
-			$reportIds = @$_POST['reportIds'];
-			if (!empty($reportIds)) {
-				$reportIds = explode(',', $reportIds);		
-				if (DBHelper::deleteReports($reportIds))
-					echo 'O:Report(s) deleted with success !';
-				else
-					echo 'K:Error occured while deleting report(s) !';
-				
-			} else { echo 'K:Report id(s) is not valid !'; }
-		break;
-	
 //////// DEL USER
 	case 'deluser' :
 			$userId = @$_POST['userId'];
@@ -262,12 +188,12 @@ switch ($action) {
 		
 //////// GET NEW ISSUES BOX
 	case 'getnewreports' :
-			require_once('pages/new_issues_box.php');
+			require_once('pages/home_new_issues_box.inc.php');
 		break;
 		
 //////// GET CHART DATA
 	case 'getmostaffecteddev' :
-			require_once('pages/most_affected_devices_box.php');
+			require_once('pages/home_most_affected_devices_box.inc.php');
 		break;		
 		
 //////// GET CHART DATA
@@ -300,13 +226,13 @@ switch ($action) {
 				case REPORTS_EVOLUTION_LINE_CHART_ID :
 					$projection = 'DATE(NOW()-INTERVAL '.INC_VALUE.' DAY) date, '.
 												'DATE_FORMAT(DATE(NOW()-INTERVAL '.INC_VALUE.' DAY),"%m-%d") formatted_date, '.
-												'(SELECT COUNT(*) FROM '.DBHelper::getTblName(TBL_REPORTS).' WHERE DATE(user_crash_date)=date) reports,'.
-												'(SELECT COUNT(*) FROM '.DBHelper::getTblName(TBL_ISSUES).' WHERE DATE(issue_datetime)=date) issues, '.
-												'(SELECT count(*)/DAYOFYEAR(DATE_FORMAT('.REPORT_CRASH_DATE.', "%Y-%m-%d")) FROM '.DBHelper::getTblName(TBL_REPORTS).' WHERE DATE_FORMAT('.REPORT_CRASH_DATE.',"%Y")=\''.date('Y').'\') avg_per_day_current_year';
+												'(SELECT COUNT(*) FROM '.TBL_REPORTS.' WHERE DATE(user_crash_date)=date) reports,'.
+												'(SELECT COUNT(*) FROM '.TBL_ISSUES.' WHERE DATE(issue_datetime)=date) issues, '.
+												'(SELECT count(*)/DAYOFYEAR(DATE_FORMAT('.REPORT_CRASH_DATE.', "%Y-%m-%d")) FROM '.TBL_REPORTS.' WHERE DATE_FORMAT('.REPORT_CRASH_DATE.',"%Y")=\''.date('Y').'\') avg_per_day_current_year';
 					$orderby = 'inc ASC LIMIT 15';
 					
 						$arr = DBHelper::selectRows(TBL_INCREMENTS, null, $orderby, $projection, null, null, true);
-						if ($arr!=null) {
+						if ($arr!=null && count($arr)>0) {
 							$data = ChartHelper::convertMySQLArrToReportsEvolChartJSON($arr);
 							
 						} else { $message = 'No data yet recorded.|'; }

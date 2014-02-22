@@ -31,7 +31,7 @@ if (isset($_POST['login'])) {
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title><?php echo APP_NAME; ?></title>
+    <title><?php echo _APPLICATION_NAME_; ?></title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" >
     <meta name="description" content="My ACRA Backend Laboratory" >
     <meta name="author" content="Medialoha" >
@@ -62,7 +62,7 @@ if (isset($_POST['login'])) {
     	<div class="span3 offset3" >
       <form class="form-signin" action="index.php" method="post" >
         <h3 class="form-signin-heading">
-        	<?php echo APP_NAME; ?>&nbsp;&nbsp;<small class="muted" >Please sign in</small>
+        	<?php echo _APPLICATION_NAME_; ?>&nbsp;&nbsp;<small class="muted" >Please sign in</small>
         </h3>
         <input name="login" type="text" class="input-block-level" placeholder="Username" >
         <input name="password" type="password" class="input-block-level" placeholder="Password" >

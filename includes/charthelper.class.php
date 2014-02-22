@@ -21,15 +21,18 @@ define('BAR_CHART_TYPE_ID', 1);
 
 class ChartHelper {
 	
-	public static function convertMySQLArrToPieChartJSON($arr) {
+
+	// $arr[i] = array(0=>label, 1=>value)
+	public static function convertMySQLArrToPieChartJSON($arr, $appendValueToLabel=false) {
 		$json = '['; $sep = '';
 		foreach($arr as $row) {
-			$json .= $sep.'{"label":"'.$row[0].'","data":'.$row[1].'}'; $sep = ',';
+			$json .= $sep.'{"label":"'.$row[0].($appendValueToLabel?' ('.$row[1].')':'').'","data":'.$row[1].'}'; $sep = ',';
 		}
 		
 		return $json.']';
 	}
 
+	// $arr[i] = array(0=>name, 1=>value)
 	public static function convertMySQLArrToBarChartJSON($arr) {
 		$data = ''; $ticks = ''; $sep = ''; $i = 0;
 		foreach($arr as $row) {
@@ -40,5 +43,28 @@ class ChartHelper {
 		}
 	
 		return '{"data":['.$data.'], "ticks":['.$ticks.']}';
+	}
+
+	/**
+	 * O : DATE
+	 * 1 : DATE FORMATTED
+	 * 2 : NB REPORTS
+	 * 3 : NB ISSUES
+	 * 4 : AVG REPORTS PER DAY
+	 */
+	public static function convertMySQLArrToReportsEvolChartJSON($arr) { 
+		$reports = array(); $issues = array(); $avg = array(); $ticks = array(); 
+		$i = sizeOf($arr);
+		
+		foreach($arr as $row) {
+			$ticks[] = '['.$i.',"'.$row->formatted_date.'"]';
+			$reports[] = '['.$i.','.$row->reports.']';
+			$issues[] = '['.$i.','.$row->issues.']';
+			$avg[] = '['.$i.','.$row->avg_per_day_current_year.']';
+			
+			--$i;
+		}
+	
+		return '{"reports":['.implode(',', $reports).'], "issues":['.implode(',', $issues).'], "avg":['.implode(',', $avg).'], "ticks":['.implode(',', $ticks).']}';
 	}
 }

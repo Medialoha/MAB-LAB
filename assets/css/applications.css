@@ -1,0 +1,17 @@
+@CHARSET "UTF-8";
+
+.apps-tbl TD.app-id, .apps-tbl TH.app-id {
+	text-align:center;
+}
+
+.apps-tbl .app-name {
+	
+}
+
+.apps-tbl .app-package {
+	
+}
+
+.apps-tbl TD.app-issues, .apps-tbl TH.app-issues {
+	text-align:center;
+}

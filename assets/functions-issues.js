@@ -18,24 +18,57 @@ function showIssueReportsTbl(issueId) {
 		tbl.show();
 }
 
-function showReportDetails(id) {
+function showChangeIssueDialog(reportIds) {
 	$('#loader').show();
 	
-	doRequest("getreport", {reportId:id}, 
+	doRequest("getchangeissuedlg", {ctl:'issues', reportIds:reportIds}, 
 				function(data) {
 					try {
-						$('#reportDialog').html(data);
+						$('#dialogContainer').height('200px');
+						$('#dialogContainer').html(data);
 								
 					} catch (err) { console.error(err); }
 			
-					$('#reportDialog').modal('show');
+					$('#dialogContainer').modal('show');
 					$('#loader').hide();
 				});	
 }
 
-function hideReportDetailsDialog() {
-	$('#reportDialog').modal('hide');
-	$('#reportDialog').html('');
+function showIssueDetails(id) {
+	$('#loader').show();
+	
+	doRequest("getissue", {ctl:'issues', issueId:id}, 
+				function(data) {
+					try {
+						$('#dialogContainer').html(data);
+								
+					} catch (err) { console.error(err); }
+			
+					$('#dialogContainer').modal('show');
+					$('#loader').hide();
+				});	
+}
+
+function showReportDetails(id) {
+	$('#loader').show();
+	
+	doRequest("getreport", {ctl:'issues', reportId:id}, 
+				function(data) {
+					try {
+						$('#dialogContainer').html(data);
+								
+					} catch (err) { console.error(err); }
+			
+					$('#dialogContainer').modal('show');
+					$('#loader').hide();
+				});	
+}
+
+function closeDialog() {
+	$('#dialogContainer').modal('hide');
+	$('#dialogContainer').html('');
+	
+	$('#dialogContainer').height('700px');
 }
 
 function isReportDetailsDialogOpen() {
@@ -49,36 +82,37 @@ function updateIssuesState(state, issueIds) {
 	if (!issueIds)
 		issueIds = getSelectedIssueIds();
 
-	doRequest("setissuesstate", { issueIds:issueIds, state:state },
+	doRequest("setissuesstate", {ctl:'issues', issueIds:issueIds, state:state },
 				function(data) {
 					var res = data.split(':');
 					
 					if (res[0]=='O') {
-						updateIssuesTblState(issueIds, state);
-					}
+						updateIssuesTblState(issueIds, res[1]);
+						
+					} else { alert(res[1]); }
 					
 					loader.hide();
-					alert(res[1]);		
 				});
 }
 
-function updateIssuesPriority(priority, issueIds) {	
-	loader = $('#loader');
+function updateIssuesPriority(priority, issueIds) {
+	var loader = $('#loader');
 	loader.show();
 	
-	if (!issueIds)
+	if (!issueIds) {
 		issueIds = getSelectedIssueIds();
+	}
 
-	doRequest("setissuespriority", { issueIds:issueIds, priority:priority },
+	doRequest("setissuespriority", {ctl:'issues', issueIds:issueIds, priority:priority },
 				function(data) {
 					var res = data.split(':');
 					
 					if (res[0]=='O') {
-						updateIssuesTblPriority(issueIds, res[2]);
-					}
+						updateIssuesTblPriority(issueIds, res[1]);
+						
+					} else { alert(res[1]); }
 					
 					loader.hide();
-					alert(res[1]);
 				});
 }
 
@@ -96,7 +130,7 @@ function delReports(reportIds, issueId) {
 	
 	loader.show();
 	
-	doRequest("delreports", {reportIds:reportIds},
+	doRequest("delreports", {ctl:'issues', reportIds:reportIds},
 				function(data) {
 					var res = data.split(':');
 		
@@ -117,15 +151,14 @@ function delReports(reportIds, issueId) {
 									removeIssuesTblRows(issueId);
 								}
 							}		
-						}							
-					}
+						}
+						
+					} else { alert(res[1]); }
 					
 					if (dialog)
 						hideReportDetailsDialog();
 					else
 						loader.hide();
-					
-					alert(res[1]);
 				});
 }
 
@@ -140,44 +173,52 @@ function delIssues(issueIds) {
 	if (!issueIds)
 		issueIds = getSelectedIssueIds();
 	
-	doRequest("delissues", {issueIds:issueIds},
+	doRequest("delissues", {ctl:'issues', issueIds:issueIds},
 				function(data) {
 					var res = data.split(':');
 		
 					if (res[0]=='O') {
 						removeIssuesTblRows(issueIds);
-					}
+						
+					} else { alert(res[1]); }
 			
 					loader.hide();	
-					alert(res[1]);
 				});
 }
 
-function updateIssuesTblState(issueIds, state) {
+function updateIssuesTblState(issueIds, html) {
 	try {
 		if (typeof stringValue != "string")
 			issueIds = ""+issueIds;
+
+		var idsArr = issueIds.split(',');
+		var htmlArr = html.split('||');
 		
-		var arr = issueIds.split(',');
-		
-		for (var i=0; i<arr.length; i++) {
-			var tr = $('TR[issue='+arr[i]+']');
-			tr.removeClass();
-			tr.addClass(state==0?'archived':state==3?'closed':'');
+		for (var i=0; i<idsArr.length; i++) {
+			var tmp = htmlArr[i].split('|');
+			
+			$('TR[issue='+idsArr[i]+']').removeClass().removeClass().addClass(tmp[2]);
+			
+			$('TR[issue='+idsArr[i]+'] > .issue-hilitecol').removeClass().addClass('issue-hilitecol '+tmp[1]);
+			$('TR[issue='+idsArr[i]+'] > .state').html(tmp[0]);
 		}
 					
 	} catch(err) { console.log(err); }
 }
 
-function updateIssuesTblPriority(issueIds, label) {
+function updateIssuesTblPriority(issueIds, html) {
 	try {
 		if (typeof stringValue != "string")
 			issueIds = ""+issueIds;
 		
-		var arr = issueIds.split(',');
+		var idsArr = issueIds.split(',');
+		var htmlArr = html.split('||');
 		
-		for (var i=0; i<arr.length; i++) {
-			$('TR[issue='+arr[i]+'] > .priority').html(label);
+		for (var i=0; i<idsArr.length; i++) {
+			var tmp = htmlArr[i].split('|');
+			
+			$('TR[issue='+idsArr[i]+'] > .issue-hilitecol').removeClass().addClass('issue-hilitecol '+tmp[1]);
+			$('TR[issue='+idsArr[i]+'] > .priority').html(tmp[0]);
 		}
 					
 	} catch(err) { console.log(err); }
@@ -211,11 +252,6 @@ function removeReportsTblRows(reportIds) {
 	} catch(err) { console.log(err); }
 }
 
-function gotoPage(start) {
-	$('#start').val(start);
-	document.filterForm.submit();
-}
-
 function toggleCheckboxes(elt) {
 	var arr = $('input[name="itemChecked"]');
 	for (var i=0; i<arr.length; i++)
@@ -234,4 +270,45 @@ function getSelectedIssueIds() {
 	}
 
 	return ids;
+}
+
+function loadTable(startPage) {	
+	$.ajax({ url:"?a=getIssuesTbl&ctl=issues", type:"get", 
+						beforeSend: function (xhr) { $('#issuesContent').html(LOADER_HTML); },
+						data: {	app:$('#selectedAppId').val(),
+										mId:$('#milestone').val(),
+										showArchived:$('#showArchived').val(),
+										state:$('#state').val(),
+										priority:$('#priority').val(),
+										order:$('#order').val(),
+										start:startPage, limit:$('#limit').val()
+									}
+				}).done(function (data) {
+			$('#issuesContent').html(data);
+		});
+}
+
+function setSelectedAppId(elt, appId) {
+	$('#selectedAppId').val(appId);
+	$('#selectedAppName').html($(elt).html());
+	
+	if (onNewAppSelected)
+		onNewAppSelected();
+}
+
+function editIssueComment() {
+	$('form#issueForm #commentEdit').show();
+	$('form#issueForm #commentView').hide();
+}
+
+function editIssueMilestone() {
+	$('form#issueForm #milestoneView').hide();		
+	$('form#issueForm #milestoneEdit').show();
+}
+ 
+function delMilestone(id) {
+	if (confirm('Do you really want to delete this milestone ?')) {
+		$('form#milestoneForm #mId').val(id);
+		$('form#milestoneForm').submit();
+	}
 }

@@ -9,6 +9,8 @@
  * Contributors:
  *     EIRL DEVAUX J. - Medialoha - initial API and implementation
  */
+define('FORMAT_ENV_KEY', 1);
+define('FORMAT_SETTINGS_KEY', 2);
 
 
 class ReportHelper {
@@ -21,6 +23,7 @@ class ReportHelper {
 			case REPORT_STATE_NEW : 
 			case REPORT_STATE_VIEWED :
 			case REPORT_STATE_CLOSED :
+			case REPORT_STATE_TESTING :
 			case REPORT_STATE_ARCHIVED :
 				break;
 			
@@ -38,6 +41,8 @@ class ReportHelper {
 				return 'open';
 			case REPORT_STATE_CLOSED :
 				return 'resolved';
+			case REPORT_STATE_TESTING :
+				return 'testing';
 			case REPORT_STATE_ARCHIVED :
 				return 'archived';
 					
@@ -98,14 +103,35 @@ class ReportHelper {
 		return $values;
 	}
 	
-	public static function displayObjectValuesToHTMLArray($obj) {
+	public static function displayObjectValuesToHTMLArray($obj, $formatKeyFunction=0) {
 		if ($obj==null) { ?><p class="muted" ><i>No data collected</i></p><?php return; }
 		
 		$values = get_object_vars($obj);
-		?><table class="table table-condensed table-hover" ><?php
+		
+		// order on key
+		ksort($values);
+		
+		?><table class="table table-condensed table-hover" ><tr><th style="min-width:370px; border:0 none;" ></th><th></th></tr><?php
 		foreach($values as $key=>$value) {
 			if (is_array($value))
 				$value = print_r($value, true);
+			else if (is_bool($value))
+				$value = '<input type="checkbox" '.($value?'checked="checked"':'').' />';
+			
+			switch ($formatKeyFunction) {
+				case FORMAT_ENV_KEY :
+						// split on upper case char
+						$key = preg_split('/(?=[A-Z])/', $key, -1, PREG_SPLIT_NO_EMPTY);
+						// remove is or get prefix
+						unset($key[0]);
+						$key = implode(' ', $key);
+					break;
+				
+				case FORMAT_SETTINGS_KEY : 
+						$key = str_replace('_', ' ', $key);
+						$key = ucwords(strtolower($key));
+					break;
+			}
 			
 			echo '<tr><td>'.$key.'</td><td>'.$value.'</td></tr>';
 		}
@@ -160,5 +186,132 @@ class ReportHelper {
 				<tr><td>Refresh Rate</td><td><?php echo $obj->refreshRate; ?></td></tr>
 			</table><?php 
 		}
+	}
+	
+	/**
+	 * 
+	 * @param $error true if report not inserted in DB
+	 * @param $package application package as array
+	 * @param $JSONArr
+	 * @return HTML content
+	 */
+	public static function createMailContent($error, $package, $JSONArr) {
+		$html = '<center><table border="0" >';
+		
+		if ($error)
+			$html .= '<tr><td colspan="2" style="color:red" ><br/><center>New report received but <b>not inserted</b> due to unhandled error !!!</center><br/></td></tr>';
+		
+		$html .= '<tr><td width="200" >Application </td><td>'.ucfirst($package[count($package)-1]).' '.$JSONArr['APP_VERSION_NAME'].' #'.$JSONArr['APP_VERSION_CODE'].'</td></tr>';
+
+		$html .= '<tr><td>User comment </td><td><em>'.(empty($JSONArr['USER_COMMENT'])?'<em style="color:grey" >No comment</em>':$JSONArr['USER_COMMENT']).'</em></td></tr>';
+
+		$html .= '<tr><td colspan="2" ><br/><br/><hr/>'.self::formatMailStackTrace($JSONArr['STACK_TRACE']).'</td></tr>';
+
+		return $html.'</table></center>';
+	}
+	
+
+	private static function formatMailStackTrace($stack) {
+		if (empty($stack))
+			return '<p><i>No data collected...</i></p>';
+
+		$groups = explode('Caused by: ', $stack);
+		$s = "<dl>";
+
+		foreach ($groups as $groupIdx=>$group) {
+			$lines = explode("\tat", $group);
+			$lastLine = sizeOf($lines)-1;
+		
+			foreach ($lines as $lineIdx=>$line) {
+
+				// first line of each group is a cause
+				if ($lineIdx==0) {
+				
+					// split line if too long
+					self::formatStackTraceCausedByLine($line);
+				
+					if ($groupIdx==0) {
+						$s .= '<dt>'.$line.'</dt>';
+
+					} else { $s .= '<dt><strong>Caused by&nbsp;</strong>:&nbsp;'.$line.'</dt>'; }
+				
+				// stack line
+				} else {
+					$more = false;
+					$className = false;
+				
+					// check more line, two cases :
+					//   - last line of a group : android.view.LayoutInflater.createView(LayoutInflater.java:586) ... 28 more
+					//   - inside a group : android.widget.TextView.(TextView.java:571) ... 31 more java.lang.reflect.InvocationTargetException
+					$tmpArr = explode('...', $line);
+						
+					if (isset($tmpArr[1])) {
+						if ($lineIdx==$lastLine) {
+							if (isset($tmpArr[1])) {
+								$more = '<dd>...&nbsp;'.$tmpArr[1].'</dd>';
+							}
+		
+						} else {
+							list($line, $tmpStr) = explode('...', $line);
+							list($count, $className) = explode('more', $tmpStr);
+								
+							$more = '<dd>...&nbsp;'.$count.' more</dd>';
+						}
+					}
+		
+					// process 'at' line : android.view.LayoutInflater.createView(LayoutInflater.java:586)
+					list($method, $class_and_line_number) = explode('(', $line);
+					$class_and_line_number = substr($class_and_line_number, 0, strlen($class_and_line_number)-2);
+						
+					$s .= '<dd>'.
+									'<i style="color:grey" >at&nbsp;</i>'.$method;
+		
+					// class and line number
+					if (!empty($class_and_line_number)) {
+						$class_and_line_number = explode(':', $class_and_line_number);
+		
+						if (sizeOf($class_and_line_number)>1) {
+							$s .= '&nbsp;(<strong>'.$class_and_line_number[0].'</strong> : <span style="color:orange" >'.$class_and_line_number[1].'</span>)';
+								
+						} else { $s .= $class_and_line_number[0]; }
+		
+					} // else { $class_and_line_number = ''; }
+						
+					$s .= '</dd>';
+						
+					if ($more!==false) {
+						$s .= $more;
+					}
+						
+					if ($className!==false) {
+						$s .= '<dt>'.self::formatStackTraceCausedByLine($className).'</dt>';
+					}
+				}
+			}
+		}
+		
+		return $s.'</dl>';
+	}
+	
+	private static function hiliteStackTraceException(&$s) {
+		$pos = stripos($s, 'Exception');
+	
+		if ($pos!==false) {
+			$dotPos = strripos($s, '.', 0);
+			$length = $pos-$dotPos+8;
+				
+			$s = substr_replace($s, '<strong>'.substr($s, $dotPos+1, $length).'</strong>', $dotPos+1, $length);
+		}
+	}
+	
+	private static function formatStackTraceCausedByLine(&$line) {
+		$strlen = strlen($line);
+		if ($strlen>120) {
+			$line = str_replace(': ', '<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;&nbsp;</span>', $line);
+		}
+			
+		self::hiliteStackTraceException($line);
+	
+		return $line;
 	}
 }

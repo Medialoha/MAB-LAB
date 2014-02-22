@@ -1,6 +1,21 @@
 MABL
 =======
 
+With MABL 1.3.0-Helen we introduced some extra features, still in development, and not all available :
+
+- Play store publication 
+	- multi language description manager for multiple apps using templates
+	- multi language screenshots manager (coming soon)
+- Sales statistics (daily sales)
+	- import your sales csv files from Play sotre and voila...
+	- auto sync using gsutils (coming soon)
+- Earnings statistics (full description of monthly sales)
+	- import your sales csv files from Play sotre and voila... (coming coon)
+	- auto sync using gsutils (coming soon)  
+- Development tools
+	- Android Asset Studio from android-ui-utils (integration in progress)
+
+
 #### Installation ####
 
 You can find a complete procedure here : [medialoha.net](http://medialoha.net/index.php/en/menu-mablab-en)
@@ -12,6 +27,8 @@ You can find a complete procedure here : [medialoha.net](http://medialoha.net/in
 - Upload new files on your server
 - Launch script file at /install/update-to-*VERSION_CODE*/update.php
 - Remove install directory
+
+Current version code is **6**.
 
 #### How to help us ? ####
 
@@ -29,6 +46,17 @@ Support us can be as simple as a like on Facebook :
 
 
 ## Change Log ##
+
+**Version 1.3.0-Helen**
+
+- *Milestones management*
+- *Applications management*
+- *New issue state : TESTING*
+- *New issue details dialog*
+- *Introduced comment field for issue*
+- *Improved issues table presentation*
+- *Publication tools (still in development)*
+- *Sales tools (still in development)*
 
 **Version 1.2.4-Lester**
 
