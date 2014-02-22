@@ -23,8 +23,14 @@ $milesArr = DbHelper::fetchMilestones(($mSelectedAppId>0?MILE_APP_ID.'='.$mSelec
 </form>
 
 <table class="table ">
-<?php foreach ($milesArr as $m) {
-	$milestone = Milestone::createFromArr($m);
+<?php 
+if (empty($milesArr)) {
+	?><tr><td colspan="2" class="muted text-i" >No milestone found.</td></tr><?php 
+
+} else {
+
+	foreach ($milesArr as $m) {
+		$milestone = Milestone::createFromArr($m);
 ?>
 <tr>
 	<td style="width:45%; border-top:0px none;" >
@@ -54,5 +60,8 @@ $milesArr = DbHelper::fetchMilestones(($mSelectedAppId>0?MILE_APP_ID.'='.$mSelec
 		<?php echo $m[MILE_DESC]; ?>
 	</td>
 </tr>
-<?php } ?>
+<?php 
+	} 
+}
+?>
 </table>
