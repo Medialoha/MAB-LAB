@@ -53,7 +53,7 @@ $mAppArr = DbHelper::selectRows(TBL_APPLICATIONS, null, APP_NAME.' ASC', '*', nu
 	  <div class="control-group">
 	    <label class="control-label" for="description">Description</label>
 	    <div class="controls">
-	      <textarea <?php echo MILE_DESC; ?> style="width:400px; height:90px;" ><?php echo isset($m)?$m[MILE_DESC]:''; ?></textarea>
+	      <textarea name="<?php echo MILE_DESC; ?>" style="width:400px; height:90px;" ><?php echo isset($m)?$m[MILE_DESC]:''; ?></textarea>
 	    </div>
 	  </div>
 	  

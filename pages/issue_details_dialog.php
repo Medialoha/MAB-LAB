@@ -20,7 +20,13 @@ $userComments = "";
 $reportsPerInstall = array();
 $reportTabs = array(array(), array());
 
+$group = 0;
 foreach ($reports as $r) {
+	
+	if ($group==3) {
+		$reportTabs[0][] = '<li class="dropdown" ><a class="dropdown-toggle" data-toggle="dropdown" href="#">'.($issue->getReportsCount()-3).' more&nbsp;&nbsp;<b class="caret"></b></a><ul class="dropdown-menu">';
+	}
+	++$group;
 	
 	$reportTabs[0][] = '<li><a data-toggle="tab" href="#report-'.$r->report_id.'" ><i class="icon-file" ></i>&nbsp;&nbsp;'.$r->getFormattedDate().'</a></li>';
 	$reportTabs[1][] = '<div class="tab-pane" id="report-'.$r->report_id.'" ></div>';
@@ -36,11 +42,14 @@ foreach ($reports as $r) {
 	} else { $reportsPerInstall[$r->installation_id] = array($r->phone_model, 1); }
 }
 
+if ($group>2)
+	$reportTabs[0][] = '</ul></li>';
+
 ?>
 <div class="modal-body" style="clear:both; height:800px; max-height:620px;" >
 	<ul id="issueTabs" class="nav nav-tabs" >
 	  <li><a data-toggle="tab" href="#issue-details" ><i class="icon-tag" ></i>&nbsp;&nbsp;Issue</a></li>
-	  <?php echo implode("", $reportTabs[0]); ?>
+	  <?php echo implode("\n", $reportTabs[0]); ?>
 	</ul>
 	
 	<div class="tab-content">	
@@ -185,7 +194,7 @@ foreach ($reports as $r) {
 		  var tabId = $(e.target).attr('href');
 			var parts = $(e.target).attr('href').split('#report-');
 			
-			if (parts.length==2 && $(tabId).is(':empty')) {				
+			if (parts.length==2/* && $(tabId).is(':empty')*/) {				
 				$(tabId).html(LOADER_HTML);
 
 				doRequest("getreport", {ctl:'issues', reportId:parts[1], issueFormat:1}, 
@@ -196,7 +205,7 @@ foreach ($reports as $r) {
 							} catch (err) { console.error(err); }
 						});	
 				
-			}	else { console.log('Issue tab selectes or report already loaded...'); }  
+			}	//else { console.log('Issue tab selected or report already loaded...'); }  
 	  });
 	</script>
 	

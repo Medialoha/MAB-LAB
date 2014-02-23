@@ -114,7 +114,7 @@ class Issue {
 	}
 	
 	public function getReportsCount() {
-		return sizeOf($this->getReports());
+		return count($this->getReports());
 	}
 	
 	public function getState() {

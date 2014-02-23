@@ -178,6 +178,11 @@ switch ($action) {
 			$values = array();
 			foreach ($_POST as $k=>$v) {
 				if (strncmp($k, 'mile_', 5)==0) {
+					if (strcmp($k, MILE_DUEDATE)==0) {
+						$values[$k] = strtotime($v);
+						continue;
+					} 
+					
 					$values[$k] = $v;
 				}				
 			}

@@ -166,24 +166,38 @@ class ReportHelper {
 		if (!is_array($dispArr)) { ?><p class="muted" ><i>Nothing recorded</i></p><?php return; }
 		
 		foreach($dispArr as $obj) {
-			$values = get_object_vars($obj);
+	//		$values = get_object_vars($obj);
 						
 			?><table class="table table-condensed table-hover" >
 				<tr>
 					<td>Orientation</td>
-					<td><?php echo ($obj->orientation==0?'Portrait':'Landscape').'&nbsp;#'.$obj->orientation; ?>&nbsp;&nbsp;<?php echo $obj->rotation; ?></td>
+					<td>
+					<?php 
+						if (isset($obj->orientation) && isset($obj->rotation))
+							echo ($obj->orientation==0?'Portrait':'Landscape'), '&nbsp;#', $obj->orientation, '&nbsp;&nbsp;', $obj->rotation; 
+						else
+							echo '<i class="muted text-i" >Not set</i>';
+					?>
+					</td>
 				</tr>
 				<tr>
 					<td>Current Size Range</td>
 					<td>
 						<?php if (isset($obj->currentSizeRange)) { ?>
 							<span class="muted" >Largest</span>&nbsp;<?php echo $obj->currentSizeRange['largest']; ?>&nbsp;-&nbsp;<span class="muted" >Smallest</span>&nbsp;<?php echo $obj->currentSizeRange['smallest']; ?>
-						<?php } else { ?><i class="muted" >Not set</i><?php } ?>
+						<?php } else { ?><i class="muted text-i" >Not set</i><?php } ?>
 					</td>
 				</tr>
-				<tr><td>Size&nbsp;/&nbsp;Real Size</td><td><?php echo $obj->getSize; ?>&nbsp;/&nbsp;<?php echo $obj->getRealSize; ?></td></tr>
-				<tr><td>Pixel Format</td><td><?php echo $obj->pixelFormat; ?></td></tr>
-				<tr><td>Refresh Rate</td><td><?php echo $obj->refreshRate; ?></td></tr>
+				<tr>
+					<td>Size&nbsp;/&nbsp;Real Size</td>
+					<td><?php echo $obj->getSize; ?>&nbsp;/&nbsp;<?php echo $obj->getRealSize; ?></td>
+				</tr>
+				<tr>
+					<td>Pixel Format</td><td><?php echo isset($obj->pixelFormat)?$obj->pixelFormat:'<i class="muted text-i" >Not set</i>'; ?></td>
+				</tr>
+				<tr>
+					<td>Refresh Rate</td><td><?php echo isset($obj->refreshRate)?$obj->refreshRate:'<i class="muted text-i" >Not set</i>'; ?></td>
+				</tr>
 			</table><?php 
 		}
 	}

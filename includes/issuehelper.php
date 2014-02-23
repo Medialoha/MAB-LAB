@@ -65,25 +65,26 @@ class IssueHelper {
 		if (isset($_SESSION['issueListOpts'])) {
 			$opts = $_SESSION['issueListOpts'];
 		
-		} else { $opts = null; }
-		
-		// overload if no options set before or new passed
-		if ($opts==null || array_key_exists('app', $_GET)) {
-			$opts = array(
-					'appId'=>array_key_exists('app', $_GET)?$_GET['app']:-1,
-					'mId'=>array_key_exists('mId', $_GET)?$_GET['mId']:-1,
-					'showArchived'=>Helper::getHTTPGetBooleanValue('showArchived', false),
-					'state'=>Helper::getHTTPGetStringValue('state', '-1'),
-					'priority'=>intval(Helper::getHTTPGetStringValue('priority', '-1')),
-					'order'=>Helper::getHTTPGetStringValue('order', 0),
-					'limit'=>intval(Helper::getHTTPGetStringValue('limit', '10')),
-					'start'=>intval(Helper::getHTTPGetStringValue('start', '0'))
-			);
-		
-			// update session
-			$_SESSION['issueListOpts'] = $opts;
+		} else { 
+			$opts = array('appId'=>-1, 
+										'mId'=>-1,
+										'showArchived'=>false,
+										'state'=>-1,
+										'priority'=>-1,
+										'order'=>0,
+										'limit'=>10,
+										'start'=>0); 
 		}
-				
+		
+		// update opts from get params
+		foreach ($opts as $k=>$v) {
+			if (array_key_exists($k, $_GET) && !empty($v))
+				$opts[$k] = $_GET[$k];
+		}
+		
+		// update session
+		$_SESSION['issueListOpts'] = $opts;
+		
 		return $opts;
 	}
 	
