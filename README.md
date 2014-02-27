@@ -47,7 +47,11 @@ Current version code is **6**.
 
 #### Test ####
 
-Use our android app to test your configuration [ACRA Backend Tester](https://github.com/Medialoha/ACRA-Backend-Tester)
+Use our android app to test your configuration :
+
+Download apk [v1.0.0](https://github.com/Medialoha/ACRA-Backend-Tester/releases/download/1.0.0/android.app.acra-tester.apk).
+
+Check Git hub repository [here](https://github.com/Medialoha/ACRA-Backend-Tester).
 
 ## Change Log ##
 
