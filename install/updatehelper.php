@@ -57,18 +57,18 @@ class UpdateHelper {
 		$this->printUpdateFinishMsg();
 	}
 	
-	public function applySQLUpdateFile() {
+	public function applySQLUpdateFile($sqlFile='db-update.sql') {
 		$this->printStartNextStepMsg('Read SQL update file');
 		
 		$success = true;
 		$message = null;
 		
-		if (!file_exists('db-update.sql')) {
-			$message = 'file does not exist, nothing to do';
+		if (!file_exists($sqlFile)) {
+			$message = 'file <i>'.$sqlFile.'</i> does not exist, nothing to do !';
 			
 		} else {
 			// read sql update file and set the table prefix
-			$sql = str_replace(TBL_NAME_PREFIX, $this->config->getTablePrefix(), @file_get_contents('db-update.sql'));
+			$sql = str_replace(TBL_NAME_PREFIX, $this->config->getTablePrefix(), @file_get_contents($sqlFile));
 
 			$this->printEndStepMsg(true);
 			$this->printStartNextStepMsg('Run SQL queries');

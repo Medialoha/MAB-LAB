@@ -15,8 +15,23 @@ With MABL 1.3.0-Helen we introduced some extra features, still in development, a
 - Development tools
 	- Android Asset Studio from android-ui-utils (integration in progress)
 
+## Support us ##
 
-#### Installation ####
+[![Donate](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=QQJM9LMALTTJA)
+
+Try our Android applications :
+
+[![Google Play Store](http://www.medialoha.net/images/get-it-on-google-play-small.png)](https://play.google.com/store/apps/developer?id=Medialoha)
+
+Support us can be as simple as a like on Facebook :
+
+[![Like us on Facebook](http://www.medialoha.net/images/like-us-on-facebook-small.png)](https://www.facebook.com/pages/Medialoha/1414959965409936 "Like us on Facebook") 
+
+#### How to help us ? ####
+
+Join our discussion forum here [mabl group](https://groups.google.com/d/forum/mabl) and share your ideas.
+
+## Installation ##
 
 You can find a complete procedure here : [medialoha.net](http://medialoha.net/index.php/en/menu-mablab-en)
 
@@ -30,20 +45,9 @@ You can find a complete procedure here : [medialoha.net](http://medialoha.net/in
 
 Current version code is **6**.
 
-#### How to help us ? ####
+#### Test ####
 
-Join our discussion forum here [mabl group](https://groups.google.com/d/forum/mabl) and share your ideas.
-
-#### How to Support us ? ####
-
-Try our Android applications :
-
-[![Google Play Store](http://www.medialoha.net/images/get-it-on-google-play-small.png)](https://play.google.com/store/apps/developer?id=Medialoha)
-
-Support us can be as simple as a like on Facebook :
-
-[![Like us on Facebook](http://www.medialoha.net/images/like-us-on-facebook-small.png)](https://www.facebook.com/pages/Medialoha/1414959965409936 "Like us on Facebook") 
-
+Use our android app to test your configuration [ACRA Backend Tester](https://github.com/Medialoha/ACRA-Backend-Tester)
 
 ## Change Log ##
 
