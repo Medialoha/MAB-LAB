@@ -11,8 +11,8 @@
  */
 
 define('_APPLICATION_NAME_', 'MAB-LAB');
-define('_APPLICATION_VERSION_NAME_', '1.3.1-Helen');
-define('_APPLICATION_VERSION_CODE_', 7);
+define('_APPLICATION_VERSION_NAME_', '1.3.2-Helen');
+define('_APPLICATION_VERSION_CODE_', 8);
 
 define('LOG_SEVERITY', 0); // could be 0=>DEBUG, 1=>INFO, 2=>WARNING, 3=>ERROR
 

@@ -55,6 +55,13 @@ Check Git hub repository [here](https://github.com/Medialoha/ACRA-Backend-Tester
 
 ## Change Log ##
 
+**Version 1.3.2-Helen**
+
+- *Support devices exception list from which reports will be ignored*
+- *New chart: daily sales per month*
+- *Sales table can now be filtered and ordered*
+- *Some issues fixed (check milestone for more details*
+
 **Version 1.3.0-Helen**
 
 - *Milestones management*

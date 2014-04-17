@@ -23,29 +23,187 @@ $currentYear = date('Y');
 $pastYear = $currentYear-1;
 
 $currentMonth = date('m');
-$pastMonth = $currentMonth-1;
+$pastMonth = $currentMonth==1?12:$currentMonth-1;
 
 $currentMonthName = date('F');
 $pastMonthName = date('F', mktime(0, 0, 0, $pastMonth, 1, $currentYear));
 
 $daysCurrentMonth = date("t");
-?>
-<div class="row" >
-	<!-- ////// SALES PER APPLICATION ////// -->
-	<div class="span6 app-stat-box" >
-		<h4>Sales per Application</h4>
-		<div id="salesPerApp" style="width:400px; height:200px;" ></div>
-		<?php 
-			$salesPerApp = DbHelper::selectRows(TBL_SALES.' LEFT JOIN '.TBL_APPLICATIONS.' ON '.APP_ID.'='.SALE_APP_ID,
-																						null,
-																						SALE_ORDER_CHARGED_TIMESTAMP.' ASC',
-																						APP_NAME.', COUNT(*) count',
-																						SALE_APP_ID,
-																						null, false
-																					);
+/*?>
+<div class="well" >
+	<strong>Estimated revenue</strong>&nbsp;&nbsp;&nbsp;&nbsp; 
+	<?php 
+		$sales = DbHelper::selectRows(TBL_SALES,
+																	$whereFilterApp.' AND '.SALE_ORDER_CHARGED_DATE.'>="'.$currentYear.'-'.$pastMonth.'-01"',
+																	SALE_ORDER_CHARGED_DATE.' ASC',
+																	SALE_CURRENCY_CODE.','.SALE_ITEM_PRICE.', MONTH('.SALE_ORDER_CHARGED_DATE.') month, '.SALE_ORDER_CHARGED_DATE,
+																	null,
+																	null, false);
+
+		if (empty($sales)) {
+			?><span class="muted text-i" >No record found.</span><?php 
+
+		} else {	
+
+			$sum = array();
+			foreach ($sales as $sale) {
+				if (!isset($sum[$sale['month']]))
+					$sum[$sale['month']] = 0;
+
+				$sum[$sale['month']] += ($sale[SALE_CURRENCY_CODE]=='EUR'?
+																		$sale[SALE_ITEM_PRICE]:
+																		Helper::currencyConverter($sale[SALE_ITEM_PRICE], $sale[SALE_CURRENCY_CODE], 'EUR')
+																);
+			}
+			
+			$sep = '&nbsp;&ndash;&nbsp;'; $prev = -1;
+			foreach ($sum as $m=>$v) {
+				echo date('F', mktime(0, 0, 0, $m, 1, $currentYear)), ' : ', round($v, 2), '<small>EUR</small>', $sep;
+				
+				$sep = '';
+				
+				if ($prev!=-1) {
+					?>&nbsp;&nbsp;
+						<span class="badge" style="background-color:<?php echo $v>$prev?'#99cc00':($v==$prev?'':'#ff4444'); ?>">
+							<i class="icon-white <?php echo $v>$prev?'icon-arrow-up':($v==$prev?'icon-minus':'icon-arrow-down'); ?>" ></i>
+						</span>
+					<?php 
+				}	
+				$prev = $v;
+			}
+		}
 		
+	?>
+</div>*/?>
+
+<div class="row" >
+	<!-- ////// DAILY SALES ////// -->
+	<div class="span6 app-stat-box" >
+		<h4>Daily Sales per Month</h4>
+		<div id="dailySalesPerMonth" style="width:400px; height:200px;" ></div>
+
+		
+		<div class="show-tbl-row" style="" >
+			<button type="button" class="btn btn-link" data-toggle="collapse" data-target="#dailySalesPerMonthTbl" >
+	  		<i class="icon-list" ></i>&nbsp;Show/hide table&nbsp;</button>		
+		</div>
+
+		<div id="dailySalesPerMonthTbl" class="collapse" >
+			<table class="table table-condensed tbl-dailysalesavgevo" >
+			<?php		
+				$dataCurrent = array();
+				$dataPast1 = array();
+				$dataPast2 = array();
+			
+				$arr1 = DbHelper::selectRows(TBL_INCREMENTS,
+																			null,
+																			// order
+																			'inc ASC LIMIT '.date('d'),
+																			// projection
+																			'DATE("'.$currentYear.'-'.$currentMonth.'-01") + INTERVAL '.INC_VALUE.' DAY,'.
+																			'(SELECT COUNT(*) FROM '.TBL_SALES.' WHERE '.$whereFilterApp.' AND ( DATEDIFF(DATE('.SALE_ORDER_CHARGED_DATE.'), DATE("'.$currentYear.'-'.$currentMonth.'-01"))>=0 AND DATEDIFF(DATE('.SALE_ORDER_CHARGED_DATE.'), DATE("'.$currentYear.'-'.$currentMonth.'-01") + INTERVAL '.INC_VALUE.' DAY)<=0 ) ) current_month',
+																			// group by
+																			null, null, false);
+				
+				$month = $pastMonth; $year = $pastMonth>$currentMonth?$pastYear:$currentYear;
+				$arr2 = DbHelper::selectRows(TBL_INCREMENTS,
+																			null,
+																			// order
+																			'inc ASC LIMIT '.date('t', mktime(0, 0, 0, $month, 1, $year)),
+																			// projection
+																			'DATE("'.$year.'-'.$month.'-01") + INTERVAL '.INC_VALUE.' DAY,'.
+																			'(SELECT COUNT(*) FROM '.TBL_SALES.' WHERE '.$whereFilterApp.' AND ( DATEDIFF(DATE('.SALE_ORDER_CHARGED_DATE.'), DATE("'.$year.'-'.$month.'-01"))>=0 AND DATEDIFF(DATE('.SALE_ORDER_CHARGED_DATE.'), DATE("'.$year.'-'.$month.'-01") + INTERVAL '.INC_VALUE.' DAY)<=0 ) ) past_month1',
+																			// group by
+																			null, null, false);
+
+				$month = $pastMonth==1?12:$pastMonth-1; $year = $month>$pastMonth?$pastYear:$currentYear;  $pastMonthName2 = date('F', mktime(0, 0, 0, $month, 1, $year));
+				$arr3 = DbHelper::selectRows(TBL_INCREMENTS,
+																			null,
+																			// order
+																			'inc ASC LIMIT '.date('t', mktime(0, 0, 0, $month, 1, $year)),
+																			// projection
+																			'DATE("'.$year.'-'.$month.'-01") + INTERVAL '.INC_VALUE.' DAY,'.
+																			'(SELECT COUNT(*) FROM '.TBL_SALES.' WHERE '.$whereFilterApp.' AND ( DATEDIFF(DATE('.SALE_ORDER_CHARGED_DATE.'), DATE("'.$year.'-'.$month.'-01"))>=0 AND DATEDIFF(DATE('.SALE_ORDER_CHARGED_DATE.'), DATE("'.$year.'-'.$month.'-01") + INTERVAL '.INC_VALUE.' DAY)<=0 ) ) past_month2',
+																			// group by
+																			null, null, false);
+
 		?>
-		<script type="text/javascript" >$(function() { drawPieChart('#salesPerApp', <?php echo ChartHelper::convertMySQLArrToPieChartJSON($salesPerApp, true); ?>, true); });</script>
+			<thead>
+				<tr>
+					<th>Day of Month</th>
+					<th><?php $pastMonthName2; ?></th>
+					<th><?php echo $pastMonthName; ?></th>
+					<th><?php echo $currentMonthName; ?></th>
+					<th style="width:35px;" ></th>
+			</thead>
+			<tbody>
+		<?php 
+				
+				$max = count($arr1);
+				if (count($arr2)>$max) {
+					$max = count($arr2);
+					$dateArr =& $arr2;
+				}
+				if (count($arr3)>$max) {
+					$max = count($arr3);
+					$dateArr =& $arr3;
+				}
+					
+				$i = 0; $currentPrev = -1; // current month, previous day value
+				for ($i=0; $i<$max; ++$i) { 
+					echo '<tr><td>'.date('d', strtotime($dateArr[$i][0])).'</td><td>';
+					
+					$current = isset($arr1[$i])?round($arr1[$i][1], 2):-1;
+					$past1 = isset($arr2[$i])?round($arr2[$i][1], 2):-1;
+					$past2 = isset($arr3[$i])?round($arr3[$i][1], 2):-1;
+					
+					if ($past2>0) {
+						$dataPast2[] = '['.$i.','.$past2.']';
+
+						echo ($past2>$current && $past2>$past1 && $current!=-1?'<strong>'.$past2.'</strong>':$past2).'</td><td>';
+						
+					} else { echo ' - </td><td>'; }
+					
+					if ($past1>0) {
+						$dataPast1[] = '['.$i.','.$past1.']';
+
+						echo ($past1>$current && $past1>$past2 && $current!=-1?'<strong>'.$past1.'</strong>':$past1).'</td>';
+						
+					} else { echo ' - </td>'; }
+
+					if ($current>0) {
+						$dataCurrent[] = '['.$i.','.$current.']';
+
+						if ($currentPrev>0) {
+							echo '<td>', ($current>$past1 && $current>$past2?'<strong>'.$current.'</strong>':$current), '</td>',
+										'<td><span class="badge" style="background-color:', ($current>$currentPrev?'#99cc00':($current==$currentPrev?'':'#ff4444')),'" ><i class="', ($current>$currentPrev?'icon-arrow-up':($current==$currentPrev?'icon-minus':'icon-arrow-down')),' icon-white" ></i></span></td></tr>';
+							
+						} else { echo '<td>', ($current>$past1 && $current>$past2?'<strong>'.$current.'</strong>':$current), '</td><td></td></tr>'; }						
+						
+					} else { echo '<td> - </td><td></td></tr>'; }
+					
+					$currentPrev = $current;
+				}
+			?>
+			</tbody>
+			</table>
+		</div>
+		
+		<script type="text/javascript" >		
+ 			$(function() {
+ 					var graph = $.plot("#dailySalesPerMonth",	
+									[ { label:"<?php echo $pastMonthName2; ?>", data:[<?php echo implode(',', $dataPast2); ?>], color:"#B4EA34", valueLabels:{	show:true, showLastValue:true } },
+                    { label:"<?php echo $pastMonthName; ?>", data:[<?php echo implode(',', $dataPast1); ?>], color:"#33B5E5", valueLabels:{	show:true, showLastValue:true } },
+                    { label:"<?php echo $currentMonthName; ?>", data:[<?php echo implode(',', $dataCurrent); ?>], color:"#9440ED", valueLabels:{	show:true, showLastValue:true } } ],
+									{ series:{ lines:{ show:true }, points:{ show:true } },
+										 xaxis:{  },
+										
+										legend: { show:true, position:'se' },
+										  grid:{ show:true, hoverable:true, color:"#666666", backgroundColor:"#ffffff", borderColor:"#666666", borderWidth:{top:0, right:0, bottom:1, left:1} }
+									});				
+
+ 		 	});
+		</script>
 	</div>
 	
 	<!-- ////// SALES PER MONTH ////// -->
@@ -305,7 +463,7 @@ $daysCurrentMonth = date("t");
 		<script type="text/javascript" >		
  			$(function() {
 					$.plot("#salesEvolution",	
-									[ <?php $sep = ''; foreach ($series as $label=>$data) { echo $sep, '{ label:"', $label, '", data:[', implode(',', $data), '], valueLabels:{	show:true, showLastValue:true }}'; $sep = ','; } ?> ],
+									[ <?php $sep = ''; $c = 0; foreach ($series as $label=>$data) { echo $sep, '{ label:"', $label, '", data:[', implode(',', $data), '], valueLabels:{	show:true, showLastValue:true }, color:"', ChartHelper::$COLORS[$c], '"}'; $sep = ','; $c = (++$c)%ChartHelper::$COLOR_COUNT; }; ?> ],
 									{ series:{ stack:true, lines:{ show:true, fill:true } },
 										 xaxis:{ mode:"time", timeformat:"%b %d" },
 										legend: { show:true, container:'#salesEvolutionLegend'  },
@@ -353,7 +511,25 @@ $daysCurrentMonth = date("t");
 		<?php } ?>
 	</div>
 	
-	<div id="salesEvolutionLegend" class="span4" style="padding-top:30px;" ></div>
+	<!-- ////// SALES PER APPLICATION ////// -->
+	<div class="span4 app-stat-box" >
+		<h4>Sales per Application</h4>
+		<div id="salesPerApp" style="width:400px; height:200px;" ></div>
+		<?php 
+			$salesPerApp = DbHelper::selectRows(TBL_SALES.' LEFT JOIN '.TBL_APPLICATIONS.' ON '.APP_ID.'='.SALE_APP_ID,
+																						null,
+																						SALE_ORDER_CHARGED_TIMESTAMP.' ASC',
+																						APP_NAME.', COUNT(*) count',
+																						SALE_APP_ID,
+																						null, false
+																					);
+		
+		?>
+		<script type="text/javascript" >$(function() { drawPieChart('#salesPerApp', <?php echo ChartHelper::convertMySQLArrToPieChartJSON($salesPerApp, false); ?>, false); });</script>
+	</div>
+</div>
+<div class="row" >
+	<div id="salesEvolutionLegend" class="span4" style="" ></div>
 </div>
 
 

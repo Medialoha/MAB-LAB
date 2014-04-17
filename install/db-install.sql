@@ -98,7 +98,7 @@ CREATE TABLE IF NOT EXISTS `%PREFIX%applications` (
 # create google play sales and earnings tables
 CREATE TABLE IF NOT EXISTS `%PREFIX%googleplay_sales` (
   `sale_order_number` bigint(20) NOT NULL,
-  `sale_order_charged_date` char(10) NOT NULL,
+  `sale_order_charged_date` datetime NOT NULL,
   `sale_charged_timestamp` int(11) NOT NULL,
   `sale_financial_status` varchar(25) NOT NULL,
   `sale_device_model` varchar(25) NOT NULL,
@@ -129,3 +129,7 @@ CREATE TABLE IF NOT EXISTS `%PREFIX%milestones` (
   `mile_duedate` double DEFAULT NULL,
   PRIMARY KEY (`mile_id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
+
+
+# create indexes
+CREATE INDEX `idx_reports_report_issue` ON `%PREFIX%reports` (`report_issue`);

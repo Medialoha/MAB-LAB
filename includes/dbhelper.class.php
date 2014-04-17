@@ -154,13 +154,8 @@ class DBHelper {
 										);
 	}
 	
-	public static function deleteIssues($ids) {
-		$where = '';
-		
-		if (is_array($ids))
-			$where = ' IN ('.implode(',', $ids).')';
-		else
-			$where = '='.$ids;
+	public static function deleteIssues($ids) {		
+		$where = ' IN ('.(is_array($ids)?implode(',', $ids):$ids).')';
 		
 		mysqli_query(self::$dbo, 'DELETE FROM '.TBL_REPORTS.' WHERE '.REPORT_ISSUE.$where);
 		mysqli_query(self::$dbo, 'DELETE FROM '.TBL_ISSUES.' WHERE '.ISSUE_ID.$where);

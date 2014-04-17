@@ -309,6 +309,11 @@ class ApplicationDesc {
 							
 							break;
 						case 'text' :
+								if (!$edit) {
+									$s = str_replace(PHP_EOL, '<br/>', $p->value);
+									
+								} else { $s = $p->value; }
+							break;
 				
 						default : $s = $p->value;
 					}

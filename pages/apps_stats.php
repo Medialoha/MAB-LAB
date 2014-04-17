@@ -25,6 +25,11 @@ foreach ($mAppArr as $app) {
 	if ($mSelectedAppId==$app[APP_ID])
 		$mSelectedAppName = $app[APP_NAME];
 }
+
+$urlApp = '';
+if ($mSelectedAppId>0) {
+	$urlApp = 'app='.$mSelectedAppId;
+}
 ?>
 <div class="navbar">
   <div class="navbar-inner">
@@ -37,9 +42,9 @@ foreach ($mAppArr as $app) {
     		</ul>
     	</li>
       
-      <li <?php echo $mNavCtl->isNav('')?'class="active"':''; ?> ><a href="<?php echo $mNavCtl->buildPageURL(null); ?>" >Statistics</a></li>
-      <li <?php echo $mNavCtl->isNav('data')?'class="active"':''; ?> ><a href="<?php echo $mNavCtl->buildPageURL('data'); ?>">Data</a></li>
-      <li <?php echo $mNavCtl->isNav('import')?'class="active"':''; ?> ><a href="<?php echo $mNavCtl->buildPageURL('import'); ?>">Import CSV</a></li>
+      <li <?php echo $mNavCtl->isNav('')?'class="active"':''; ?> ><a href="<?php echo $mNavCtl->buildPageURL(null, $urlApp); ?>" >Statistics</a></li>
+      <li <?php echo $mNavCtl->isNav('data')?'class="active"':''; ?> ><a href="<?php echo $mNavCtl->buildPageURL('data', $urlApp); ?>">Data</a></li>
+      <li <?php echo $mNavCtl->isNav('import')?'class="active"':''; ?> ><a href="<?php echo $mNavCtl->buildPageURL('import', $urlApp); ?>">Import CSV</a></li>
     </ul>
   </div>
 </div>

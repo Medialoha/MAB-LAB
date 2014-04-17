@@ -119,6 +119,17 @@ $cfg = CfgHelper::getInstance();
 	    </div>
 	  </div>
   </fieldset>
+  
+  <fieldset><legend><img src="assets/images/ic_config_reports.png" class="fieldset-icon" />Report Exception</legend>
+	  <div class="control-group">
+	    <label class="control-label" for="reportExceptionIds">
+	    	Device ids<br/><small class="muted" >One device id per line</small>
+	    </label>
+	    <div class="controls">
+	      <textarea id="reportExceptionIds" name="in-report-exception-devices" rows="3" style="width:400px;" ><?php echo implode(PHP_EOL, $cfg->getReportExceptionDevices()); ?></textarea>
+	    </div>
+	  </div>
+  </fieldset>
 
   <fieldset><legend><img src="assets/images/ic_config_email.png" class="fieldset-icon" />Mail Options</legend>
 	  <div class="control-group">

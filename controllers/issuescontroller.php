@@ -108,7 +108,6 @@ switch ($action) {
 	case 'delissues' :
 			$issueIds = @$_POST['issueIds'];
 			if (!empty($issueIds)) {
-				$reportIds = explode(',', $issueIds);
 				DBHelper::deleteIssues($issueIds);
 		
 				echo 'O:Issue(s) deleted with success !';
@@ -197,8 +196,12 @@ switch ($action) {
 		break;
 
 //////// UPDATE ISSUE DETAILS
-	case 'updateIssueDetails' :			
-			$error = DbHelper::exec('UPDATE '.TBL_ISSUES.' SET '.ISSUE_MILESTONE_ID.'='.$_POST['new_milestone'].', '.ISSUE_COMMENT.'="'.$_POST['new_comment'].'" WHERE '.ISSUE_ID.'='.$_POST['issue_id']);
+	case 'updateIssueDetails' :				
+			$error = DbHelper::exec('UPDATE '.TBL_ISSUES.
+                                ' SET '.ISSUE_MILESTONE_ID.'='.(empty($_POST['new_milestone'])?'null':$_POST['new_milestone']).', '.
+                                        ISSUE_COMMENT.'="'.addslashes($_POST['new_comment']).'"'.
+                              ' WHERE '.ISSUE_ID.'='.$_POST['issue_id']);
+			
 			if ($error==null) {
 				Helper::pushAlert(ALERT_SUCCESS, 'Issue updated with success !');
 				

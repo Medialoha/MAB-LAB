@@ -20,13 +20,21 @@ define('BAR_CHART_TYPE_ID', 1);
 
 
 class ChartHelper {
+
+	public static $COLORS = array("#33B5E5", "#9440ED", "#B4EA34", "#FFB239", "#F04158", "#FFF145");
+	public static $COLOR_COUNT = 6;
+	
 	
 
 	// $arr[i] = array(0=>label, 1=>value)
-	public static function convertMySQLArrToPieChartJSON($arr, $appendValueToLabel=false) {
-		$json = '['; $sep = '';
+	public static function convertMySQLArrToPieChartJSON($arr, $appendValueToLabel=false) {		
+		$json = '['; $sep = ''; $c = 0;
+		$arr = $arr===null?array():$arr;
+		
 		foreach($arr as $row) {
-			$json .= $sep.'{"label":"'.$row[0].($appendValueToLabel?' ('.$row[1].')':'').'","data":'.$row[1].'}'; $sep = ',';
+			$json .= $sep.'{"label":"'.$row[0].($appendValueToLabel?' ('.$row[1].')':'').'","data":'.$row[1].', color:"'.self::$COLORS[$c].'"}'; $sep = ',';
+			
+			$c = (++$c)%self::$COLOR_COUNT;
 		}
 		
 		return $json.']';

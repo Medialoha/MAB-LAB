@@ -68,10 +68,17 @@ if (empty($data)) {
 
 // if data not empty then store into DB
 if (!empty($data)) {
-	Debug::logi("Seems to be a valid request... Try to decode JSON and save to DB.", 'REPORT');
-
+	Debug::logi("Seems to be a valid request... Try to decode JSON and save to DB.", 'REPORT');	
+	
 	$json = json_decode($data, true);
+	
+	// check if device is in exception list
+	if (isset($json['device_id']) && !empty($json['device_id']) && $cfg->isInReportExceptionDevices($json['device_id'])) {
+		Debug::logi("Report ignored, device ".$json['device_id']." is in exception list.");
 		
+		exit;
+	}
+	
 	// open db connection
 	DBHelper::open();
 	

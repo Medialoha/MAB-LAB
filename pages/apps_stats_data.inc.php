@@ -10,17 +10,64 @@
  *     EIRL DEVAUX J. - Medialoha - initial API and implementation
 */
 
-$where = null;
+$orderOpts = array( array('Date ASC', SALE_ORDER_CHARGED_TIMESTAMP.' ASC'), 
+										array('Date DESC', SALE_ORDER_CHARGED_TIMESTAMP.' DESC'));
+$order = isset($_POST['order'])?$_POST['order']:0;
+
+$periodEnd = isset($_POST['periodEnd'])?$_POST['periodEnd']:'';
+
+if (!isset($_POST['periodStart'])) {
+	$periodStart = date('Y-m-d', strtotime((empty($periodEnd)?'':$periodEnd).' -90 days'));
+	
+} else { $periodStart = $_POST['periodStart']; }
+
+
+$where = array();
 if ($mSelectedAppId>0)
-	$where = SALE_APP_ID.'='.$mSelectedAppId;
+	$where[] = SALE_APP_ID.'='.$mSelectedAppId;
+
+$where[] = SALE_ORDER_CHARGED_TIMESTAMP.'>='.strtotime($periodStart);
+
+if (!empty($periodEnd))
+	$where[] = SALE_ORDER_CHARGED_TIMESTAMP.'<='.strtotime($periodEnd);
 
 $sales = DbHelper::selectRows(TBL_SALES.' LEFT JOIN '.TBL_APPLICATIONS.' ON '.APP_ID.'='.SALE_APP_ID, 
-																$where, 
-																SALE_ORDER_CHARGED_TIMESTAMP.' ASC', 
+																implode(' AND ', $where),
+																$orderOpts[$order][1], 
 																TBL_SALES.'.*, '.APP_NAME, 
 																null, null, false
 															);
 ?>
+<div class="well" >
+	<form class="form-inline" action="<?php echo $mNavCtl->getURL(); ?>" method="post" style="margin-bottom:0px;" >
+		<strong style="padding-left:15px; padding-right:15px;" >Period</strong>
+	
+		<div id="periodStart" class="input-append" >
+	  	<input name="periodStart" data-format="yyyy-MM-dd" type="text" class="input-small" value="<?php echo $periodStart; ?>" />
+	    <span class="add-on"><i data-time-icon="icon-time" data-date-icon="icon-calendar" ></i></span>
+	  </div>
+	
+		&nbsp;&nbsp;-&nbsp;&nbsp;
+	
+		<div id="periodEnd" class="input-append" >
+	  	<input name="periodEnd" data-format="yyyy-MM-dd" type="text" class="input-small" value="<?php echo empty($periodEnd)?date('Y-m-d'):$periodEnd; ?>" />
+	    <span class="add-on"><i data-time-icon="icon-time" data-date-icon="icon-calendar" ></i></span>
+	  </div>
+
+		<strong style="padding-left:15px; padding-right:15px;" >Order</strong>
+	  
+	  <select name="order" >
+	  <?php 
+	  	foreach ($orderOpts as $k=>$v) {
+	  		echo '<option value="', $k, '" ', $k==$order?'selected="selected"':'', ' >', $v[0], '</option>';
+	  	} 
+	 	?>
+	  </select>
+	  
+  	<button type="submit" class="btn" style="float:right;" >Go !</button>
+  </form>
+</div>
+
 <div class="row" >
 	<div class="span12" >
 		<ul class="nav nav-pills">
@@ -65,3 +112,22 @@ $sales = DbHelper::selectRows(TBL_SALES.' LEFT JOIN '.TBL_APPLICATIONS.' ON '.AP
 		</table>
 	</div>
 </div>
+
+<!-- <div class="pagination"> -->
+<!--   <ul> -->
+<!--     <li><a href="#">Prev</a></li> -->
+<!--     <li><a href="#">1</a></li> -->
+<!--    	<li><a href="#">Next</a></li> -->
+<!-- 	</ul> -->
+<!-- </div> -->
+
+<script type="text/javascript" >
+  $(function() {
+    $('#periodStart').datetimepicker({
+      pickTime: false
+    });
+    $('#periodEnd').datetimepicker({
+      pickTime: false
+    });
+  });
+</script>

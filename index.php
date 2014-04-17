@@ -24,7 +24,6 @@ require_once('includes/report.class.php');
 require_once('includes/issue.class.php');
 require_once('includes/issuehelper.php');
 
-
 // init page
 $mNavCtl = new NavigationController();
 
@@ -90,14 +89,15 @@ if ($mNavCtl!=null) { // start content
   </head>
   <body>
     <div class="navbar navbar-inverse navbar-fixed-top">
-      <div class="navbar-inner">
+      <div class="navbar-inner"> 
         <div class="container">
-          <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
-          <a class="brand" href="#">MAB-LAB</a>
+<!--           <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse"> -->
+<!--             <span class="icon-bar"></span> -->
+<!--             <span class="icon-bar"></span> -->
+<!--             <span class="icon-bar"></span> -->
+<!--           </button> -->
+          <img src="assets/images/ic_superandroid.png" style=" float:left; height:40px;" />
+          <a class="brand" href="#">&nbsp;MABL</a>
           <div class="nav-collapse collapse">
             <ul class="nav">
               <li <?php echo $mNavCtl->id==PAGE_ID_HOME?'class="active"':''; ?> >

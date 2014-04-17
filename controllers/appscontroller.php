@@ -128,6 +128,7 @@ switch ($action) {
 			if ((empty($code) &&	$mAppDesc->createEmptyTranslation($_POST['lang-code'], $_POST['lang-name'])) || $mAppDesc->loadTranslation($code, $isTmpl)) {
 				$tmpArr = explode('{', $tmpl);
 				$properties = array();
+				$html = '';
 				
 				foreach($tmpArr as $r) {
 					if (empty($r)) continue;

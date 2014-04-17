@@ -110,6 +110,12 @@ switch ($action) {
 						if (strcmp($key, 'report.packagename.shrink')==0 || strcmp($key, 'report.sendmail')==0) {
 							$tmpCfg[$key] = $v=='1'?true:false;
 						
+						} else if (strcmp($key, 'report.exception.devices')==0) {
+							if (!empty($v)) {
+								$tmpCfg[$key] = '"'.str_replace(PHP_EOL, '", "' , $v).'"';
+								
+							} else { $tmpCfg[$key] = ''; } 
+						
 						} else { $tmpCfg[$key] = $v; }
 					}
 				}

@@ -31,6 +31,8 @@ class CfgHelper {
 	private $mSendMailOnReportReceived;
 	private $mReportMailRecipients;
 	
+	private $mReportExceptionDevices;
+	
 	private $mMailSender;
 	
 	// dashboard options
@@ -77,6 +79,8 @@ class CfgHelper {
 		$obj->mReportMailRecipients = is_string($mGlobalCfg['report.sendmail.recipients'])?$mGlobalCfg['report.sendmail.recipients']:'';
 		
 		$obj->mMailSender = array($mGlobalCfg['mail.from.addr'], $mGlobalCfg['mail.from.name']);
+
+		$obj->mReportExceptionDevices = $mGlobalCfg['report.exception.devices'];
 		
 		$obj->mDashboardRefresh = $mGlobalCfg['dashboard.refresh.interval'];
 		$obj->mDashboardNbNewIssues = $mGlobalCfg['dashboard.issues.nb'];
@@ -87,7 +91,8 @@ class CfgHelper {
 	private static function safeGlobalConfig(&$configArr) { 
 		$keys = array('db.host', 'db.name', 'db.port', 'db.user', 'db.pwd', 'tbl.prefix', 
 									'date.format', 'date.timezone', 
-									'report.packagename.shrink', 'report.sendmail', 'report.sendmail.recipients', 'report.basicauth', 'report.basicauth.method', 'report.basicauth.accounts', 
+									'report.packagename.shrink', 'report.sendmail', 'report.sendmail.recipients', 'report.basicauth', 'report.basicauth.method', 'report.basicauth.accounts',
+									'report.exception.devices',
 									'mail.from.addr', 'mail.from.name', 
 									'dashboard.refresh.interval', 'dashboard.issues.nb', 
 									'report.tags');
@@ -183,6 +188,8 @@ class CfgHelper {
 																				$arr['report.basicauth.method'],
 																				$accounts,
 																	
+																				$arr['report.exception.devices'],
+																	
 																				$arr['mail.from.addr'], $arr['mail.from.name'],
 																	
 																				$arr['dashboard.refresh.interval'], $arr['dashboard.issues.nb'],
@@ -254,6 +261,12 @@ class CfgHelper {
 	public function shrinkPackageName() { return $this->mShrinkPackageName; }
 	
 	public function sendMailOnReportReceived() { return $this->mSendMailOnReportReceived; }
+	
+	public function getReportExceptionDevices() { return is_array($this->mReportExceptionDevices)?$this->mReportExceptionDevices:array(); }
+	
+	public function isInReportExceptionDevices($deviceId) {
+		return in_array($deviceId, $this->mReportExceptionDevices);
+	}
 	
 	public function getDashboardRefreshIntervalInMillis() { return $this->mDashboardRefresh; }
 	
