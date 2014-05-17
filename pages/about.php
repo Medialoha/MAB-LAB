@@ -23,7 +23,7 @@
 <div class="row" >
 	<div class="span6 offset3" >
 		<dl>
-			<dt><a href="http://twitter.github.io/bootstrap/" target="_blank" >Twiter Bootstrap</a></dt>
+			<dt><a href="http://twitter.github.io/bootstrap/" target="_blank" >Twitter Bootstrap</a></dt>
 			<dd>
 				<blockquote>Sleek, intuitive, and powerful front-end framework for faster and easier web development.</blockquote>
 				<small>License&nbsp;<a href="libs/bootstrap/LICENSE" target="_blank" >Apache License 2.0</a></small>
