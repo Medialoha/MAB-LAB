@@ -9,6 +9,7 @@
  * Contributors:
  *     EIRL DEVAUX J. - Medialoha - initial API and implementation
 */
+require_once('includes/currency.class.php');
 
 $mAppArr = DbHelper::selectRows(TBL_APPLICATIONS, null, APP_NAME.' ASC', '*', null, null, false);
 $mSelectedAppId = $mNavCtl->getParam('app', '-1');

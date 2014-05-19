@@ -1,19 +1,19 @@
 MABL
 =======
 
-With MABL 1.3.0-Helen we introduced some extra features, still in development, and not all available :
+With MABL 1.3 we introduced some extra features, still in development, and not all available :
 
 - Play store publication 
 	- multi language description manager for multiple apps using templates
 	- multi language screenshots manager (coming soon)
 - Sales statistics (daily sales)
 	- import your sales csv files from Play sotre and voila...
-	- auto sync using gsutils (coming soon)
+	- auto sync using gsutils
 - Earnings statistics (full description of monthly sales)
 	- import your sales csv files from Play sotre and voila... (coming coon)
 	- auto sync using gsutils (coming soon)  
 - Development tools
-	- Android Asset Studio from android-ui-utils (integration in progress)
+	- Android Asset Studio from android-ui-utils
 
 ## Support us ##
 
@@ -21,7 +21,7 @@ With MABL 1.3.0-Helen we introduced some extra features, still in development, a
 
 Try our Android applications :
 
-[![Google Play Store](http://www.medialoha.net/images/get-it-on-google-play-small.png)](https://play.google.com/store/apps/developer?id=Medialoha)
+[![Google Play Store](http://medialoha.net/images/google_play_download_grey.png)](https://play.google.com/store/apps/developer?id=Medialoha)
 
 Support us can be as simple as a like on Facebook :
 
@@ -31,19 +31,10 @@ Support us can be as simple as a like on Facebook :
 
 Join our discussion forum here [mabl group](https://groups.google.com/d/forum/mabl) and share your ideas.
 
-## Installation ##
+## Installation / Update ##
 
 You can find a complete procedure here : [medialoha.net](http://medialoha.net/index.php/en/menu-mablab-en)
 
-#### Update procedure ####
-
-1. Backup your data
-- Edit the configuration file */includes/config.php* from the new release 
-- Upload new files on your server
-- Launch script file at /install/update-to-*VERSION_CODE*/update.php
-- Remove install directory
-
-Current version code is **6**.
 
 #### Test ####
 
@@ -54,6 +45,13 @@ Download apk [v1.0.0](https://github.com/Medialoha/ACRA-Backend-Tester/releases/
 Check Git hub repository [here](https://github.com/Medialoha/ACRA-Backend-Tester).
 
 ## Change Log ##
+
+**Version 1.3.3-Helen**
+
+- *Currency support for sales report added*
+- *Sales statistics improved*
+- *Complete Asset Studio integration*
+- *Missed add and remove application features*
 
 **Version 1.3.2-Helen**
 

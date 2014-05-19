@@ -1,0 +1,946 @@
+<!--
+  Copyright 2012 readyState Software Ltd.
+  Android Asset Studio Copyright 2010 Google Inc.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<div id="main-container">
+  <div id="page-header">
+  	<a href="#" class="assetstudio" >Android Asset Studio</a>
+  	<h1>Android Action Bar Style Generator</h1>
+    <p id="page-intro">
+      The <strong>Android Action Bar Style Generator</strong> allows you to easily create a simple, 
+      attractive and seamless custom action bar style for your Android application. It will generate
+      all necessary nine patch assets plus associated XML drawables and styles which you can copy straight 
+      into your project.
+    </p>
+  </div>
+  
+  <div id="inputs" class="row" >
+    <div id="inputs-form" style="float:left; width:55%; margin:0px;" ></div>
+    <div id="preview" style="float:right; width:40%; margin:0px;" ></div>
+  </div>
+ 
+  <div id="outputs">
+    <h3>
+      Output resources
+      <div id="zip-button-stub"></div>         
+    </h3>
+  </div>
+  <div id="footer">
+  	<p>Created by <a href="http://jeffgilfelt.com">Jeff Gilfelt</a>, source code on <a href="https://github.com/jgilfelt/android-actionbarstylegenerator">GitHub</a>, copyright 2012 readyState Software Ltd.</p>
+    <p>Built upon the <a href="http://code.google.com/p/android-ui-utils">android-ui-utils</a> asset studio framework created by <a href="http://roman.nurik.net/">Roman Nurik</a>, copyright Google Inc.</p>
+    <br/>
+    <p>All generated art is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/3.0/">Creative Commons Attribution 3.0 Unported License</a>.</p>
+  </div>
+</div>
+
+<script>
+      $(studio.checkBrowser);
+      
+      function toTitleCase(str) {
+        return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
+      }
+     
+      var zipper = studio.zip.createDownloadifyZipButton($('#zip-button-stub'));
+
+      // Load image resources (stencils)
+      var resList = {};
+      
+      var shapes = {
+      	    'ab_solid':1,
+      	    'ab_transparent':1,
+        	'ab_stacked_solid':1,
+        	'ab_bottom_solid':1,
+        	'ab_texture_tile':1,
+        	'menu_dropdown_panel':1,
+        	//'menu_hardkey_panel':1,
+        	'tab_unselected':1, 
+        	'tab_unselected_pressed':1,
+        	'tab_unselected_focused':1,
+        	'tab_selected':1, 
+        	'tab_selected_pressed':1,
+        	'tab_selected_focused':1,
+        	'spinner_ab_focused':1,
+        	'spinner_ab_pressed':1,
+        	'progress_primary':1,
+        	'progress_secondary':1,
+        	'list_focused':1,
+        	'list_pressed':1,
+        	'btn_cab_done_focused':1,
+        	'btn_cab_done_pressed':1,
+        	'cab_background_top':1,
+        	'cab_background_bottom':1
+       };
+       
+       var nonStyledShapes = {
+       	    'spinner_ab_default':1,
+       	    'spinner_ab_disabled':1,
+       	    'progress_bg':1,
+       	    'btn_cab_done_default':1
+       }
+       
+       var neutralOptionNonStyledShapes = {
+       	    'btn_cab_done_pressed':1,
+       	    'spinner_ab_pressed':1,
+       	    'list_pressed':1
+       }
+       
+       var xmlTemplates = {
+       	    'styles':1,
+       	    'styles-sherlock':1,
+       	    'styles-v14-sherlock':1,
+       	    'styles-appcompat':1,
+       	    'styles-v14-appcompat':1,
+       	    //'colors':1,
+       	    //'focused_background':1,
+       	    //'pressed_background':1,
+       	    'selectable_background':1,
+       	    'spinner_background_ab':1,
+       	    'tab_indicator_ab':1,
+       	    'progress_horizontal':1,
+       	    'btn_cab_done':1,
+       	    'ab_background_textured':1
+       }
+      
+       // Create image output slots
+      var group = studio.ui.createImageOutputGroup({
+        container: $('#outputs')
+      });
+      
+      for (var density in {'xhdpi':1})
+        for (var backgroundShape in shapes)
+        studio.ui.createImageOutputSlot({
+          container: group,
+          id: 'out-icon-' + backgroundShape, //density,
+          label: backgroundShape //(density == 'web') ? 'web, hi-res' : density
+        });
+        
+      // preview 
+      var prev = studio.ui.createImageOutputGroup({
+        container: $('#preview')
+      }); 
+      studio.ui.createImageOutputSlot({
+        container: prev,
+        id: 'out-icon-' + 'preview', 
+        label: ''
+      });
+      
+      for (var density in {'xxhdpi':1, 'xhdpi':1, 'hdpi':1, 'mdpi':1})
+        for (var backgroundShape in shapes)
+          for (var type in {'back':1, 'fore1':1, 'mask':1})
+            resList[backgroundShape + '-' + density + '-' + type] = (
+              BASE_PATH+'res/actionbar-stencil/' + backgroundShape + '/' + density + '/' + type + '.png');
+      
+      // cab assets need 2nd mask
+      for (var density in {'xxhdpi':1, 'xhdpi':1, 'hdpi':1, 'mdpi':1})
+        for (var backgroundShape in {'cab_background_top':1, 'cab_background_bottom':1, 'tab_selected_focused':1, 'tab_selected_pressed':1, 'tab_unselected_focused':1, 'tab_unselected_pressed':1})
+          resList[backgroundShape + '-' + density + '-' + 'mask1'] = (
+            BASE_PATH+'res/actionbar-stencil/' + backgroundShape + '/' + density + '/' + 'mask1' + '.png');
+       
+      // tab hairline      
+      for (var density in {'xxhdpi':1, 'xhdpi':1, 'hdpi':1, 'mdpi':1})
+        for (var backgroundShape in {'tab_unselected_focused':1, 'tab_unselected_pressed':1}) {
+          resList[backgroundShape + '-' + density + '-' + 'mask_old'] = (
+            BASE_PATH+'res/actionbar-stencil/' + backgroundShape + '/' + density + '/' + 'mask_old' + '.png');
+          resList[backgroundShape + '-' + density + '-' + 'mask_old1'] = (
+            BASE_PATH+'res/actionbar-stencil/' + backgroundShape + '/' + density + '/' + 'mask_old1' + '.png');
+        }
+
+      for (var density in {'xxhdpi':1, 'xhdpi':1, 'hdpi':1, 'mdpi':1})
+        for (var nonStyledShape in nonStyledShapes)
+          for (var type in {'light':1, 'dark':1})
+            resList[nonStyledShape + '-' + density + '-' + type] = (
+              BASE_PATH+'res/actionbar-stencil/' + nonStyledShape + '/' + density + '/' + type + '.png');
+      
+      // neutral        
+      for (var density in {'xxhdpi':1, 'xhdpi':1, 'hdpi':1, 'mdpi':1})
+        for (var neutralOptionNonStyledShape in neutralOptionNonStyledShapes)
+          for (var type in {'light':1, 'dark':1})
+            resList[neutralOptionNonStyledShape + '-' + density + '-' + type] = (
+              BASE_PATH+'res/actionbar-stencil/' + neutralOptionNonStyledShape + '/' + density + '/' + type + '.png');
+
+      // JG
+      var xmlList = {};
+      for (var template in xmlTemplates)
+        xmlList[template] = (
+          BASE_PATH+'res/actionbar-xml-templates/' + template + '.xml');
+      
+      var previewList = {};
+      
+      for (var theme in {'light':1, 'dark':1}) {
+        for (var type in {'solid':1, 'transparent':1}) {
+          previewList['back' + '-' + theme + '-' + type] = (
+              BASE_PATH+'res/actionbar-preview/' + theme + '-' + type + '/' + 'back.png');
+          previewList['fore2' + '-' + theme + '-' + type] = (
+          		BASE_PATH+'res/actionbar-preview/' + theme + '-' + type + '/' + 'fore2.png');
+          previewList['mask-ab-main' + '-' + theme + '-' + type] = (
+          		BASE_PATH+'res/actionbar-preview/' + theme + '-' + type + '/' + 'mask_ab_main.png');
+          previewList['mask-ab-stacked' + '-' + theme + '-' + type] = (
+          		BASE_PATH+'res/actionbar-preview/' + theme + '-' + type + '/' + 'mask_ab_stacked.png');
+          previewList['mask-accent' + '-' + theme + '-' + type] = (
+          		BASE_PATH+'res/actionbar-preview/' + theme + '-' + type + '/' + 'mask_accent.png');
+          previewList['mask-pressed' + '-' + theme + '-' + type] = (
+          		BASE_PATH+'res/actionbar-preview/' + theme + '-' + type + '/' + 'mask_pressed.png');
+          previewList['mask-popup' + '-' + theme + '-' + type] = (
+          		BASE_PATH+'res/actionbar-preview/' + theme + '-' + type + '/' + 'mask_popup.png');
+          previewList['mask-tab' + '-' + theme + '-' + type] = (
+          		BASE_PATH+'res/actionbar-preview/' + theme + '-' + type + '/' + 'mask_tab.png');
+          previewList['mask-tab-hairline' + '-' + theme + '-' + type] = (
+          		BASE_PATH+'res/actionbar-preview/' + theme + '-' + type + '/' + 'mask_tab_hairline.png');
+          previewList['mask-ab-main-textured' + '-' + theme + '-' + type] = (
+          		BASE_PATH+'res/actionbar-preview/' + theme + '-' + type + '/' + 'mask_ab_main_textured.png');
+        }
+      }
+          
+	  var XML_RESOURCES = {};
+	  var IMAGE_RESOURCES = {};
+	  var PREVIEW_RESOURCES = {};
+	  
+      imagelib.loadImageResources(resList, function(r) {
+        IMAGE_RESOURCES = r;
+        IMAGE_RESOURCES._loaded = true;
+        
+        studio.hash.bindFormToDocumentHash(form);
+        
+        imagelib.loadXmlTemplates(xmlList, function(r2) {
+          XML_RESOURCES = r2;
+          XML_RESOURCES._loaded = true;
+          //regenerate();
+          
+          imagelib.loadImageResources(previewList, function(r3) {
+          	PREVIEW_RESOURCES = r3;
+          	PREVIEW_RESOURCES._loaded = true;
+          	regenerate();
+          });
+          
+        });
+        
+      });
+
+/*
+      var IMAGE_RESOURCES = {};
+      imagelib.loadImageResources(resList, function(r) {
+        IMAGE_RESOURCES = r;
+        IMAGE_RESOURCES._loaded = true;
+        regenerate();
+        studio.hash.bindFormToDocumentHash(form);
+      });
+*/
+      var PARAM_RESOURCES = {
+       'xxhdpi-tab_unselected_pressed': { w:  8, h:  14 },
+        'xhdpi-tab_unselected_pressed': { w:  6, h:  10 },
+         'hdpi-tab_unselected_pressed': { w:  5, h:  8 },
+         'mdpi-tab_unselected_pressed': { w:  4, h:  6 },
+
+       'xxhdpi-tab_unselected_focused': { w:  8, h:  14 },
+        'xhdpi-tab_unselected_focused': { w:  6, h:  10 },
+         'hdpi-tab_unselected_focused': { w:  5, h:  8 },
+         'mdpi-tab_unselected_focused': { w:  4, h:  6 },
+
+       'xxhdpi-tab_unselected': { w:  8, h:  14 },
+        'xhdpi-tab_unselected': { w:  6, h:  10 },
+         'hdpi-tab_unselected': { w:  5, h:  8 },
+         'mdpi-tab_unselected': { w:  4, h:  6 },
+         
+       'xxhdpi-tab_selected_pressed': { w:  8, h:  26 },
+        'xhdpi-tab_selected_pressed': { w:  6, h:  18 },
+         'hdpi-tab_selected_pressed': { w:  5, h:  14 },
+         'mdpi-tab_selected_pressed': { w:  4, h:  10 },
+
+       'xxhdpi-tab_selected_focused': { w:  8, h:  26 },
+        'xhdpi-tab_selected_focused': { w:  6, h:  18 },
+         'hdpi-tab_selected_focused': { w:  5, h:  14 },
+         'mdpi-tab_selected_focused': { w:  4, h:  10 },
+
+       'xxhdpi-tab_selected': { w:  8, h:  26 },
+        'xhdpi-tab_selected': { w:  6, h:  18 },
+         'hdpi-tab_selected': { w:  5, h:  14 },
+         'mdpi-tab_selected': { w:  4, h:  10 },
+
+       'xxhdpi-ab_solid': { w:  74, h:  74 },         
+        'xhdpi-ab_solid': { w:  50, h:  50 },
+         'hdpi-ab_solid': { w:  38, h:  38 },
+         'mdpi-ab_solid': { w:  26, h:  26 },
+
+       'xxhdpi-ab_transparent': { w:  74, h:  74 },          
+        'xhdpi-ab_transparent': { w:  50, h:  50 },
+         'hdpi-ab_transparent': { w:  38, h:  38 },
+         'mdpi-ab_transparent': { w:  26, h:  26 }, 
+
+       'xxhdpi-ab_stacked_solid': { w:  74, h:  74 },            
+        'xhdpi-ab_stacked_solid': { w:  50, h:  50 },
+         'hdpi-ab_stacked_solid': { w:  38, h:  38 },
+         'mdpi-ab_stacked_solid': { w:  26, h:  26 },
+
+       'xxhdpi-ab_bottom_solid': { w:  74, h:  74 },            
+        'xhdpi-ab_bottom_solid': { w:  50, h:  50 },
+         'hdpi-ab_bottom_solid': { w:  38, h:  38 },
+         'mdpi-ab_bottom_solid': { w:  26, h:  26 },
+         
+       'xxhdpi-menu_dropdown_panel': { w:  194, h:  98 },
+        'xhdpi-menu_dropdown_panel': { w:  130, h:  66 },
+         'hdpi-menu_dropdown_panel': { w:  98, h:  50 },
+         'mdpi-menu_dropdown_panel': { w:  66, h:  34 },
+/*         
+        'xhdpi-menu_hardkey_panel': { w:  130, h:  50 },
+         'hdpi-menu_hardkey_panel': { w:  98, h:  38 },
+         'mdpi-menu_hardkey_panel': { w:  66, h:  26 },
+*/         
+
+       'xxhdpi-spinner_ab_focused': { w:  68, h:  98 },
+        'xhdpi-spinner_ab_focused': { w:  46, h:  66 },
+         'hdpi-spinner_ab_focused': { w:  35, h:  50 },
+         'mdpi-spinner_ab_focused': { w:  24, h:  34 },
+
+       'xxhdpi-spinner_ab_pressed': { w:  68, h:  98 },         
+        'xhdpi-spinner_ab_pressed': { w:  46, h:  66 },
+         'hdpi-spinner_ab_pressed': { w:  35, h:  50 },
+         'mdpi-spinner_ab_pressed': { w:  24, h:  34 },
+
+       'xxhdpi-spinner_ab_default': { w:  68, h:  98 },         
+        'xhdpi-spinner_ab_default': { w:  46, h:  66 },
+         'hdpi-spinner_ab_default': { w:  35, h:  50 },
+         'mdpi-spinner_ab_default': { w:  24, h:  34 },
+
+       'xxhdpi-spinner_ab_disabled': { w:  68, h:  98 },         
+        'xhdpi-spinner_ab_disabled': { w:  46, h:  66 },
+         'hdpi-spinner_ab_disabled': { w:  35, h:  50 },
+         'mdpi-spinner_ab_disabled': { w:  24, h:  34 },
+
+       'xxhdpi-list_focused': { w:  20, h:  20 },
+        'xhdpi-list_focused': { w:  14, h:  14 },
+         'hdpi-list_focused': { w:  11, h:  11 },
+         'mdpi-list_focused': { w:  8, h:  8 },
+         
+       'xxhdpi-list_pressed': { w:  20, h:  20 },
+        'xhdpi-list_pressed': { w:  14, h:  14 },
+         'hdpi-list_pressed': { w:  11, h:  11 },
+         'mdpi-list_pressed': { w:  8, h:  8 },
+
+       'xxhdpi-progress_primary': { w:  68, h:  50 },         
+        'xhdpi-progress_primary': { w:  46, h:  34 },
+         'hdpi-progress_primary': { w:  35, h:  26 },
+         'mdpi-progress_primary': { w:  24, h:  18 }, 
+
+       'xxhdpi-progress_secondary': { w:  14, h:  50 },         
+        'xhdpi-progress_secondary': { w:  10, h:  34 },
+         'hdpi-progress_secondary': { w:  8, h:  26 },
+         'mdpi-progress_secondary': { w:  6, h:  18 }, 
+         
+       'xxhdpi-progress_bg': { w:  14, h:  50 },
+        'xhdpi-progress_bg': { w:  10, h:  34 },
+         'hdpi-progress_bg': { w:  8, h:  26 },
+         'mdpi-progress_bg': { w:  6, h:  18 }, 
+
+       'xxhdpi-btn_cab_done_default': { w:  6, h:  80 },         
+        'xhdpi-btn_cab_done_default': { w:  5, h:  56 },
+         'hdpi-btn_cab_done_default': { w:  4, h:  44 },
+         'mdpi-btn_cab_done_default': { w:  4, h:  32 },
+
+       'xxhdpi-btn_cab_done_focused': { w:  6, h:  80 },         
+        'xhdpi-btn_cab_done_focused': { w:  5, h:  56 },
+         'hdpi-btn_cab_done_focused': { w:  4, h:  44 },
+         'mdpi-btn_cab_done_focused': { w:  4, h:  32 },
+
+       'xxhdpi-btn_cab_done_pressed': { w:  6, h:  80 },         
+        'xhdpi-btn_cab_done_pressed': { w:  5, h:  54 },
+         'hdpi-btn_cab_done_pressed': { w:  4, h:  41 },
+         'mdpi-btn_cab_done_pressed': { w:  6, h:  28 },
+
+       'xxhdpi-cab_background_top': { w:  74, h:  74 },         
+        'xhdpi-cab_background_top': { w:  50, h:  50 },
+         'hdpi-cab_background_top': { w:  38, h:  38 },
+         'mdpi-cab_background_top': { w:  26, h:  26 },
+
+       'xxhdpi-cab_background_bottom': { w:  74, h:  74 },         
+        'xhdpi-cab_background_bottom': { w:  50, h:  50 },
+         'hdpi-cab_background_bottom': { w:  38, h:  38 },
+         'mdpi-cab_background_bottom': { w:  26, h:  26 },
+         
+       'xxhdpi-ab_texture_tile': { w:  12, h:  12 },         
+        'xhdpi-ab_texture_tile': { w:  8, h:  8 },
+         'hdpi-ab_texture_tile': { w:  6, h:  6 },
+         'mdpi-ab_texture_tile': { w:  6, h:  6 },
+         
+      };
+      
+      var DEFAULT_COLORS_LIGHT = {
+      	'backColor':'#E4E4E4',
+      	'secondaryColor':'#D6D6D6',
+      	'tertiaryColor':'#F2F2F2',
+      	'accentColor':'#33B5E5',
+      	'actionbarstyle':'solid',
+      	'cabBackColor':'#FFFFFF',
+      	'cabHighlightColor':'33B5E5',
+      	'tabColor':'#33B5E5'
+      }
+      
+      var DEFAULT_COLORS_DARK = {
+      	'backColor':'#2D2D2D',
+      	'secondaryColor':'#151515',
+      	'tertiaryColor':'#303030',
+      	'accentColor':'#33B5E5',
+      	'actionbarstyle':'transparent',
+      	'cabBackColor':'#002E3E',
+      	'cabHighlightColor':'33B5E5',
+      	'tabColor':'#33B5E5'
+      }
+      
+      var DEFAULT_COLORS_INVERSE = {
+      	'backColor':'#2D2D2D',
+      	'secondaryColor':'#555555',
+      	'tertiaryColor':'#303030',
+      	'accentColor':'#33B5E5',
+      	'actionbarstyle':'solid',
+      	'cabBackColor':'#002E3E',
+      	'cabHighlightColor':'33B5E5',
+      	'tabColor':'#33B5E5'
+      }
+      
+      var NEUTRAL_PRESSED_COLOR_DARK = '#F0F0F0';
+      var NEUTRAL_PRESSED_COLOR_LIGHT = '#999999';
+      
+      function setDefaultColorPalette(theme) {
+      	if (theme == 'light') {
+      		form.setValuesSerialized(DEFAULT_COLORS_LIGHT);
+      	} else if (theme == 'dark') {
+      		form.setValuesSerialized(DEFAULT_COLORS_DARK);
+      	} else {
+      		form.setValuesSerialized(DEFAULT_COLORS_INVERSE);
+      	}
+      }
+   
+      var INVERSE_THEME_ATTRS = 
+'        <!-- Light.DarkActionBar specific -->\n'+
+'        <item name="android:actionBarWidgetTheme">@style/Theme.##stylep##.Widget</item>\n';   
+      
+      var INVERSE_THEME_ATTRS_SHERLOCK = 
+'        <!-- Light.DarkActionBar specific -->\n'+
+'        <item name="actionBarWidgetTheme">@style/Theme.##stylep##.Widget</item>\n';
+
+      /**
+       * Main image generation routine.
+       */
+      function regenerate(force, generateWebIcon) {
+        if (!force) {
+          if (regenerate.timeout_) {
+            clearTimeout(regenerate.timeout_);
+          }
+          regenerate.timeout_ = setTimeout(function() {
+            regenerate(true);
+          }, 1000);
+          return;
+        }
+        
+        if (!IMAGE_RESOURCES._loaded || !XML_RESOURCES._loaded)
+          return;
+
+        var values = form.getValues();
+        //var showGuides = $('#output-show-guides').is(':checked');
+
+        var styleName = values['name'].replace(/[^a-z0-9_]/ig, '');
+        var baseTheme = values['theme'];
+        var compat = values['compat'];
+        var coreTheme = ((baseTheme == 'light_dark') ? 'dark' : baseTheme);
+        var neutralPressed = values['neutralPressed'];
+        
+        if (baseThemeSetting == null) {
+        	//console.log('theme null');
+        	//console.log('baseTheme=' + baseTheme);
+        	baseThemeSetting = baseTheme;
+        } else if (baseTheme != baseThemeSetting) {
+        	// theme changed
+        	
+        	//console.log('theme changed');
+        	//console.log('baseThemeSetting=' + baseThemeSetting);
+        	//console.log('baseTheme=' + baseTheme);
+        	setDefaultColorPalette(baseTheme);
+        	baseThemeSetting = baseTheme;
+        }
+        
+        var styleNameTC = toTitleCase(styleName);
+        
+        var rx = new RegExp('##stylep##', "g");
+        var inverseAttrs = (baseTheme == 'light_dark') ? INVERSE_THEME_ATTRS.replace(rx, styleNameTC) : '';
+        var inverseAttrsSherlock = (baseTheme == 'light_dark') ? INVERSE_THEME_ATTRS_SHERLOCK.replace(rx, styleNameTC) : '';
+        
+        var acc = values['accentColor'].color.substring(1);        
+        if (acc.length == 3) {
+        	acc = acc[0] + acc[0] + acc[1] + acc[1] + acc[2] + acc[2];
+        }	
+        
+        var replaceStrings = {
+        	'style':(styleName.toLowerCase()),
+        	'stylep':(styleNameTC),
+        	'base':((baseTheme == 'light') ? '.Light' : ''),
+        	'accent':(acc.toUpperCase()),
+        	'actionbarstyle':(toTitleCase(values['actionbarstyle'])),
+        	
+        	'tab_unselected':((values['hairline'] == true) ? '@drawable/tab_unselected_' + styleName.toLowerCase() : '@android:color/transparent'),
+        	'solid_ab_bg':((values['texture'] == true) ? 'background_textured' : 'solid'),
+        	'solid_ab_bottom_bg':((values['texture'] == true) ? 'background_textured' : 'bottom_solid'),
+        	
+        	'parent_theme':((baseTheme == 'light_dark') ? '.Light.DarkActionBar' : ((baseTheme == 'light') ? '.Light' : '')),
+        	'inverse':((baseTheme == 'light_dark') ? '.Inverse' : ''),
+        	'actionbar_base':((baseTheme == 'light_dark') ? '.Light' : ((baseTheme == 'light') ? '.Light' : '')),
+        	'inverse_attrs':inverseAttrs,
+        	'inverse_attrs_sherlock':inverseAttrsSherlock
+        };
+        
+        zipper.clear();
+        zipper.setZipFilename('actionbar_style_' + styleName.toLowerCase() + '.zip');
+
+        var continue_ = function(foreCtx) {
+          //var backgroundShape = values['backgroundShape'];
+          //var backgroundShape = 'tab-unselected-pressed';
+          
+          // process xml
+          for (var template in xmlTemplates) {
+          	if (template == 'styles-sherlock') continue;
+          	if (template == 'styles-appcompat') continue;
+          	if (template == 'styles-v14-sherlock' && compat != 'sherlock') continue;
+          	if (template == 'styles-v14-appcompat' && compat != 'appcompat') continue;
+          	var dir;
+          	var suffix = '';
+          	if (template == 'styles' || template == 'colors') {
+          		dir = BASE_PATH+'res/values/';
+          		if (template == 'styles' && compat == 'sherlock') {
+          			suffix = '-sherlock';
+          		}
+          		if (template == 'styles' && compat == 'appcompat') {
+          			suffix = '-appcompat';
+          		}
+            } else if (template == 'styles-v14-sherlock') {
+            	template = 'styles';
+            	suffix = '-v14-sherlock';
+            	dir = BASE_PATH+'res/values-v14/';
+            } else if (template == 'styles-v14-appcompat') {
+            	template = 'styles';
+            	suffix = '-v14-appcompat';
+            	dir = BASE_PATH+'res/values-v14/';
+          	} else {
+          		dir = BASE_PATH+'res/drawable/';
+          	}
+          	
+          	var data = XML_RESOURCES[template + suffix];
+          	for (var id in replaceStrings) {
+          		var regexp = new RegExp('##' + id + '##', "g");
+          		data = data.replace(regexp, replaceStrings[id]);
+          	}
+          	
+          	zipper.add({
+          	  name: (dir + template + '_' + styleName.toLowerCase() + '.xml'),
+              textData: data
+            })
+          }
+          
+          // process non-styled assets
+          for (var nonStyledShape in nonStyledShapes) {
+          	for (var density in {'xxhdpi':1, 'xhdpi':1, 'hdpi':1, 'mdpi':1}) {
+              var mult = studio.util.getMultBaseMdpi(density);
+          	  var iconSize = PARAM_RESOURCES[density + '-' + nonStyledShape];
+              var targetRect = { x:  0, y:  0, w:  iconSize.h, h:  iconSize.h };
+
+              var outCtx = imagelib.drawing.context(iconSize);
+              
+              imagelib.drawing.copy(outCtx, IMAGE_RESOURCES[nonStyledShape + '-' + density + '-' + coreTheme], iconSize);
+             
+              zipper.add({
+                name: (BASE_PATH+'res/drawable-' + density + '/' + nonStyledShape + '_' + styleName.toLowerCase() + '.9.png'),
+                base64data: outCtx.canvas.toDataURL().match(/;base64,(.+)/)[1]
+              });
+              
+          	}
+          }
+          
+          // process neutral non-styled assets
+          if (neutralPressed) {
+            for (var neutralOptionNonStyledShape in neutralOptionNonStyledShapes) {
+          	  for (var density in {'xxhdpi':1, 'xhdpi':1, 'hdpi':1, 'mdpi':1}) {
+                var mult = studio.util.getMultBaseMdpi(density);
+          	    var iconSize = PARAM_RESOURCES[density + '-' + neutralOptionNonStyledShape];
+                var targetRect = { x:  0, y:  0, w:  iconSize.h, h:  iconSize.h };
+
+                var outCtx = imagelib.drawing.context(iconSize);
+              
+                imagelib.drawing.copy(outCtx, IMAGE_RESOURCES[neutralOptionNonStyledShape + '-' + density + '-' + coreTheme], iconSize);
+             
+                zipper.add({
+                  name: (BASE_PATH+'res/drawable-' + density + '/' + neutralOptionNonStyledShape + '_' + styleName.toLowerCase() + '.9.png'),
+                  base64data: outCtx.canvas.toDataURL().match(/;base64,(.+)/)[1]
+                });
+                
+                if (density == 'xhdpi') {
+                  imagelib.loadFromUri(outCtx.canvas.toDataURL(), function(neutralOptionNonStyledShape) {
+                    return function(img) {
+                      $('#out-icon-' + neutralOptionNonStyledShape).attr('src', img.src);
+                    };
+                  }(neutralOptionNonStyledShape));
+                }
+              
+          	  }
+            }
+          }
+
+          // process styled assets
+          for (var backgroundShape in shapes) {
+          
+          for (var density in {'xxhdpi':1, 'xhdpi':1, 'hdpi':1, 'mdpi':1}) {
+            var mult = studio.util.getMultBaseMdpi(density);
+            //if (density == 'web') {
+            //  mult = 1;
+            //  if (!generateWebIcon) {
+            //    continue;
+            //  }
+            //}
+            
+            // bail if we've already processed a neutral version
+            if (neutralPressed && neutralOptionNonStyledShapes.hasOwnProperty(backgroundShape)) {
+              continue;
+            }	
+
+            var iconSize = PARAM_RESOURCES[density + '-' + backgroundShape];
+            //var targetRect = PARAM_RESOURCES[density + '-targetRect'];
+            var targetRect = { x:  0, y:  0, w:  iconSize.h, h:  iconSize.h };
+
+            var outCtx = imagelib.drawing.context(iconSize);
+            var tmpCtx = imagelib.drawing.context(iconSize);
+            
+            var fillColor;
+              if ( backgroundShape.match('spinner') ||
+              	backgroundShape.match('transparent') || 
+              	backgroundShape.match('progress') ||
+              	backgroundShape.match('list') || backgroundShape.match('cab_done') ) {
+              	fillColor = values['accentColor'].color;
+              } else if (backgroundShape.match('stacked')) {
+              	fillColor = values['secondaryColor'].color; 
+              } else if (backgroundShape.match('menu')) {
+              	fillColor = values['tertiaryColor'].color;
+              } else if (backgroundShape.match('cab_background')) {
+              	fillColor = values['cabBackColor'].color;
+              } else if (backgroundShape.match('tab')) {
+              	fillColor = values['tabColor'].color;
+              } else {
+              	fillColor = values['backColor'].color;
+              }
+              
+              var altFillColor = (backgroundShape.match('cab_background')) ? values['cabHighlightColor'].color : 
+                (backgroundShape.match('tab_selected_') || backgroundShape.match('tab_unselected_')) ? values['accentColor'].color : null;
+                
+              if (neutralPressed && ((backgroundShape.match('tab_selected_pressed') || backgroundShape.match('tab_unselected_pressed')))) {
+              	altFillColor = (coreTheme == 'dark') ? NEUTRAL_PRESSED_COLOR_DARK : NEUTRAL_PRESSED_COLOR_LIGHT;
+              }
+              
+              var maskName = (backgroundShape.match('tab_unselected_') && (values['hairline'] == true)) ? '-mask_old' : '-mask';
+            	
+              //console.log(backgroundShape + " - " + maskName);
+            
+              tmpCtx.save();
+              tmpCtx.globalCompositeOperation = 'source-over';
+              imagelib.drawing.copy(tmpCtx, IMAGE_RESOURCES[backgroundShape + '-' + density + maskName], iconSize);
+              tmpCtx.globalCompositeOperation = 'source-atop';
+              tmpCtx.fillStyle = fillColor;
+              tmpCtx.fillRect(0, 0, iconSize.w, iconSize.h);
+                            
+              if (foreCtx) {
+                var copyFrom = foreCtx;
+                var foreSize = {
+                  w: foreCtx.canvas.width,
+                  h: foreCtx.canvas.height
+                };
+
+                //if (values['foreColor'].alpha) {
+                  var tmpCtx2 = imagelib.drawing.context(foreSize);
+                  imagelib.drawing.copy(tmpCtx2, foreCtx, foreSize);
+                  tmpCtx2.globalCompositeOperation = 'source-atop';
+                  tmpCtx2.fillStyle = values['foreColor'].color;
+                  tmpCtx2.fillRect(0, 0, foreSize.w, foreSize.h);
+                  copyFrom = tmpCtx2;
+                  tmpCtx.globalAlpha = values['foreColor'].alpha / 100;
+                //}
+
+                //imagelib.drawing[values['crop'] ? 'drawCenterCrop' : 'drawCenterInside']
+                imagelib.drawing['drawCenterCrop']
+                  (tmpCtx, copyFrom, targetRect, {
+                    x: 0, y: 0,
+                    w: foreSize.w, h: foreSize.h
+                  });
+              }
+              tmpCtx.restore();
+              
+              // TODO
+              var tmpCtxAlt;
+              if (altFillColor) {
+              	tmpCtxAlt = imagelib.drawing.context(iconSize);
+              	tmpCtxAlt.save();
+                tmpCtxAlt.globalCompositeOperation = 'source-over';
+                imagelib.drawing.copy(tmpCtxAlt, IMAGE_RESOURCES[backgroundShape + '-' + density + maskName + '1'], iconSize);
+                tmpCtxAlt.globalCompositeOperation = 'source-atop';
+                tmpCtxAlt.fillStyle = altFillColor;
+                tmpCtxAlt.fillRect(0, 0, iconSize.w, iconSize.h);
+                tmpCtxAlt.restore();
+              }
+
+
+              var foreEffect = 1; //values['foreEffect'];
+              imagelib.drawing.copy(outCtx, IMAGE_RESOURCES[backgroundShape + '-' + density + '-back'], iconSize);
+              imagelib.drawing.copy(outCtx, tmpCtx, iconSize);
+              if (altFillColor) {
+              	imagelib.drawing.copy(outCtx, tmpCtxAlt, iconSize);
+              }
+              imagelib.drawing.copy(outCtx, IMAGE_RESOURCES[backgroundShape + '-' + density + '-fore' + foreEffect], iconSize);
+            //}
+            
+            var ext = (backgroundShape.match('ab_texture_tile')) ? '.png' : '.9.png';
+
+            zipper.add({
+              name: (BASE_PATH+'res/drawable-' + density + '/' + backgroundShape + '_' + styleName.toLowerCase() + ext),
+              base64data: outCtx.canvas.toDataURL().match(/;base64,(.+)/)[1]
+            });
+
+            //if (showGuides)
+            //  studio.ui.drawImageGuideRects(outCtx, iconSize, [
+            //    targetRect
+            //  ]);
+
+			if (density == 'xhdpi') {
+              imagelib.loadFromUri(outCtx.canvas.toDataURL(), function(backgroundShape) {
+                return function(img) {
+                  $('#out-icon-' + backgroundShape).attr('src', img.src);
+                };
+              }(backgroundShape));
+            }
+          }
+          
+          } // JG
+          
+          // ***** PREVIEW ******
+
+			var iconSize = { w: 480, h: 728 };
+			var targetRect = {
+				x : 0,
+				y : 0,
+				w : iconSize.h,
+				h : iconSize.h
+			};
+
+			var outCtx = imagelib.drawing.context(iconSize);
+			
+			var tmpCtxAB = imagelib.drawing.context(iconSize);
+			var tmpCtxStacked = imagelib.drawing.context(iconSize);
+			var tmpCtxAccent = imagelib.drawing.context(iconSize);
+			var tmpCtxPressed = imagelib.drawing.context(iconSize);
+			var tmpCtxPopup = imagelib.drawing.context(iconSize);
+			var tmpCtxTab = imagelib.drawing.context(iconSize);
+
+			var fillColor = values['backColor'].color;
+			
+			var abStyle = values['actionbarstyle'];
+			
+			var tabKey = (values['hairline'] == true) ? 'mask-tab-hairline' : 'mask-tab';
+			
+			tmpCtxAB.save();
+			tmpCtxAB.globalCompositeOperation = 'source-over';
+			imagelib.drawing.copy(tmpCtxAB, PREVIEW_RESOURCES['mask-ab-main' + '-' + coreTheme + '-' + abStyle], iconSize);
+			tmpCtxAB.globalCompositeOperation = 'source-atop';
+			tmpCtxAB.fillStyle = fillColor;
+			tmpCtxAB.fillRect(0, 0, iconSize.w, iconSize.h);
+			tmpCtxAB.restore();
+			
+			fillColor = values['secondaryColor'].color;
+			
+			tmpCtxStacked.save();
+			tmpCtxStacked.globalCompositeOperation = 'source-over';
+			imagelib.drawing.copy(tmpCtxStacked, PREVIEW_RESOURCES['mask-ab-stacked' + '-' + coreTheme + '-' + abStyle], iconSize);
+			tmpCtxStacked.globalCompositeOperation = 'source-atop';
+			tmpCtxStacked.fillStyle = fillColor;
+			tmpCtxStacked.fillRect(0, 0, iconSize.w, iconSize.h);
+			tmpCtxStacked.restore();
+			
+			fillColor = values['accentColor'].color;
+			
+			tmpCtxAccent.save();
+			tmpCtxAccent.globalCompositeOperation = 'source-over';
+			imagelib.drawing.copy(tmpCtxAccent, PREVIEW_RESOURCES['mask-accent' + '-' + coreTheme + '-' + abStyle], iconSize);
+			tmpCtxAccent.globalCompositeOperation = 'source-atop';
+			tmpCtxAccent.fillStyle = fillColor;
+			tmpCtxAccent.fillRect(0, 0, iconSize.w, iconSize.h);
+			tmpCtxAccent.restore();
+			
+			fillColor = (neutralPressed) ? (coreTheme == 'dark') ? NEUTRAL_PRESSED_COLOR_DARK : NEUTRAL_PRESSED_COLOR_LIGHT : values['accentColor'].color;
+			
+			tmpCtxPressed.save();
+			tmpCtxPressed.globalCompositeOperation = 'source-over';
+			imagelib.drawing.copy(tmpCtxPressed, PREVIEW_RESOURCES['mask-pressed' + '-' + coreTheme + '-' + abStyle], iconSize);
+			tmpCtxPressed.globalCompositeOperation = 'source-atop';
+			tmpCtxPressed.fillStyle = fillColor;
+			tmpCtxPressed.fillRect(0, 0, iconSize.w, iconSize.h);
+			tmpCtxPressed.restore();
+			
+			fillColor = values['tabColor'].color;
+			
+			tmpCtxTab.save();
+			tmpCtxTab.globalCompositeOperation = 'source-over';
+			imagelib.drawing.copy(tmpCtxTab, PREVIEW_RESOURCES[tabKey + '-' + coreTheme + '-' + abStyle], iconSize);
+			tmpCtxTab.globalCompositeOperation = 'source-atop';
+			tmpCtxTab.fillStyle = fillColor;
+			tmpCtxTab.fillRect(0, 0, iconSize.w, iconSize.h);
+			tmpCtxTab.restore();
+
+			fillColor = values['tertiaryColor'].color;
+			
+			tmpCtxPopup.save();
+			tmpCtxPopup.globalCompositeOperation = 'source-over';
+			imagelib.drawing.copy(tmpCtxPopup, PREVIEW_RESOURCES['mask-popup' + '-' + coreTheme + '-' + abStyle], iconSize);
+			tmpCtxPopup.globalCompositeOperation = 'source-atop';
+			tmpCtxPopup.fillStyle = fillColor;
+			tmpCtxPopup.fillRect(0, 0, iconSize.w, iconSize.h);
+			tmpCtxPopup.restore();
+
+			var foreEffect = 2;
+			imagelib.drawing.copy(outCtx, PREVIEW_RESOURCES['back' + '-' + ((baseTheme == 'light_dark') ? 'light' : coreTheme) + '-' + abStyle], iconSize);
+			imagelib.drawing.copy(outCtx, tmpCtxAB, iconSize);
+			
+			if (values['texture'] == true && abStyle == 'solid') {
+				imagelib.drawing.copy(outCtx, PREVIEW_RESOURCES['mask-ab-main-textured' + '-' + coreTheme + '-' + abStyle], iconSize);
+			}
+			
+			imagelib.drawing.copy(outCtx, tmpCtxStacked, iconSize);
+			imagelib.drawing.copy(outCtx, tmpCtxPopup, iconSize);
+			imagelib.drawing.copy(outCtx, tmpCtxTab, iconSize);
+			imagelib.drawing.copy(outCtx, tmpCtxAccent, iconSize);
+			imagelib.drawing.copy(outCtx, tmpCtxPressed, iconSize);
+			imagelib.drawing.copy(outCtx, PREVIEW_RESOURCES['fore' + foreEffect + '-' + coreTheme + '-' + abStyle], iconSize);
+
+			imagelib.loadFromUri(outCtx.canvas.toDataURL(), function(backgroundShape) {
+				return function(img) {
+					$('#out-icon-' + backgroundShape).attr('src', img.src);
+				};
+			}('preview'));
+			
+          // ***** END PREVIEW ******
+          
+        };
+
+        //if (values['foreground']) {
+        //  continue_(values['foreground'].ctx);
+        //} else {
+          continue_(null);
+        //}
+      }
+
+      var form = new studio.forms.Form('iconform', {
+        onChange: function(field) {
+          regenerate();
+        },
+        fields: [
+        
+          new studio.forms.TextField('name', {
+            title: 'Style name',
+            helpText: 'Used as name suffix when generating resources. No spaces or punctuation.',
+            defaultValue: 'example'
+          }),
+          new studio.forms.EnumField('compat', {
+            title: 'Style compatibility',
+            buttons: false,
+            options: [
+              { id: 'holo', title: 'Holo' },
+              { id: 'appcompat', title: 'AppCompat' },
+              { id: 'sherlock', title: 'Sherlock' }
+            ],
+            helpText: 'Sherlock styles require the <a href="http://actionbarsherlock.com">ActionBarSherlock</a> library.',
+            defaultValue: 'holo'
+          }),
+          new studio.forms.EnumField('theme', {
+            title: 'Base theme',
+            helpText: 'The application base theme. Changing this setting will reset the form to Android defaults.',
+            buttons: false,
+            options: [
+              { id: 'light', title: 'Light' },
+              { id: 'dark', title: 'Dark' },
+              { id: 'light_dark', title: 'Light - Dark Action Bar' }
+            ],
+            defaultValue: 'light'
+          }),
+          new studio.forms.EnumField('actionbarstyle', {
+            title: 'Action bar style',
+            buttons: true,
+            options: [
+              { id: 'solid', title: 'Solid' },
+              { id: 'transparent', title: 'Transparent' }
+            ],
+            defaultValue: 'solid'
+          }),
+          new studio.forms.BooleanField('texture', {
+            title: 'Action bar texture',
+            helpText: 'Solid style action bar texture effect on API 14+.',
+            defaultValue: false,
+            offText: 'Off',
+            onText: 'On'
+          }),
+          new studio.forms.BooleanField('hairline', {
+            title: 'Tab hairline style',
+            defaultValue: false,
+            offText: 'Off',
+            onText: 'On'
+          }),
+          new studio.forms.BooleanField('neutralPressed', {
+            title: 'Neutral pressed states',
+            helpText: 'Default KitKat style.',
+            defaultValue: true,
+            offText: 'Off',
+            onText: 'On'
+          }),
+          new studio.forms.ColorField('backColor', {
+            title: 'Action bar color',
+            helpText: 'Solid style action bar background.',
+            defaultValue: DEFAULT_COLORS_LIGHT['backColor']
+          }),
+          new studio.forms.ColorField('secondaryColor', {
+            title: 'Stacked color',
+            helpText: 'Solid style stacked tab background.',
+            defaultValue: DEFAULT_COLORS_LIGHT['secondaryColor']
+          }),
+          new studio.forms.ColorField('tabColor', {
+            title: 'Tab indicator color',
+            defaultValue: DEFAULT_COLORS_LIGHT['tabColor']
+          }),
+          new studio.forms.ColorField('tertiaryColor', {
+            title: 'Popup color',
+            helpText: 'Overflow menu, submenu and spinner panel background.',
+            defaultValue: DEFAULT_COLORS_LIGHT['tertiaryColor']
+          }),
+          new studio.forms.ColorField('accentColor', {
+            title: 'Accent color',
+            helpText: 'Focus & pressed states, horizontal progress and transparent action bar keyline.',
+            defaultValue: DEFAULT_COLORS_LIGHT['accentColor']
+          }),
+          new studio.forms.ColorField('cabBackColor', {
+            title: 'Action mode background color',
+            helpText: 'Contextual action bar background.',
+            defaultValue: DEFAULT_COLORS_LIGHT['cabBackColor']
+          }),
+          new studio.forms.ColorField('cabHighlightColor', {
+            title: 'Action mode highlight color',
+            helpText: 'Contextual action bar highlight.',
+            defaultValue: DEFAULT_COLORS_LIGHT['cabHighlightColor']
+          }),
+          
+        ]
+      });
+      form.createUI($('#inputs-form').get(0));
+      
+      var baseThemeSetting = null; //'light';
+    </script>

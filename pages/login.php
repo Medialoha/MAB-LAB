@@ -39,10 +39,9 @@ if (isset($_POST['login'])) {
     <!-- Le styles -->
     <link href="libs/bootstrap/css/bootstrap.css" rel="stylesheet" >
     <link href="libs/bootstrap/css/bootstrap-responsive.css" rel="stylesheet" >
-    
-    <link href="assets/css/tags.css" rel="stylesheet" >
-    <link href="assets/css/page-login.css" rel="stylesheet" >
-    <link href="assets/css/page-login.css" rel="stylesheet" >
+
+    <link href="assets/css/style.css" rel="stylesheet" >
+    <link href="assets/css/login.css" rel="stylesheet" >
 
     <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
@@ -58,17 +57,27 @@ if (isset($_POST['login'])) {
 		<link rel="shortcut icon" href="assets/images/favicon.png" >
   </head>
   <body>
-    <div class="container row" >
-    	<div class="span3 offset3" >
+    <div class="container" >
+    	<div class="card" style="width:310px; margin:25px auto 0px auto;" >
+    	
       <form class="form-signin" action="index.php" method="post" >
-        <h3 class="form-signin-heading">
+        <h3 class="form-signin-heading" >
         	<?php echo _APPLICATION_NAME_; ?>&nbsp;&nbsp;<small class="muted" >Please sign in</small>
         </h3>
-        <input name="login" type="text" class="input-block-level" placeholder="Username" >
-        <input name="password" type="password" class="input-block-level" placeholder="Password" >
+        
+        <div class="input-prepend" >
+					<span class="add-on"><i class="icon-user" ></i></span>
+        	<input name="login" type="text" class="input-block-level" placeholder="Username" />
+        </div>
+        
+        <div class="input-prepend" >
+					<span class="add-on"><i class="icon-lock" ></i></span>
+        	<input name="password" type="password" class="input-block-level" placeholder="Password" />
+        </div>
 
         <p><?php echo $message; ?></p>
         
+        <br/>
         <button class="btn btn-primary" type="submit">Sign in</button>
       </form>
       </div>

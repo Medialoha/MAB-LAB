@@ -115,8 +115,23 @@ class DBHelper {
 		return -1;
 	}
 	
-	public static function updateApplicationName($id, $name) {
-		return self::exec('UPDATE '.TBL_APPLICATIONS.' SET '.APP_NAME.'="'.$name.'" WHERE '.APP_ID.'='.$id, false);
+	public static function updateApplication($id, $name, $package=null) {
+		if ($id>0) {
+			if (!self::exec('UPDATE '.TBL_APPLICATIONS.' SET '.APP_NAME.'="'.$name.'", '.APP_PACKAGE.'='.(is_null($package)?'null':'"'.$package.'"').' WHERE '.APP_ID.'='.$id, false))
+				return 0;
+						
+		} else {
+			$query = 'INSERT INTO '.TBL_APPLICATIONS.' ('.APP_NAME.', '.APP_PACKAGE.') VALUES ("'.$name.'", '.(is_null($package)?'null':'"'.$package.'"').')';
+			
+			if (mysqli_query(self::$dbo, $query)) {
+				$res = self::selectRow(TBL_APPLICATIONS, APP_ID.'=(SELECT MAX('.APP_ID.') FROM '.TBL_APPLICATIONS.')', APP_ID);
+					
+				if ($res!=null)
+					$id = $res[0];
+			}
+		}
+				
+		return $id;
 	}
 	
 	public static function insertIssue($values) {
@@ -398,6 +413,30 @@ class DBHelper {
 		return $error;
 	}
 	
+	/**
+	 * Update googleplay_sales merchant currency and convert amount to merchant currency
+	 */
+	public static function updateSalesCurrency($currency) {
+		if (!$currency instanceof Currency) {
+			return false;
+		}
+		
+		$error = 0;
+		$query = 'UPDATE '.TBL_SALES.' SET '.SALE_MERCHANT_CURRENCY.'="'.$currency->getCurrencyCode().'", '.SALE_CHARGED_AMOUNT_MERCHANT_CURRENCY.'=';
+		
+		$sales = self::selectRows(TBL_SALES, SALE_MERCHANT_CURRENCY."<>'".$currency->getCurrencyCode()."'", null, SALE_ORDER_NUMBER.','.SALE_CURRENCY_CODE.','.SALE_CHARGED_AMOUNT, null, null, false);
+		
+		if ($sales!=null) {
+			foreach ($sales as $s) {
+				if (self::exec($query.$currency->convert($s[SALE_CHARGED_AMOUNT], $s[SALE_CURRENCY_CODE]).' WHERE '.SALE_ORDER_NUMBER.'='.$s[SALE_ORDER_NUMBER])!=null) {
+					++$error;
+				}
+			}
+		}
+		
+		return $error==0;
+	}
+	
 	public static function getReportIssueKey(&$reportArr) {
 // 		$arr = explode("\n", $reportArr[REPORT_STACK_TRACE]);
 // 		return md5($reportArr[REPORT_VERSION_CODE].$reportArr[REPORT_VERSION_NAME].$reportArr[REPORT_PACKAGE_NAME].$arr[0]);
@@ -438,6 +477,17 @@ class DBHelper {
 		}
 
 		return $result;		
+	}
+	
+	public static function deleteApplication($ids) {
+		$where = APP_ID;
+		
+		if (is_array($ids))
+			$where .= ' IN ("'.implode('","', $ids).'")';
+		else
+			$where .= '="'.$ids.'"';
+		
+		return mysqli_query(self::$dbo, 'DELETE FROM '.TBL_APPLICATIONS.' WHERE '.$where);
 	}
 	
 	public static function deleteUsers($ids) {

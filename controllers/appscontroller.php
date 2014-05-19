@@ -9,12 +9,34 @@
  * Contributors:
  *     EIRL DEVAUX J. - Medialoha - initial API and implementation
  */
+require_once('includes/currency.class.php');
+
 
 switch ($action) {
 
-	//////// UPDATE APP NAME
-	case 'updateAppName' :
-			DbHelper::updateApplicationName($_POST['appId'], $_POST['appName']);
+	//////// DELETE APPLICATION
+	case 'deleteApp' :		
+			echo DbHelper::deleteApplication($_POST['appId']);
+		break;
+
+	//////// UPDATE APPLICATION
+	case 'updateApp' :		
+			// insert or update application
+			$newAppId = DbHelper::updateApplication($_POST['appId'], $_POST['appName'], array_key_exists('appPackage', $_POST)?$_POST['appPackage']:null);
+			
+			if ($_POST['appId']==0) {
+				if ($newAppId!=0) {
+					$packageName = array_key_exists('appPackage', $_POST)?$_POST['appPackage']:'';
+				
+					echo '<tr id="app', $_POST['appId'], '" ><td class="app-id" >', $newAppId, '</td>',
+								'<td class="app-name" >', $_POST['appName'], 
+								'</td><td class="app-package text-i" >', $packageName, 
+								'</td><td class="app-issues" > - </td><td style="text-align:right;" >',
+								'<a href="javascript:editApplication(', $newAppId, ", '", $_POST['appName'], "'", $packageName, ');" style="" title="Edit application" ><i class="icon-edit" ></i></a>&nbsp;',
+								'<a href="javascript:delApplication(', $newAppId, ');" style="" title="Delete application" ><i class="icon-trash" ></i></a></td></tr>';
+				}
+				
+			} else { if ($newAppId>0) echo 'OK'; else echo 'KO'; }
 		
 		break;
 
@@ -22,16 +44,19 @@ switch ($action) {
 	case 'import' :
 			require_once(BASE_PATH.'includes/googlecheckoutcsvfileimporter.class.php');
 			
+			$currency = new Currency($mCfg->getCurrencyCode());
+			$importer = new GoogleCheckoutCSVFileImporter($currency);
+			
 			$error = null;
 			
 			if ($_FILES['csvFile']['error']>0) {
 				$error = "Upload file error: ".$_FILES['csvFile']['error'];
 				
 			} else {
-				$error = GoogleCheckoutCSVFileImporter::checkUploadedFile($_FILES['csvFile']);
+				$error = $importer->checkUploadedFile($_FILES['csvFile']);
 				if ($error==null) {
 					
-					$error = GoogleCheckoutCSVFileImporter::import($_FILES['csvFile'], $_POST['fileType']);
+					$error = $importer->import($_FILES['csvFile'], $_POST['fileType']);
 					if (count($error)>0) {
 						foreach($error as $msg)
 							Helper::pushAlert(ALERT_ERROR, $msg);

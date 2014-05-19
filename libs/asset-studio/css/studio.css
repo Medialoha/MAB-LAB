@@ -22,31 +22,30 @@
   top: 0;
 }
 
-/* main styles + layout */
-
-/* html, body { */
-/*   font-family: roboto, sans-serif; */
-/*   font-size: 16px; */
-/*   font-weight: 400; */
-/*   line-height: 20px; */
-/*   background-color: #f0f0f0; */
-/*   color: #333; */
-/*   -webkit-font-smoothing: antialiased; */
-/* } */
+#outputs A {
+	color:#ffffff;
+}
 
 #main-container strong {
-  font-weight: 600;
+  font-weight:600;
 }
 
 #main-container a {
   color: #09c;
 }
 
+#main-container #outputs A {
+	color:#ffffff;
+}
+
+#main-container #outputs A[disabled] {
+	color:#000000;	
+}
+
 #main-container {
-  background-color: #f8f8f8;
-  width: 800px;
-  margin: 24px auto;
-  border-radius: 2px;
+  background-color: #ffffff;
+ 	width:auto; max-width:840px;
+  margin:4px auto;
   
   font-family: roboto, sans-serif;
   font-size: 16px;
@@ -56,7 +55,7 @@
   -webkit-font-smoothing: antialiased;
 }
 
-#page-header, #page-links, #inputs, #outputs, #footer {
+#page-header, #page-links, #inputs, #outputs, #main-container #footer {
   padding: 24px;
 }
 
@@ -170,7 +169,7 @@
       color: #ccc;
     }
 
-#outputs, #footer {
+#outputs, #main-container #footer {
   border-top: 4px solid #f0f0f0;
 }
 
@@ -504,14 +503,25 @@ button:not([disabled]):active {
 .browser-unsupported-note {
   padding: 6px 12px;
   border: 0 !important;
-  box-shadow: 0 3px 15px rgba(0,0,0,0.25);
-
-  -webkit-box-shadow: 0 3px 15px rgba(0,0,0,0.25);
-  -moz-box-shadow: 0 3px 15px rgba(0,0,0,0.25);
+  font-style:italic;
+  font-size:13px;
 }
 
 /* bug fixes */
 
 .colorpicker {
   z-index: 10000; /* bugfix for jQuery UI sliders appearing above colorpicker */
+}
+
+#inputs, #stage {
+	margin:0px 4px;
+	background-color: #EEEEEE;
+}
+
+#instage-container #stage {
+	margin-left:0px;
+}
+
+#instage-container {
+	margin-bottom:4px;
 }

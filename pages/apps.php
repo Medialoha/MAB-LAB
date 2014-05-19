@@ -9,6 +9,7 @@
  * Contributors:
  *     EIRL DEVAUX J. - Medialoha - initial API and implementation
 */
+require_once('includes/currency.class.php');
 
 
 $apps = DbHelper::selectRows(TBL_APPLICATIONS, null, APP_NAME.' ASC', 
@@ -16,30 +17,54 @@ $apps = DbHelper::selectRows(TBL_APPLICATIONS, null, APP_NAME.' ASC',
 															null, null, false);
 ?>
 <fieldset><legend><img src="assets/images/ic_application.png" class="fieldset-icon" />Applications</legend>
-	<table class="table table-condensed apps-tbl" >
+	<table id="appsTbl" class="table table-condensed apps-tbl" >
 	<thead>
 		<tr>
 			<th class="app-id" >ID</th>
 			<th style="width:300px;" >Application Name</th>
 			<th>Package</th>
 			<th class="app-issues" style="width:30px;" ><i class="icon-tag" /></th>
+			<th style="" ></th>
 		</tr>
 	</thead>
 	<tbody>
-	<?php foreach ($apps as $app) { ?> 
-		<tr id="<?php echo $app[APP_ID]; ?>" >
+	<?php foreach ($apps as $app) { 
+					$canEditPackage = $app['issues']==0; 	
+		
+	?> 
+		<tr id="app<?php echo $app[APP_ID]; ?>" >
 			<td class="app-id" ><?php echo $app[APP_ID]; ?></td>
-			<td class="app-name" >
-				<span><?php echo $app[APP_NAME]; ?></span>
-				<a href="javascript:updateAppName(<?php echo $app[APP_ID]; ?>, '<?php echo $app[APP_NAME]; ?>');" style="float:right;" title="Edit application name" >
-					<i class="icon-edit" ></i>
-				</a>
-			</td>
+			<td class="app-name" ><?php echo $app[APP_NAME]; ?></td>
 			<td class="app-package text-i" ><?php echo $app[APP_PACKAGE]; ?></td>
 			<td class="app-issues" ><?php echo $app['issues']; ?></td>
+			<td style="text-align:right;" >
+				<a href="javascript:editApplication(<?php echo $app[APP_ID], ", '", $app[APP_NAME], "'", $canEditPackage?", '".$app[APP_PACKAGE]."'":''; ?>);" style="" title="Edit application" >
+					<i class="icon-edit" ></i>
+				</a>&nbsp;
+				<a href="javascript:delApplication(<?php echo $canEditPackage?$app[APP_ID]:'0'; ?>);" style="" title="Delete application" >
+					<i class="icon-trash" ></i>
+				</a>
+			</td>
 		</tr>
 	<?php } ?>
 	</tbody>
+	<tfoot>
+		<tr>
+			<td>
+				<input type="hidden" id="appId" />
+			</td>
+			<td style="padding:25px 20px 0px 5px;" >
+				<input type="text" id="appName" placeholder="Application name" style="width:100%" />
+			</td>
+			<td style="padding:25px 20px 0px 5px;" >
+				<input type="text" id="appPackage" placeholder="Package" style="width:100%" />
+			</td>
+			<td style="padding:25px 0px 0px 0px; text-align:right;" colspan="2" >
+				<button type="button" class="btn" onclick="updateApplication()" ><i class="icon-ok" ></i></button>
+				<button type="button" class="btn" onclick="clearEditApplication()" title="clear" ><i class="icon-remove" ></i></button>
+			</td>
+		</tr>
+	</tfoot>
 	</table>
 </fieldset>
 

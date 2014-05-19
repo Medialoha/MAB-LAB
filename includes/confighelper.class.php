@@ -22,6 +22,9 @@ class CfgHelper {
 	// report display options
 	private $mDateFormat;
 	private $mDateTimezone;
+	
+	private $mCurrencyCode;
+	
 	private $mShrinkPackageName;
 	
 	private $mBasicAuth;
@@ -42,20 +45,20 @@ class CfgHelper {
 	
 	// CONSTRUCTOR
 	public static function getInstance() {
-		self::init();
-		
-		return $_SESSION[CONFIG_OBJ_SESSION_NAME];
+		return self::init();
 	}
 	
 	public static function init($recreate=false) {
 		if (!array_key_exists(CONFIG_OBJ_SESSION_NAME, $_SESSION) || !$_SESSION[CONFIG_OBJ_SESSION_NAME] instanceof CfgHelper || $recreate==true) {
 			$_SESSION[CONFIG_OBJ_SESSION_NAME] = CfgHelper::createHelperObject();
 		}
+		
+		return $_SESSION[CONFIG_OBJ_SESSION_NAME];
 	}
 	
-	private static function createHelperObject() {
+	private static function createHelperObject() { 
 		global $mGlobalCfg;
-		
+
 		$obj = new CfgHelper();
 		
 		self::safeGlobalConfig($mGlobalCfg);
@@ -68,6 +71,8 @@ class CfgHelper {
 			$obj->mDateTimezone = date_default_timezone_get();
 			
 		} else { date_default_timezone_set($obj->mDateTimezone); }
+		
+		$obj->mCurrencyCode = $mGlobalCfg['currency.code'];
 		
 		$obj->mShrinkPackageName = $mGlobalCfg['report.packagename.shrink'];
 		
@@ -91,6 +96,7 @@ class CfgHelper {
 	private static function safeGlobalConfig(&$configArr) { 
 		$keys = array('db.host', 'db.name', 'db.port', 'db.user', 'db.pwd', 'tbl.prefix', 
 									'date.format', 'date.timezone', 
+									'currency.code',
 									'report.packagename.shrink', 'report.sendmail', 'report.sendmail.recipients', 'report.basicauth', 'report.basicauth.method', 'report.basicauth.accounts',
 									'report.exception.devices',
 									'mail.from.addr', 'mail.from.name', 
@@ -98,6 +104,7 @@ class CfgHelper {
 									'report.tags');
 		$defaultValues = array('', '', '', '', 'mabl_', 
 														'Y-m-d H:i', 'Europe/Berlin', 
+														'EUR',
 														true, false, '', 
 														false, 0, array(), 
 														'', 'MAB-LAB', 
@@ -135,6 +142,8 @@ class CfgHelper {
 	
 	// Write config to file includes/config.php
 	public static function writeConfig($arr, $path="") {
+		global $mGlobalCfg;
+		
 		$error = self::checkConfigArr($arr);
 		
 		if ($error!=null) return $error;
@@ -162,15 +171,18 @@ class CfgHelper {
 		
 		// if all files checks passed
 		if ($error==null) {
-			$accounts = ''; $sep = ''; 
-			foreach ($arr['report.basicauth.accounts'] as $account) {
-				$accounts .= $sep.'array(\'login\'=>"'.$account['login'].'", \'password\'=>"'.$account['password'].'", \'clear\'=>'.($account['clear']?'true':'false').')';
-				$sep = ',';
-			}
+			if (array_key_exists('report.basicauth.accounts', $arr)) {
+				$accounts = ''; $sep = ''; 
+				foreach ($arr['report.basicauth.accounts'] as $account) {
+					$accounts .= $sep.'array(\'login\'=>"'.$account['login'].'", \'password\'=>"'.$account['password'].'", \'clear\'=>'.($account['clear']?'true':'false').')';
+					$sep = ',';
+				}
+				
+			} else { $accounts = ''; }
 
 			$tmpl = file_get_contents($configTmplFile);
 
-			if (!file_put_contents($configFile,
+			if (file_put_contents($configFile,
 															sprintf($tmpl,
 																				$arr['db.host'], (empty($arr['db.port'])?'false':$arr['db.port']), 
 																				$arr['db.name'], 
@@ -180,12 +192,14 @@ class CfgHelper {
 																	
 																				$arr['date.format'], $arr['date.timezone'],
 																	
+																				$arr['currency.code'],
+																	
 																				$arr['report.packagename.shrink']?'true':'false',
 																				$arr['report.sendmail']?'true':'false',
 																				$arr['report.sendmail.recipients'],
 																	
 																				$arr['report.basicauth']?'true':'false',
-																				$arr['report.basicauth.method'],
+																				array_key_exists('report.basicauth.method', $arr)?$arr['report.basicauth.method']:'',
 																				$accounts,
 																	
 																				$arr['report.exception.devices'],
@@ -196,9 +210,11 @@ class CfgHelper {
 																	
 																				$arr['report.tags']
 																			))) {
-					
-				$error = 'An error occured while writing configuration file !';
-			}
+																				
+				// update current config, call init(true) to get an updated instance of config helper
+				$mGlobalCfg = $arr;
+																				
+			} else { $error = 'An error occured while writing configuration file !'; }
 		}
 	
 		return $error;
@@ -244,6 +260,8 @@ class CfgHelper {
 	}
 	
 	public function getBasicAuthMethod() { return $this->mBasicAuthMethod; }
+	
+	public function getCurrencyCode() { return $this->mCurrencyCode; }
 	
 	public function getDateFormat() { return $this->mDateFormat; }
 	

@@ -1,6 +1,6 @@
 @CHARSET "UTF-8";
 #main-container {
-  width: 1000px;
+  width:auto; max-width:840px;
 }
 
 #instage-container {

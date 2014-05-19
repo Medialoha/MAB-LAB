@@ -9,10 +9,12 @@
  * Contributors:
  *     EIRL DEVAUX J. - Medialoha - initial API and implementation
 */
+$cfg = CfgHelper::getInstance();
+$currency = new Currency($cfg->getCurrencyCode());
 
 $orderOpts = array( array('Date ASC', SALE_ORDER_CHARGED_TIMESTAMP.' ASC'), 
 										array('Date DESC', SALE_ORDER_CHARGED_TIMESTAMP.' DESC'));
-$order = isset($_POST['order'])?$_POST['order']:0;
+$order = isset($_POST['order'])?$_POST['order']:1;
 
 $periodEnd = isset($_POST['periodEnd'])?$_POST['periodEnd']:'';
 
@@ -87,7 +89,7 @@ $sales = DbHelper::selectRows(TBL_SALES.' LEFT JOIN '.TBL_APPLICATIONS.' ON '.AP
 				<th style="text-align:center;" >SKU</th>
 				<th style="text-align:center;" >Buyer country</th>
 				<th style="text-align:center;" >Status</th>
-				<th style="text-align:center;" colspan="2" >Item price</th>
+				<th style="text-align:center;" colspan="2" >Charged amount</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -104,8 +106,8 @@ $sales = DbHelper::selectRows(TBL_SALES.' LEFT JOIN '.TBL_APPLICATIONS.' ON '.AP
 					<td style="text-align:center;" ><?php echo $s[SALE_SKU_ID]; ?></td>	
 					<td style="text-align:center;" ><?php echo $s[SALE_BUYER_COUNTRY]; ?></td>		
 					<td style="text-align:center;" ><?php echo $s[SALE_FINANCIAL_STATUS]; ?></td>
-					<td style="text-align:center;" ><?php echo $s[SALE_CURRENCY_CODE]; ?></td>
-					<td style="text-align:center;" ><?php echo $s[SALE_ITEM_PRICE]; ?></td>		
+					<td class="<?php echo $s[SALE_CURRENCY_CODE]==$s[SALE_MERCHANT_CURRENCY]?'muted':''; ?>" style="text-align:center;" ><?php echo $currency->formatValue($s[SALE_CHARGED_AMOUNT], $s[SALE_CURRENCY_CODE]); ?></td>
+					<td style="text-align:center;" ><?php echo $currency->formatValue($s[SALE_CHARGED_AMOUNT_MERCHANT_CURRENCY], $s[SALE_MERCHANT_CURRENCY]); ?></td>		
 				</tr>
 		<?php }} ?>
 		</tbody>

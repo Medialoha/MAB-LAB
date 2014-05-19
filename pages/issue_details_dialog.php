@@ -147,7 +147,7 @@ if ($group>2)
 							<dt>Comment</dt>
 							<dd id="commentView" class="well" >
 								<span class="pull-right" ><a href="javascript:editIssueComment()" >&nbsp;<i class="icon-pencil" ></i>&nbsp;</a></span>
-								<?php echo empty($issue->issue_comment)?'<span class="muted text-i" >No comment</span>':$issue->issue_comment; ?>
+								<?php echo empty($issue->issue_comment)?'<span class="muted text-i" >No comment</span>':nl2br(stripslashes($issue->issue_comment)); ?>
 							</dd>
 							<dd id="commentEdit" style="display:none;" >
 								<textarea name="new_comment" style="width:75%; height:70px;" ><?php echo $issue->issue_comment; ?></textarea>

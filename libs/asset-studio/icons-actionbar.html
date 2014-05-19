@@ -136,7 +136,7 @@
 
   var nameField;
   var form = new studio.forms.Form('iconform', {
-    onChange: function(field) {
+    onChange: function(field) { 
       var values = form.getValues();
       if ((!field || field.id_ == 'source')
           && values['source'] && values['source'].name) {

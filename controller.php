@@ -11,6 +11,7 @@
  */
 
 $mNavCtl = new NavigationController();
+$mCfg = CfgHelper::getInstance(); 
 
 $action = $_REQUEST['a'];
 
@@ -34,11 +35,10 @@ switch ($action) {
 		
 //////// CREATE HTACCESS AND HTPASSWD FILES
 	case 'createHtFiles' :
-			$cfg = CfgHelper::getInstance();
 			$error = null;
 			$reportDir = 'report/';
 			
-			if ($cfg->isReportBasicAuthEnabled() && $cfg->getBasicAuthMethod()==AUTH_METHOD_HTACCESS) {
+			if ($mCfg->isReportBasicAuthEnabled() && $mCfg->getBasicAuthMethod()==AUTH_METHOD_HTACCESS) {
 				require_once('libs/PHP-Htpasswd/Htpasswd.php');
 				
 				if (!is_writeable($reportDir)) {
@@ -53,7 +53,7 @@ switch ($action) {
 											'</Files>';
 					
 					if (file_put_contents($reportDir.'.htaccess', $content)) {
-						$account = $cfg->getBasicAuthAccount();
+						$account = $mCfg->getBasicAuthAccount();
 						
 						$password = Htpasswd::encryptPassword($account->password, Htpasswd::ENCTYPE_APR_MD5);
 						
@@ -99,7 +99,7 @@ switch ($action) {
 		
 //////// UPDATE CONFIG
 	case 'updateconfig' :
-			$cfg = CfgHelper::getInstance();
+			require_once('includes/currency.class.php');
 			
 			$tmpCfg = array();
 			foreach ($_POST as $k=>$v) {
@@ -137,10 +137,18 @@ switch ($action) {
 				$tmpCfg['report.basicauth.method'] = intval($_POST['report-basicauth-method']);
 				
 			} else { $tmpCfg['report.basicauth'] = false; }
-						
+			
 			$error = CfgHelper::writeConfig($tmpCfg);
-			if ($error==null) {
-				CfgHelper::init(true);				
+			if ($error==null) { 
+				$mCfg = CfgHelper::init(true);
+
+				// check if currency changed
+				if (array_key_exists('currency-update-db', $_POST)==1) {
+					$currency = new Currency($mCfg->getCurrencyCode());
+				
+					DbHelper::updateSalesCurrency($currency);
+				}
+								
 				Helper::pushAlert(ALERT_SUCCESS, 'Configuration saved.');
 						
 			} else { Helper::pushAlert(ALERT_ERROR, $error); }

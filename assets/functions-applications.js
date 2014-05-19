@@ -10,19 +10,71 @@
  */
 
 /////////// APPS MANAGEMENT METHODS ////////////////
-function updateAppName(appId, appName) { 	
-	var newName = prompt("New application name :", appName);
+function editApplication(appId, appName, appPackage) {
+	$('#appId').val(appId);
+	$('#appName').val(appName);
+	$('#appPackage').val(appPackage);
 	
-	if (!newName)
+	$('#appPackage').prop('disabled', (typeof appPackage==="undefined"));
+}
+
+function updateApplication() {
+	if ($('#appName').val().length==0)
 		return;
 	
 	$('#loader').show();
-	doRequest('updateAppName&ctl=apps', {appId:appId, appName:newName}, 
+	
+	var app = { appId:$('#appId').val(), appName:$('#appName').val() }; 
+	
+	if (!$('#appPackage').prop('disabled'))
+		app.appPackage = $('#appPackage').val(); 
+	
+	doRequest('updateApp&ctl=apps', app, 
 				function(data) {
-					$("TR#"+appId+" > TD.app-name > SPAN").html(newName);
+					if (app.appId>0) {
+						$("TR#app"+app.appId+" > TD.app-name").html(app.appName);
+						
+						if (app.appPackage)
+							$("TR#app"+app.appId+" > TD.app-package").html(app.appPackage);
+						
+					} else {
+						if (!data) {
+							alert('Error occured while trying to insert application !');
+							
+						} else { $('#appsTbl > tbody:last').append(data); } 
+					} 
+
+					clearEditApplication();
+					
 					$('#loader').hide();
-				});
+				});	
 }
+
+function clearEditApplication() {
+	$('#appId').val(-1);
+	$('#appName').val('');
+	$('#appPackage').val('');
+
+	$('#appPackage').prop('disabled', false);
+}
+
+function delApplication(appId) {
+	if (appId>0) {
+		if (confirm("Do you really want to delete this application ?")) {
+			doRequest('deleteApp&ctl=apps', { appId:appId }, 
+					function(data) {
+						$("TR#app"+appId).remove();	
+
+						clearEditApplication();
+						
+						$('#loader').hide();
+					});	
+		}
+		
+	} else { alert("Application still in use, cannot be deleted..."); } 
+}
+
+
 
 /////////// PUBLICATION TRANSLATIONS METHODS ////////////////
 function saveTranslation() {

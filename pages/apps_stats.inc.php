@@ -11,6 +11,9 @@
 */
 require_once('includes/charthelper.class.php');
 
+$cfg = CfgHelper::getInstance(); 
+$currency = new Currency($cfg->getCurrencyCode());
+
 $isAllAppSelected = ($mSelectedAppId==-1);
 
 $whereFilterApp = SALE_APP_ID;
@@ -29,52 +32,34 @@ $currentMonthName = date('F');
 $pastMonthName = date('F', mktime(0, 0, 0, $pastMonth, 1, $currentYear));
 
 $daysCurrentMonth = date("t");
-/*?>
+
+?>
 <div class="well" >
 	<strong>Estimated revenue</strong>&nbsp;&nbsp;&nbsp;&nbsp; 
 	<?php 
 		$sales = DbHelper::selectRows(TBL_SALES,
 																	$whereFilterApp.' AND '.SALE_ORDER_CHARGED_DATE.'>="'.$currentYear.'-'.$pastMonth.'-01"',
 																	SALE_ORDER_CHARGED_DATE.' ASC',
-																	SALE_CURRENCY_CODE.','.SALE_ITEM_PRICE.', MONTH('.SALE_ORDER_CHARGED_DATE.') month, '.SALE_ORDER_CHARGED_DATE,
-																	null,
-																	null, false);
+																	'(SELECT SUM('.SALE_CHARGED_AMOUNT_MERCHANT_CURRENCY.') FROM '.TBL_SALES.' WHERE MONTH('.SALE_ORDER_CHARGED_DATE.')=MONTH(DATE_SUB(NOW(), INTERVAL 1 MONTH)) AND YEAR(DATE('.SALE_ORDER_CHARGED_DATE.'))='.$currentYear.' ) past, '.
+																	'(SELECT SUM('.SALE_CHARGED_AMOUNT_MERCHANT_CURRENCY.') FROM '.TBL_SALES.' WHERE MONTH('.SALE_ORDER_CHARGED_DATE.')=MONTH(CURDATE()) AND YEAR(DATE('.SALE_ORDER_CHARGED_DATE.'))='.$currentYear.' ) current, MONTH(CURDATE())',
+																	null,	null, false);
 
 		if (empty($sales)) {
 			?><span class="muted text-i" >No record found.</span><?php 
 
 		} else {	
+			$s =& $sales[0];
 
-			$sum = array();
-			foreach ($sales as $sale) {
-				if (!isset($sum[$sale['month']]))
-					$sum[$sale['month']] = 0;
-
-				$sum[$sale['month']] += ($sale[SALE_CURRENCY_CODE]=='EUR'?
-																		$sale[SALE_ITEM_PRICE]:
-																		Helper::currencyConverter($sale[SALE_ITEM_PRICE], $sale[SALE_CURRENCY_CODE], 'EUR')
-																);
-			}
-			
-			$sep = '&nbsp;&ndash;&nbsp;'; $prev = -1;
-			foreach ($sum as $m=>$v) {
-				echo date('F', mktime(0, 0, 0, $m, 1, $currentYear)), ' : ', round($v, 2), '<small>EUR</small>', $sep;
-				
-				$sep = '';
-				
-				if ($prev!=-1) {
-					?>&nbsp;&nbsp;
-						<span class="badge" style="background-color:<?php echo $v>$prev?'#99cc00':($v==$prev?'':'#ff4444'); ?>">
-							<i class="icon-white <?php echo $v>$prev?'icon-arrow-up':($v==$prev?'icon-minus':'icon-arrow-down'); ?>" ></i>
-						</span>
-					<?php 
-				}	
-				$prev = $v;
-			}
+			echo $pastMonthName, ' : ', $currency->format($s[0]), '&nbsp;&ndash;&nbsp;', $currentMonthName, ' : ', $currency->format($s[1]);
+			?>&nbsp;&nbsp;
+				<span class="badge" style="background-color:<?php echo $s[1]>$s[2]?'#99cc00':($s[1]==$s[2]?'':'#ff4444'); ?>">
+					<i class="icon-white <?php echo $s[1]>$s[2]?'icon-arrow-up':($s[1]==$s[2]?'icon-minus':'icon-arrow-down'); ?>" ></i>
+				</span>
+			<?php 
 		}
 		
 	?>
-</div>*/?>
+</div>
 
 <div class="row" >
 	<!-- ////// DAILY SALES ////// -->
@@ -233,14 +218,18 @@ $daysCurrentMonth = date("t");
 																			// projection
 																			INC_VALUE.'+1,'.
 																			'(SELECT COUNT(*) FROM '.TBL_SALES.' WHERE '.$whereFilterApp.' AND MONTH(DATE('.SALE_ORDER_CHARGED_DATE.'))=1+'.INC_VALUE.' AND YEAR(DATE('.SALE_ORDER_CHARGED_DATE.'))='.$currentYear.') current,'.
-																			'(SELECT COUNT(*) FROM '.TBL_SALES.' WHERE '.$whereFilterApp.' AND MONTH(DATE('.SALE_ORDER_CHARGED_DATE.'))=1+'.INC_VALUE.' AND YEAR(DATE('.SALE_ORDER_CHARGED_DATE.'))='.$pastYear.') past',
+																			'(SELECT COUNT(*) FROM '.TBL_SALES.' WHERE '.$whereFilterApp.' AND MONTH(DATE('.SALE_ORDER_CHARGED_DATE.'))=1+'.INC_VALUE.' AND YEAR(DATE('.SALE_ORDER_CHARGED_DATE.'))='.$pastYear.') past, '.
+																			'(SELECT ROUND(SUM('.SALE_CHARGED_AMOUNT_MERCHANT_CURRENCY.'), 2) FROM '.TBL_SALES.' WHERE MONTH('.SALE_ORDER_CHARGED_DATE.')=1+'.INC_VALUE.' AND YEAR(DATE('.SALE_ORDER_CHARGED_DATE.'))='.$currentYear.' ) current_revenue, '.
+																			'(SELECT ROUND(SUM('.SALE_CHARGED_AMOUNT_MERCHANT_CURRENCY.'), 2) FROM '.TBL_SALES.' WHERE MONTH('.SALE_ORDER_CHARGED_DATE.')=1+'.INC_VALUE.' AND YEAR(DATE('.SALE_ORDER_CHARGED_DATE.'))='.$pastYear.' ) past_revenue',
 																			// group by
 																			null, null, false	);
 			
 			
-				$dataCurrent = '['; $dataPast = '['; $ticks = '['; $sep = ''; $i = 0;
+				$nbCurrent = '['; $nbPast = '['; 
+				$revCurrent = '['; $revPast = '[';
+				$ticks = '['; $sep = ''; $i = 0;
 				
-				foreach ($arr as $idx=>$s) {
+				foreach ($arr as $idx=>$s) { 
 					$ignore = $s[0]>$currentMonth; 
 	
 					$prev = $idx>0?$arr[$idx-1][1]:-1;
@@ -265,13 +254,18 @@ $daysCurrentMonth = date("t");
 					
 					$ticks .= $sep.'['.$i.',"'.date("M", mktime(0, 0, 0, $s[0], 1, date('Y'))).'"]';
 					
-					$dataCurrent .= $sep.'['.$i.','.$s[1].']';
-					$dataPast .= $sep.'['.$i.','.$s[2].']';
+					$nbCurrent .= $sep.'['.$i.','.$s[1].']';
+					$nbPast .= $sep.'['.$i.','.(empty($s[2])?'0':$s[2]).']';
+					$revCurrent .= $sep.'['.$i.','.$s[3].']';
+					$revPast .= $sep.'['.$i.','.(empty($s[4])?'0':$s[4]).']';
+					
 					
 					$sep = ','; ++$i;
 				}
 	
-				$dataCurrent .= ']'; $dataPast .= ']'; $ticks .= ']';
+				$nbCurrent .= ']'; $nbPast .= ']'; 
+				$revCurrent .= ']'; $revPast .= ']';
+				$ticks .= ']';
 			?>
 			</tbody>
 			</table>
@@ -279,11 +273,63 @@ $daysCurrentMonth = date("t");
 
 		<script type="text/javascript" >		
 			$(function() {
-					$.plot('#salesPerMonth',	[ { label:<?php echo $currentYear; ?>, data:<?php echo $dataCurrent; ?>, color:"#33b5e5", bars:{ align:"left", barWidth:0.4, numbers:{ xAlign:function (x) {return x+0.2;}, font:{ weight:"bold", color:"#111111" }} } },
-				                     		  		{ label:<?php echo $pastYear; ?>, data: <?php echo $dataPast; ?>, color:"#cdcdcd", bars:{ align:"right", barWidth:0.4, numbers:{ xAlign:function (x) {return x-0.2;}, font:{ weight:"normal", color:"#777777" }}} } ],
-				                     		   		{ series: { bars:{ show:true, lineWidth:1, align:"center", numbers:{ show:true, processing:function(val) { return val>0?val:""; } } } },
+					$.plot('#salesPerMonth',	[ { label:<?php echo $currentYear; ?>, 
+																				data:<?php echo $nbCurrent; ?>, 
+								                     		yaxis:1,
+																				color:"#33b5e5", 
+																				bars:{ 
+																					show:true, 
+																					lineWidth:1, 
+																					align:"left", 
+																					barWidth:0.4, 
+																					numbers:{ 
+																						show:true, 
+																						processing:function(val) { return val>0?val:""; }, 
+																						xAlign:function (x) {return x+0.2;}, 
+																						font:{ weight:"bold", color:"#111111" }
+																					} 
+																				} 
+																			},
+				                     		  		{ label:<?php echo $pastYear; ?>, 
+						                     		  	data:<?php echo $nbPast; ?>, 
+						                     		    yaxis:1,
+								                     		color:"#cdcdcd", 
+								                     		bars:{ 
+									                     		show:true, 
+									                     		lineWidth:1, 
+									                     		align:"right", 
+									                     		barWidth:0.4, 
+									                     		numbers:{ 
+										                     		show:true, 
+										                     		processing:function (val) { return val>0?val:""; }, 
+										                     		xAlign:function (x) { return x-0.2; }, 
+										                     		font:{ weight:"normal", color:"#777777" }
+										                     	} 
+									                     	} 
+									                    },
+				                     		  		{ label:"Revenue <?php echo $currentYear; ?>", 
+					                     		  		data:<?php echo $revCurrent; ?>,
+				                     		        yaxis:2,
+				                     		        color:"#9440ED",
+				                     		        points:{ show:false },
+				                     		        lines:{ show:true },
+				                     		       	valueLabels:{	show:false/*, showLastValue:true*/ }
+				                     		      },
+				                     		  		{ label:"Revenue <?php echo $pastYear; ?>", 
+					                     		  		data:<?php echo $revPast; ?>,
+				                     		        yaxis:2,
+				                     		        color:"#bbbbbb",
+				                     		        points:{ show:false },
+				                     		        lines:{ show:true }
+				                     		      }
+				                     		    ], 
+				                     		    { 
+     		    														//series: { bars:{ show:true, lineWidth:1, align:"center", numbers:{ show:true, processing:function(val) { return val>0?val:""; } } } },
    		   																xaxis: { ticks:<?php echo $ticks; ?> },
-				                     						grid: { show:true, color:"#666666", backgroundColor:"#ffffff", borderColor:"#666666", borderWidth:{top:0, right:0, bottom:1, left:1} } });	
+   		   																yaxes: [ 
+   		    		   													{ position:"left", axisLabel:"Nb sales", axisLabelUseCanvas:true }, 
+   		     		   													{ position:"right", axisLabel:"Revenue", axisLabelUseCanvas:true } ],
+				                     						grid: { show:true, color:"#666666", backgroundColor:"#ffffff", borderColor:"#666666", borderWidth:{top:0, right:1, bottom:1, left:1} } });	
 				});
 		</script>
 	</div>

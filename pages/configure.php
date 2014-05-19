@@ -9,11 +9,13 @@
  * Contributors:
  *     EIRL DEVAUX J. - Medialoha - initial API and implementation
  */
+require_once('includes/currency.class.php');
 
 // force reloading configure to prevent out of sync from config file
 CfgHelper::init(true);
 
 $cfg = CfgHelper::getInstance(); 
+$curr = new Currency($cfg->getCurrencyCode());
 ?>
 <form name="configForm" class="form-horizontal" method="post" >
 	<input type="hidden" id="action" name="a" value="" />
@@ -27,6 +29,19 @@ $cfg = CfgHelper::getInstance();
 	      
 	      <label class="control-label-inline" for="reportDateFormat" style="width:175px;" >Default timezone</label>
 	      <input type="text" id="reportDateFormat" name="in-date-timezone" value="<?php echo $cfg->getDateTimezone(); ?>" >
+	    </div>
+	  </div>
+	  <div class="control-group">
+	    <label class="control-label" for="reportCurrency">Currency</label>
+	    <div class="controls">
+	    	<select id="reportCurrency" name="in-currency-code" onchange="$('#reportCurrencyUpdateDb').prop('checked', true);" >
+	    	<?php foreach (Currency::$currency_codes as $idx=>$code) { 
+	    					echo '<option value="', $code, '" ', ($code==$curr->getCurrencyCode()?'selected="selected"':''),' >', $code, '</option>';
+							} ?>
+	    	</select>	      
+	    	
+	      <label class="control-label-inline" style="width:200px;" for="reportBasicAuthPasswordObfuscate" >Update values in database</label>
+	      <input type="checkbox" id="reportCurrencyUpdateDb" name="currency-update-db" value="1" />
 	    </div>
 	  </div>
 	  <div class="control-group">

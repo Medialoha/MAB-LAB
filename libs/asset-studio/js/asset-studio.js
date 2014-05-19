@@ -2726,17 +2726,17 @@ studio.checkBrowser = function() {
   }
 
   if (!browserSupported) {
-    $('<div>')
+    $('<div class="alert" >')
       .addClass('browser-unsupported-note ui-state-highlight')
       .attr('title', 'Your browser is not supported.')
-      .append($('<span class="ui-icon ui-icon-alert" ' +
-                'style="float:left; margin:0 7px 50px 0;">'))
+//      .append($('<span class="ui-icon ui-icon-alert" ' +
+//                'style="float:left; margin:0 7px 50px 0;">'))
       .append($('<p>')
         .html('Currently only ' +
               '<a href="http://www.google.com/chrome">Google Chrome</a> ' +
               'is recommended and supported. Your mileage may vary with ' +
               'other browsers.'))
-      .prependTo('body');
+      .appendTo('#page-header');
   }
 };
 
@@ -3603,7 +3603,7 @@ studio.forms.ImageField = studio.forms.Field.extend({
         .appendTo(clipartParamsEl);
 
       for (var i = 0; i < studio.forms.ImageField.clipartList_.length; i++) {
-        var clipartSrc = 'res/clipart/' + studio.forms.ImageField.clipartList_[i];
+        var clipartSrc = BASE_PATH+'res/clipart/' + studio.forms.ImageField.clipartList_[i];
         $('<img>')
           .addClass('form-image-clipart-item')
           .attr('src', clipartSrc)

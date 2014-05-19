@@ -138,7 +138,7 @@ $filterLimits = array(5, 10, 15, 20, 50, 100, 200);
 	$issues = IssueHelper::fetchIssues($filterOpts);
 
 	if (empty($issues)) {
-		?><tr><td colspan="6" class="muted" >No issues recorded yet...</td></tr><?php
+		?><tr><td colspan="8" class="muted" >No issues recorded yet...</td></tr><?php
 	
 	} else {
 		$pos = 0;

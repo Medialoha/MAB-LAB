@@ -90,6 +90,8 @@ define('SALE_BUYER_POSTAL_CODE', 'sale_buyer_postal_code');
 define('SALE_BUYER_COUNTRY', 'sale_buyer_country');
 // extra columns :
 define('SALE_APP_ID', 'sale_app_id');
+define('SALE_MERCHANT_CURRENCY', 'sale_merchant_currency');
+define('SALE_CHARGED_AMOUNT_MERCHANT_CURRENCY', 'sale_charged_amount_merchant_currency');
 
 
 define('TBL_EARNINGS', TBL_PREFIX.'googleplay_earnings');
