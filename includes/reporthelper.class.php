@@ -154,6 +154,8 @@ class ReportHelper {
 			foreach($values as $key=>$value) {
 				if (is_array($value))
 					$value = print_r($value, true);
+				else if(is_bool($value))
+					$value = '<input type="checkbox" '.($value ? 'checked="checked"' : '').'>';
 				
 				echo '<tr><td>'.$key.'</td><td>'.$value.'</td></tr>';
 			} 
