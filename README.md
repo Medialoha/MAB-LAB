@@ -46,6 +46,12 @@ Check Git hub repository [here](https://github.com/Medialoha/ACRA-Backend-Tester
 
 ## Change Log ##
 
+**Version 1.3.4-Helen**
+
+- *Fixed issues #77 #78 and #79*
+
+Special thanks to **xeno010** and **asylume** !
+
 **Version 1.3.3-Helen**
 
 - *Currency support for sales report added*

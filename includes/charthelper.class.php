@@ -32,7 +32,7 @@ class ChartHelper {
 		$arr = $arr===null?array():$arr;
 		
 		foreach($arr as $row) {
-			$json .= $sep.'{"label":"'.$row[0].($appendValueToLabel?' ('.$row[1].')':'').'","data":'.$row[1].', color:"'.self::$COLORS[$c].'"}'; $sep = ',';
+			$json .= $sep.'{"label":"'.$row[0].($appendValueToLabel?' ('.$row[1].')':'').'","data":'.$row[1].', "color":"'.self::$COLORS[$c].'"}'; $sep = ',';
 			
 			$c = (++$c)%self::$COLOR_COUNT;
 		}

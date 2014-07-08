@@ -122,6 +122,11 @@ $reportTabsId = 'reportTabs'.($issueFormat?'-'.$reportId:'');
 	  				if (strcmp($initialValue, $crashValue)!=0)
 	  					$diff = true;
 	  				
+	  				if (is_bool($initialValue)) {
+							$initialValue = '<input type="checkbox" '.($initialValue?'checked="checked"':'').'>';
+							$crashValue = '<input type="checkbox" '.($crashValue?'checked="checked"':'').'>';
+	  				}		
+	  				
 	  				echo '<tr><td>'.$key.'</td><td style="width:200px;" >'.
 	  									str_replace('+', '<br/>', $initialValue).'</td><td style="width:200px;" class="'.($diff?'text-error':'').'" >'.
 	  									str_replace('+', '<br/>', $crashValue).'</td></tr>';

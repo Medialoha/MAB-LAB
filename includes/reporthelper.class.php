@@ -113,10 +113,12 @@ class ReportHelper {
 		
 		?><table class="table table-condensed table-hover" ><tr><th style="min-width:370px; border:0 none;" ></th><th></th></tr><?php
 		foreach($values as $key=>$value) {
-			if (is_array($value))
+			if (is_array($value)) {
 				$value = print_r($value, true);
-			else if (is_bool($value))
+				
+			} else if (is_bool($value)) {
 				$value = '<input type="checkbox" '.($value?'checked="checked"':'').' />';
+			}
 			
 			switch ($formatKeyFunction) {
 				case FORMAT_ENV_KEY :
@@ -152,12 +154,16 @@ class ReportHelper {
 			
 			$values = get_object_vars($prefObj);
 			foreach($values as $key=>$value) {
-				if (is_array($value))
+				if (is_array($value)) {
 					$value = print_r($value, true);
-				else if(is_bool($value))
+				
+				} else if(is_bool($value)) {
 					$value = '<input type="checkbox" '.($value ? 'checked="checked"' : '').'>';
+					
+				} 
 				
 				echo '<tr><td>'.$key.'</td><td>'.$value.'</td></tr>';
+				
 			} 
 		}
 		
