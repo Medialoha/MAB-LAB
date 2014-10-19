@@ -26,7 +26,7 @@ CREATE TABLE `%PREFIX%reports` (
   `build` text,
   `total_mem_size` varchar(25) DEFAULT NULL,
   `available_mem_size` varchar(25) DEFAULT NULL,
-  `custom_data` varchar(255) DEFAULT NULL,
+  `custom_data` text,
   `stack_trace` text,
   `initial_configuration` text,
   `crash_configuration` text,
