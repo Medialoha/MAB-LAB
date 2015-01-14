@@ -64,8 +64,12 @@ class IssueHelper {
 		
 		if (isset($_SESSION['issueListOpts'])) {
 			$opts = $_SESSION['issueListOpts'];
-		
-		} else { 
+			if(count($opts) < 12){
+				$opts = null;
+			}
+		} 
+				
+		if (!isset($opts)) {
 			$opts = array('app'=>-1, 
 										'mId'=>-1,
 										'showArchived'=>false,
@@ -73,8 +77,13 @@ class IssueHelper {
 										'priority'=>-1,
 										'order'=>0,
 										'limit'=>10,
-										'start'=>0); 
+										'start'=>0,
+										'versionName'=>-1,
+										'androidVersion'=>-1,
+										'deviceName'=>'',
+										'issueCause'=>''); 
 		}
+		
 		
 		// update opts from get params
 		foreach ($opts as $k=>$v) {					
@@ -91,11 +100,13 @@ class IssueHelper {
 							$opts[$k] = intval($new_value)==1?true:false;
 								
 						} else { $opts[$k] = $new_value; }
+					} else if (is_string($new_value)) {
+						$opts[$k] = $new_value;
 					}
 				}
 			}
 		}
-		
+				
 		// update session
 		$_SESSION['issueListOpts'] = $opts;
 		
@@ -108,6 +119,20 @@ class IssueHelper {
 	 * @param Array of filtering options
 	 */
 	public static function fetchIssues($filterOpts) {
+		$orderBy = self::getFetchIssuesOrderBy($filterOpts);
+		$limit = self::getFetchIssuesLimit($filterOpts);
+		
+		return DBHelper::fetchIssues(self::buildIssuesWhereClause($filterOpts), $orderBy, null, $limit, null);
+	}
+	
+	public static function fetchIssuesTable($filterOpts) {
+		$orderBy = self::getFetchIssuesOrderBy($filterOpts);
+		$limit = self::getFetchIssuesLimit($filterOpts);
+		
+		return DBHelper::fetchIssuesTable(self::buildIssuesWhereClause($filterOpts), $orderBy, null, $limit, null);
+	}
+	
+	public static function getFetchIssuesOrderBy($filterOpts) {
 		switch ($filterOpts['order']) {
 			case 1 : $orderBy = ISSUE_STATE.' DESC, '.ISSUE_DATETIME.' DESC'; 
 				break;
@@ -118,10 +143,12 @@ class IssueHelper {
 				
 			default : $orderBy = ISSUE_STATE.' ASC, '.ISSUE_DATETIME.' DESC';   
 		}
-
-		$limit = $filterOpts['start'].', '.$filterOpts['limit'];
 		
-		return DBHelper::fetchIssues(self::buildIssuesWhereClause($filterOpts), $orderBy, null, $limit, null);
+		return $orderBy;
+	}
+	
+	public static function getFetchIssuesLimit($filterOpts) {
+		return  $filterOpts['start'].', '.$filterOpts['limit'];
 	}
 	
 	/**
@@ -132,24 +159,41 @@ class IssueHelper {
 		$where = array();
 		
 		if ($filterOpts['app']>0)
-			$where[] = ISSUE_APP_ID.'='.$filterOpts['app'];
+			$where[] = TBL_ISSUES.'.'.ISSUE_APP_ID.'='.$filterOpts['app'];
 		
 		if ($filterOpts['mId']>0)
-			$where[] = ISSUE_MILESTONE_ID.'='.$filterOpts['mId'];
+			$where[] = TBL_ISSUES.'.'.ISSUE_MILESTONE_ID.'='.$filterOpts['mId'];
 		
 		if (!$filterOpts['showArchived']) {
-			$where[] = ISSUE_STATE.'<>'.ISSUE_STATE_ARCHIVED;
+			$where[] = TBL_ISSUES.'.'.ISSUE_STATE.'<>'.ISSUE_STATE_ARCHIVED;
 		}
 		
 		if (isset($filterOpts['state']) && $filterOpts['state']!='' && $filterOpts['state']!='-1') {
-			$where[] = ISSUE_STATE.' IN ('.$filterOpts['state'].')';
+			$where[] = TBL_ISSUES.'.'.ISSUE_STATE.' IN ('.$filterOpts['state'].')';
 		}
 		
 		if (isset($filterOpts['priority']) && $filterOpts['priority']>=0) {
-			$where[] = ISSUE_PRIORITY.'='.$filterOpts['priority'];
+			$where[] = TBL_ISSUES.'.'.ISSUE_PRIORITY.'='.$filterOpts['priority'];
+		}
+		
+		if (isset($filterOpts['versionName']) && $filterOpts['versionName']!='-1') {
+			$where[] = '('.TBL_REPORTS.'.'.REPORT_VERSION_NAME.' LIKE "'.$filterOpts['versionName'].'")';
+		}
+		
+		if (isset($filterOpts['androidVersion']) && $filterOpts['androidVersion']!='-1') {
+			$where[] = '('.TBL_REPORTS.'.'.REPORT_ANDROID_VERSION.' LIKE "'.$filterOpts['androidVersion'].'")';
+		}
+		
+		if (!empty($filterOpts['deviceName']) && $filterOpts['deviceName']!='-1') {
+			$where[] = '('.TBL_REPORTS.'.'.REPORT_PRODUCT.' LIKE "%'.$filterOpts['deviceName'].'%" OR '.TBL_REPORTS.'.'.REPORT_BRAND.' LIKE "%'.$filterOpts['deviceName'].'%" OR '.TBL_REPORTS.'.'.REPORT_PHONE_MODEL.' LIKE "%'.$filterOpts['deviceName'].'%")';
+		}
+		
+		if (!empty($filterOpts['issueCause']) && $filterOpts['issueCause']!='-1') {
+			$where[] = TBL_ISSUES.'.'.ISSUE_CAUSE.' LIKE "%'.$filterOpts['issueCause'].'%"';
 		}
 		
 		Debug::logd($where);
+		
 		
 		return count($where)==0?'':implode(' AND ', $where);
 	}
