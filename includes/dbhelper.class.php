@@ -40,6 +40,7 @@ class DBHelper {
 	public static function selectRows($table, $where=null, $order=null, $projection='*', $groupby=null, $limit=null, $returnAsObjects=true) {
 		$arr = null;
 		
+
 		$result = mysqli_query(self::$dbo, 'SELECT '.$projection.
 																				' FROM '.$table.
 																				(empty($where)?'':' WHERE '.$where).
@@ -64,6 +65,7 @@ class DBHelper {
 			mysqli_free_result($result);
 		
 		} else { die('DATABASE ERROR : '.mysqli_error(self::$dbo)); }
+		
 		
 		return $arr;
 	}
@@ -147,9 +149,21 @@ class DBHelper {
 		return -1;
 	}
 	
+	public static function fetchIssuesTable($where=null, $orderBy=null, $groupBy=null, $limit=null, $projection=null) {
+		$tbl = TBL_ISSUES.' LEFT JOIN '.TBL_APPLICATIONS.' ON '.APP_ID.'='.ISSUE_APP_ID;
+		$tbl .= ' JOIN '.TBL_REPORTS.' ON '.TBL_ISSUES.'.'.ISSUE_ID.' = '.TBL_REPORTS.'.'.REPORT_ISSUE;
+		
+		return self::fetchIssuesFromTable($tbl, $where, $orderBy, $groupBy, $limit, $projection);
+	}
+	
 	public static function fetchIssues($where=null, $orderBy=null, $groupBy=null, $limit=null, $projection=null) {
 		$tbl = TBL_ISSUES.' LEFT JOIN '.TBL_APPLICATIONS.' ON '.APP_ID.'='.ISSUE_APP_ID;
-		
+
+		return self::fetchIssuesFromTable($tbl, $where, $orderBy, $groupBy, $limit, $projection);
+	}
+	
+	public static function fetchIssuesFromTable($tbl, $where=null, $orderBy=null, $groupBy=null, $limit=null, $projection=null) {
+
 		if ($projection==null) {
 			$projection = TBL_ISSUES.'.*, '.APP_PACKAGE.', '.APP_NAME;
 		}

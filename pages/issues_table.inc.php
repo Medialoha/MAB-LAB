@@ -22,6 +22,8 @@ $filterSortCols = array(
 );
 
 $filterLimits = array(5, 10, 15, 20, 50, 100, 200);
+
+$mSelectedAppId = $mNavCtl->getParam('app', '-1');
 ?>
 <style> .tooltip-inner { max-width:700px; text-align:left; font-size:15px; } </style>
 
@@ -70,6 +72,68 @@ $filterLimits = array(5, 10, 15, 20, 50, 100, 200);
 			</div>
 		</div>
 		
+		<div class="control-group" >
+			<label class="control-label" >Application version</label>
+			<div class="controls" >
+				<select id="versionName" >
+					<option value="-1" >-----------</option>
+					<?php 
+					    $versionWhere = null;
+						
+						$versionJoin = " JOIN ".TBL_ISSUES." ON ".TBL_ISSUES.".".ISSUE_ID." = ".TBL_REPORTS.".".REPORT_ISSUE;
+						
+						if(isset($mSelectedAppId) && intval($mSelectedAppId) > 0) {
+							$versionJoin .= " AND ".TBL_ISSUES.".".ISSUE_APP_ID." = ".intval($mSelectedAppId);
+						}
+						
+						$versionArr = DbHelper::selectRows(TBL_REPORTS.$versionJoin, $versionWhere, 'size DESC', TBL_REPORTS.'.'.REPORT_VERSION_NAME.', '.TBL_REPORTS.'.'.REPORT_VERSION_CODE.', COUNT('.TBL_REPORTS.'.'.REPORT_VERSION_NAME.') as size', TBL_REPORTS.'.'.REPORT_VERSION_NAME, 100, false) ;										
+						foreach ($versionArr as $ver) {
+							?><option value="<?php echo $ver[REPORT_VERSION_NAME]; ?>" <?php if ($filterOpts['versionName']==$ver[REPORT_VERSION_NAME]) echo 'selected="selected"'; ?> ><?php echo $ver[REPORT_VERSION_NAME] ?> (<?php echo $ver[REPORT_VERSION_CODE] ?>)</option><?php 
+						}
+					?>
+				</select>
+			</div>
+		</div>
+		
+		<div class="control-group" >
+			<label class="control-label" >Android version</label>
+			<div class="controls" >
+				<select id="androidVersion" >
+					<option value="-1" >-----------</option>
+					<?php 
+					    $versionWhere = null;
+						
+						$reporsJoin = " JOIN ".TBL_ISSUES." ON ".TBL_ISSUES.".".ISSUE_ID." = ".TBL_REPORTS.".".REPORT_ISSUE;
+						
+						if(isset($mSelectedAppId) && intval($mSelectedAppId) > 0) {
+							$reporsJoin .= " AND ".TBL_ISSUES.".".ISSUE_APP_ID." = ".intval($mSelectedAppId);
+						}
+						
+						$versionArr = DbHelper::selectRows(TBL_REPORTS.$reporsJoin, $versionWhere, TBL_REPORTS.'.'.REPORT_ANDROID_VERSION.' DESC', TBL_REPORTS.'.'.REPORT_ANDROID_VERSION, TBL_REPORTS.'.'.REPORT_ANDROID_VERSION, 100, false) ;										
+						foreach ($versionArr as $ver) {
+							?><option value="<?php echo $ver['android_version']; ?>" <?php if ($filterOpts['androidVersion']==$ver[REPORT_ANDROID_VERSION]) echo 'selected="selected"'; ?> ><?php echo $ver[REPORT_ANDROID_VERSION] ?></option><?php 
+						}
+					?>
+				</select>
+			</div>
+		</div>
+		
+		<div class="control-group">
+	  
+		  <label class="control-label" for="deviceName" >Device name</label>
+		  <div class="controls" >
+				  <input type="text" id="deviceName" value="<?php echo $filterOpts['deviceName']; ?>"></input>
+		  </div>
+		</div>
+		
+		<div class="control-group">
+	  
+		  <label class="control-label" for="issueCause" >Issue cause</label>
+		  <div class="controls" >
+				  <input type="text" id="issueCause" value="<?php echo $filterOpts['issueCause']; ?>"></input>
+		  </div>
+		</div>
+		
 		<div class="control-group">
 			<label class="control-label" for="sortBy" >Sort by</label>
 			<div class="controls" >
@@ -90,6 +154,9 @@ $filterLimits = array(5, 10, 15, 20, 50, 100, 200);
 		<div class="control-group" style="text-align:right;" >
 	  	<button type="submit" class="btn" onclick="loadTable(0, 1)" ><i class="icon-ok" ></i>&nbsp;&nbsp;Apply</button>
 	  </div>
+	  
+	  
+	 
 	 </div>
 </div>
 
@@ -132,10 +199,12 @@ $filterLimits = array(5, 10, 15, 20, 50, 100, 200);
 	</tr>
 </thead>
 <tbody>
-<?php 	
-	$totalRows = DbHelper::countRows(TBL_ISSUES, ($mSelectedAppId>0?ISSUE_APP_ID.'='.$mSelectedAppId.' AND ':'').IssueHelper::buildIssuesWhereClause($filterOpts));
+<?php
+	$reporsJoin = " JOIN ".TBL_REPORTS." ON ".TBL_ISSUES.".".ISSUE_ID." = ".TBL_REPORTS.".".REPORT_ISSUE;
+						
+	$totalRows = DbHelper::countRows(TBL_ISSUES.$reporsJoin, ($mSelectedAppId>0?ISSUE_APP_ID.'='.$mSelectedAppId.' AND ':'').IssueHelper::buildIssuesWhereClause($filterOpts));
 
-	$issues = IssueHelper::fetchIssues($filterOpts);
+	$issues = IssueHelper::fetchIssuesTable($filterOpts);
 
 	if (empty($issues)) {
 		?><tr><td colspan="8" class="muted" >No issues recorded yet...</td></tr><?php

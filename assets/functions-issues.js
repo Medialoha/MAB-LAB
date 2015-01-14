@@ -281,7 +281,12 @@ function loadTable(startPage) {
 										state:$('#state').val(),
 										priority:$('#priority').val(),
 										order:$('#order').val(),
-										start:startPage, limit:$('#limit').val()
+										versionName:$('#versionName').val(),
+										androidVersion:$('#androidVersion').val(),
+										deviceName:$('#deviceName').val(),
+										issueCause:$('#issueCause').val(),
+										start:startPage,
+										limit:$('#limit').val()
 									}
 				}).done(function (data) {
 			$('#issuesContent').html(data);
