@@ -169,6 +169,7 @@ $mSelectedAppId = $mNavCtl->getParam('app', '-1');
 		<th colspan="2" >Application</th>
 		<th style="width:35px" ><i class="icon-signal" ></i></th>
 		<th style="width:35px" ><i class="icon-file" ></i></th>
+		<th style="width:35px" >V</th>
 	
 		<th style="width:65px;" >
 			<div class="btn-group">
@@ -231,6 +232,7 @@ $mSelectedAppId = $mNavCtl->getParam('app', '-1');
 				IssueHelper::printIssueLink($issue->issue_id, $issue->issue_cause);
 			?>
 			</td>
+			<td />
 			<td rowspan="2" >
 				<div class="btn-group pull-right">
 				  <button class="btn btn-small" onclick="showIssueDetails(<?php echo $issue->issue_id; ?>)" ><i class="icon-eye-open" ></i></button>
@@ -282,6 +284,7 @@ $mSelectedAppId = $mNavCtl->getParam('app', '-1');
 			<td class="state" ><?php echo $state->getLabel(true); ?></td>
 			<td class="priority" ><?php echo $priority->getLabel(false); ?></td>		
 			<td id="count<?php echo $issue->issue_id; ?>" class="count" ><?php echo $issue->getReportsCount(); ?></td>
+			<td><?php echo $reports[0]->getApplicationVersion(); ?></td>
 		</tr>
 		
 		<tr issue="<?php echo $issue->issue_id; ?>" class="<?php echo $trClasses; ?>" >
