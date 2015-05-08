@@ -15,6 +15,7 @@ $cfg = CfgHelper::getInstance();
 
 $mAppArr = DbHelper::selectRows(TBL_APPLICATIONS, null, APP_NAME.' ASC', '*', null, null, false);
 
+
 $mSelectedAppId = $mNavCtl->getParam('app', '-1');
 $mSelectedAppName = "All Applications";
 $mSelectedAppPackage = null;
