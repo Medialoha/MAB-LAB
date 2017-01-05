@@ -53,6 +53,7 @@ CREATE TABLE `%PREFIX%reports` (
   `report_state` INT(1) NOT NULL DEFAULT 1,
   `report_issue` INT(11) NOT NULL DEFAULT 0,
   `report_app_id` INT NOT NULL,
+  `build_config` text,
   
   PRIMARY KEY (`report_id`),
   UNIQUE (`report_key`)
